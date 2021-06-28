@@ -3,6 +3,8 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule } from '@angular/material/dialog';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
@@ -10,14 +12,17 @@ import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
 import { MetaMaskConnectingComponent } from './meta-mask-connecting/meta-mask-connecting.component';
 import { MetaMaskNotFoundComponent } from './meta-mask-not-found/meta-mask-not-found.component';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import { SaveLandsComponent } from './save-lands/save-lands.component';
+import { ExceptionDialogContentComponent } from './exception-dialog-content/exception-dialog-content.component';
 
 @NgModule({
     declarations: [
         AppComponent,
         HomeComponent,
         MetaMaskNotFoundComponent,
-        MetaMaskConnectingComponent
+        MetaMaskConnectingComponent,
+        SaveLandsComponent,
+        ExceptionDialogContentComponent,
     ],
     imports: [
         BrowserModule,
@@ -27,7 +32,8 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
         MatCardModule,
         FlexLayoutModule,
         MatDialogModule,
-        MatProgressSpinnerModule
+        MatProgressSpinnerModule,
+        MatSnackBarModule
     ],
     providers: [],
     bootstrap: [AppComponent]

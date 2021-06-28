@@ -56,7 +56,7 @@ export class Web3Service {
         }
         if (!this.contractCache.has(networkId!)) {
             const web3 = this.getWeb3(networkId!)!;
-            this.contractCache.set(networkId!, new UtopiaContract(new web3.eth.Contract(UTOPIA_ABI, CONTRACT_ADDRESS[networkId!]), this.loadingService));
+            this.contractCache.set(networkId!, new UtopiaContract(new web3.eth.Contract(UTOPIA_ABI, CONTRACT_ADDRESS[networkId!]), this.loadingService, this.metaMaskProvider));
         }
         return this.contractCache.get(networkId!)!;
     }
@@ -81,17 +81,24 @@ export class Web3Service {
         );
     }
 
-    public isConnected(networkId?: number): Observable<boolean> {
-        return this.loadingService.prepare(this.provider().pipe(map(p => {
-            return p != null && p.isConnected() && (networkId == null || p.networkVersion == networkId);
-        })));
+    public isConnected(networkId?: number, wallet?: string): Observable<boolean> {
+        return this.loadingService.prepare(
+            this.provider()
+                .pipe(map(p =>
+                    p != null && p.isConnected() && this.checkProvider(p, networkId, wallet)
+                ))
+        );
     }
 
     public networkId(): number {
         return this.metaMaskProvider?.networkVersion;
     }
 
-    public connect(networkId?: number): Observable<boolean> {
+    public wallet(): string {
+        return this.metaMaskProvider?.selectedAddress;
+    }
+
+    public connect(networkId?: number, wallet?: string): Observable<boolean> {
         if (this.metaMaskProvider === null) return of(false);
         // if (this.metaMaskProvider !== undefined && this.metaMaskProvider.isConnected())
         //     return of(true);
@@ -103,14 +110,17 @@ export class Web3Service {
                         // if (provider.isConnected()) return of(true);
                         return from(provider.request({ method: 'eth_requestAccounts' }))
                             .pipe(
-                                map((d) => {
-                                    return networkId == null || provider.networkVersion == networkId;
-                                }),
+                                map((d) => this.checkProvider(provider, networkId, wallet)),
                                 catchError(e => of(false))
                             );
                     })
                 )
         );
+    }
+
+    private checkProvider(provider: any, networkId?: number, wallet?: string): boolean {
+        return (networkId == null || provider.networkVersion == networkId)
+            && (wallet == null || provider.selectedAddress == wallet);
     }
 }
 

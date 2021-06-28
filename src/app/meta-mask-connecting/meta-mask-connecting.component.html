@@ -1,16 +1,11 @@
 <mat-card class="page-content">
     <mat-card-header>
-        <mat-card-title *ngIf="!connectionFailed && !wrongNetwork">Connecting Meta Mask</mat-card-title>
-        <mat-card-title *ngIf="connectionFailed">Failed to connect Meta Mask</mat-card-title>
-        <mat-card-title *ngIf="wrongNetwork && networkName() != null">You are connected to the wrong network
-        </mat-card-title>
-        <mat-card-title *ngIf="wrongNetwork && networkName() == null">Unknown network id in url
-        </mat-card-title>
+        <mat-card-title>{{title}}</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-        <p *ngIf="wrongNetwork  && networkName()!=null">Please select the {{networkName()}}</p>
+        <p>{{message}}</p>
     </mat-card-content>
     <mat-card-actions>
-        <button *ngIf="connectionFailed" mat-raised-button color="primary" (click)="tryConnect()">Retry</button>
+        <button *ngIf="canRetry" mat-raised-button color="primary" (click)="tryConnect()">Retry</button>
     </mat-card-actions>
 </mat-card>

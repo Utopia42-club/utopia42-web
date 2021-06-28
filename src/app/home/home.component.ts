@@ -14,9 +14,9 @@ export class HomeComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        console.log("asdf00");
-        this.contract = this.service.getSmartContract();
-        this.contract.getUsersAssignee().subscribe(v => console.log("value", v));
+        // console.log("asdf00");
+        // this.contract = this.service.getSmartContract();
+        // this.contract.getUsersAssignee().subscribe(v => console.log("value", v));
     }
 
     buy() {

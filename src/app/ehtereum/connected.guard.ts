@@ -14,7 +14,7 @@ export class ConnectedGuard implements CanActivate {
     }
 
     canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree | Observable<boolean | UrlTree> | Promise<boolean | UrlTree> {
-        return this.service.isConnected(next.queryParams.networkId).pipe(map(v => {
+        return this.service.isConnected(next.queryParams.networkId, next.queryParams.wallet).pipe(map(v => {
             return v ? true :
                 this.router.createUrlTree(["/connect"], { queryParams: { ...next.queryParams, returnUrl: this.getUrlWithoutParams(state.url) } });
         }));
