@@ -27,8 +27,7 @@ export class UtopiaContract {
         );
     }
 
-
-    public assignLand(wallet, x1, y1, x2, y2, hash) {
+    public assignLand(wallet: string, x1: number, y1: number, x2: number, y2: number, hash?: string) {
         return this.loadingService.prepare(
             new Observable(s =>
                 this.ethContract.methods.landPrice(x1, y1, x2, y2).call(this.listener(s))
@@ -41,27 +40,8 @@ export class UtopiaContract {
         );
     }
 
-    private listener(subscriber: Subscriber<any>) {
-        return (error: any, value: any) => {
-            if (error)
-                return subscriber.error(error);
-            // it returns tx hash because sending tx
-            subscriber.next(value);
-            subscriber.complete();
-        }
-    }
-
     public getOwnerLands(wallet): Observable<Land[]> {
         return this.getLands(wallet, []);
-    }
-
-    public updateLand(ipfsKey, index, wallet?): Observable<any> {
-        if (wallet == null) wallet = this.currentWallet();
-        return this.loadingService.prepare(
-            new Observable(s => {
-                this.ethContract.methods.updateLand(ipfsKey, index).send({ from: wallet }, this.listener(s));
-            })
-        );
     }
 
     private getLands(wallet: string, current: Land[]): Observable<Land[]> {
@@ -74,6 +54,15 @@ export class UtopiaContract {
                     }
                     return of(current);
                 }))
+        );
+    }
+
+    public updateLand(ipfsKey, index, wallet?): Observable<any> {
+        if (wallet == null) wallet = this.currentWallet();
+        return this.loadingService.prepare(
+            new Observable(s => {
+                this.ethContract.methods.updateLand(ipfsKey, index).send({ from: wallet }, this.listener(s));
+            })
         );
     }
 
@@ -93,7 +82,6 @@ export class UtopiaContract {
             }))
         );
     }
-
     public getOwnerList(): Observable<string[]> {
         return this.loadingService.prepare(
             new Observable(s => this.ethContract.methods.getOwners().call(this.listener(s)))
@@ -116,6 +104,16 @@ export class UtopiaContract {
                 }, {})
             )
         );
+    }
+
+    private listener(subscriber: Subscriber<any>) {
+        return (error: any, value: any) => {
+            if (error)
+                return subscriber.error(error);
+            // it returns tx hash because sending tx
+            subscriber.next(value);
+            subscriber.complete();
+        }
     }
 }
 

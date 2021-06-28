@@ -16,7 +16,7 @@ export class LoadingService {
     openDialog(): void {
         if (this.dialogRef != null) return;
 
-        this.dialogRef = this.dialog.open(MatSpinner);
+        this.dialogRef = this.dialog.open(MatSpinner, { disableClose: true });
     }
 
     private taskStarted(): void {

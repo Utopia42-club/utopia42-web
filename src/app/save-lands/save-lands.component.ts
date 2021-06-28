@@ -3,9 +3,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
 import { of, Subscription } from 'rxjs';
-import { catchError, concatMap, mergeMap, takeLast, tap } from 'rxjs/operators';
+import { catchError, concatMap, map, takeLast, tap } from 'rxjs/operators';
 import { Web3Service } from '../ehtereum/web3.service';
 import { ExceptionDialogContentComponent } from '../exception-dialog-content/exception-dialog-content.component';
+import { LoadingService } from '../loading.service';
 
 @Component({
     selector: 'app-save-lands',
@@ -18,7 +19,7 @@ export class SaveLandsComponent implements OnInit, OnDestroy {
     private wallet: string;
     ipfsKeys: string[];
 
-    constructor(private route: ActivatedRoute, private dialog: MatDialog,
+    constructor(private route: ActivatedRoute, private dialog: MatDialog, private readonly loadingService: LoadingService,
         private readonly service: Web3Service, private snackBar: MatSnackBar) {
     }
 
@@ -40,26 +41,27 @@ export class SaveLandsComponent implements OnInit, OnDestroy {
     save(): void {
         const status = this.ipfsKeys.map(k => false);
         this.subscription.add(
-            of(...this.ipfsKeys)
-                .pipe(
-                    mergeMap((key, index) =>
-                        this.service.getSmartContract(this.network)
-                            .updateLand(key, index, this.wallet)
-                            .pipe(tap(v => {
-                                console.log(v);
-                                status[index] = true;
-                                this.snackBar.open(`Land ${index + 1} number saved.`)
-                            }))
-                    ), catchError(e => {
-                        console.log(e);
-                        this.dialog.open(ExceptionDialogContentComponent, { data: { title: "Failed to save lands!" } })
-                        return of(false)
-                    }), takeLast(1), tap(v => {
-                        if (v) {
-                            this.snackBar.open(`All Lands saved.`)
-                        }
-                    })
-                ).subscribe()
+            this.loadingService.prepare(
+                of(...this.ipfsKeys)
+                    .pipe(
+                        concatMap((key, index) => {
+                            return this.service.getSmartContract()
+                                .updateLand(key, index, this.wallet)
+                                .pipe(map(v => {
+                                    status[index] = true;
+                                    this.snackBar.open(`Land ${index + 1} number saved.`)
+                                    return true;
+                                }))
+                        }), catchError(e => {
+                            console.log(e);
+                            this.dialog.open(ExceptionDialogContentComponent, { data: { title: "Failed to save lands!" } });
+                            return of(false)
+                        }), takeLast(1), tap(v => {
+                            if (v)
+                                this.snackBar.open(`All Lands saved.`)
+                        })
+                    )
+            ).subscribe()
         );
     }
 }

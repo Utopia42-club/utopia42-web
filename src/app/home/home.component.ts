@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { UtopiaContract } from '../ehtereum/utopia-contract';
 import { Web3Service } from '../ehtereum/web3.service';
 
+
+
 @Component({
     selector: 'app-home',
     templateUrl: './home.component.html',
@@ -14,9 +16,12 @@ export class HomeComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        // console.log("asdf00");
-        // this.contract = this.service.getSmartContract();
-        // this.contract.getUsersAssignee().subscribe(v => console.log("value", v));
+        // console.log("sending")
+        // const ipfs = ipfsClient.create({ host: 'utopia42.club', port: 443, protocol: 'https' })
+        // from(ipfs.add("asdf{}ASDFASDF}X"))
+        // .subscribe((v)=>{
+        //     console.log(v);
+        // })
     }
 
     buy() {
