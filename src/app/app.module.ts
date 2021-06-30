@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -14,6 +14,10 @@ import { MetaMaskConnectingComponent } from './meta-mask-connecting/meta-mask-co
 import { MetaMaskNotFoundComponent } from './meta-mask-not-found/meta-mask-not-found.component';
 import { SaveLandsComponent } from './save-lands/save-lands.component';
 import { ExceptionDialogContentComponent } from './exception-dialog-content/exception-dialog-content.component';
+import { PortLandsComponent } from './port-lands/port-lands.component';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatTableModule } from '@angular/material/table';
 
 @NgModule({
     declarations: [
@@ -23,6 +27,7 @@ import { ExceptionDialogContentComponent } from './exception-dialog-content/exce
         MetaMaskConnectingComponent,
         SaveLandsComponent,
         ExceptionDialogContentComponent,
+        PortLandsComponent,
     ],
     imports: [
         BrowserModule,
@@ -33,10 +38,16 @@ import { ExceptionDialogContentComponent } from './exception-dialog-content/exce
         FlexLayoutModule,
         MatDialogModule,
         MatProgressSpinnerModule,
-        MatSnackBarModule
+        MatSnackBarModule,
+        MatSelectModule,
+        MatFormFieldModule,
+        MatTableModule
     ],
     providers: [],
-    bootstrap: [AppComponent]
+    bootstrap: [AppComponent],
+    schemas: [
+        CUSTOM_ELEMENTS_SCHEMA
+    ],
 })
 export class AppModule {
 

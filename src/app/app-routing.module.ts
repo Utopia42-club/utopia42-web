@@ -6,6 +6,7 @@ import { SupportGuard } from './ehtereum/support.guard';
 import { HomeComponent } from './home/home.component';
 import { MetaMaskConnectingComponent } from './meta-mask-connecting/meta-mask-connecting.component';
 import { MetaMaskNotFoundComponent } from './meta-mask-not-found/meta-mask-not-found.component';
+import { PortLandsComponent } from './port-lands/port-lands.component';
 import { SaveLandsComponent } from './save-lands/save-lands.component';
 
 const routes: Routes = [
@@ -13,6 +14,7 @@ const routes: Routes = [
         path: '', component: HomeComponent, canActivate: [SupportGuard, ConnectedGuard],
         children: [
             { path: 'save/:ipfsKeys', component: SaveLandsComponent},
+            { path: 'port', component: PortLandsComponent},
         ]
     },
     { path: 'not-supported', component: MetaMaskNotFoundComponent, canActivate: [NotSupportGuard] },
