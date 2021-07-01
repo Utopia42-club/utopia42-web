@@ -56,7 +56,12 @@
     </table>
     <mat-card-content *ngIf="landPrices.length != 0">
         <h3>
-            Total Price in ether: <b>{{ totalPrice() }}</b>
+            Total Price in ether (without gas fee): <b>{{ totalPrice() }}</b>
         </h3>
     </mat-card-content>
+    <mat-card-actions>
+        <button mat-raised-button color="primary" (click)="port()" *ngIf="landPrices.length != 0">
+            Port Lands from Source to Traget
+        </button>
+    </mat-card-actions>
 </mat-card>

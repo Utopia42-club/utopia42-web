@@ -1,3 +1,4 @@
+import { Land } from './../ehtereum/utopia-contract';
 import { CONTRACT_ADDRESS } from './../ehtereum/web3.service';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
@@ -9,6 +10,17 @@ import { METAMASK_PROVIDER_LIST, Web3Service } from '../ehtereum/web3.service';
 import { ExceptionDialogContentComponent } from '../exception-dialog-content/exception-dialog-content.component';
 import { LoadingService } from '../loading.service';
 
+interface LandPrice {
+    name: string,
+    land: Land,
+    price: number
+}
+
+interface SourceNetwork {
+    networkId: string,
+    networkName: string
+}
+
 @Component({
     selector: 'app-port-lands',
     templateUrl: './port-lands.component.html',
@@ -16,13 +28,13 @@ import { LoadingService } from '../loading.service';
 })
 export class PortLandsComponent implements OnInit, OnDestroy {
     private subscription = new Subscription();
-    private network: string;
     private wallet: string;
+    private network: string;
     networkName: string;
     selectedNetworkId: string = '';
-    sourceNetworks: {}[];
-    landPrices: {}[] = [];
-    tempLandPrices: {}[] = [];
+    sourceNetworks: SourceNetwork[];
+    landPrices: LandPrice[] = [];
+    tempLandPrices: LandPrice[] = [];
     displayedColumns = ["Name", "x1", "y1", "x2", "y2", "Price"];
 
     constructor(
@@ -34,29 +46,25 @@ export class PortLandsComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit(): void {
-        this.network = this.service.networkId().toString();
-        this.networkName = METAMASK_PROVIDER_LIST[this.network];
-        this.wallet = this.service.wallet();
-        this.sourceNetworks = Object.keys(METAMASK_PROVIDER_LIST).reduce(
-            (r, e) => {
-                if (CONTRACT_ADDRESS[e] != '' && e != this.network)
-                    r.push({
-                        networkId: e,
-                        networkName: METAMASK_PROVIDER_LIST[e],
-                    });
-                return r;
-            },
-            []
-        );
-        //TODO:
-        // this.subscription.add(this.route.params.subscribe(params => {
-        //     this.ipfsKeys = `${params.ipfsKeys}`.split(',');
-        //     console.log(this.ipfsKeys);
-        // }));
-        // this.subscription.add(this.route.queryParams.subscribe(params => {
-        //     this.network = params.networkId ? `${params.networkId}` : undefined;
-        //     this.wallet = params.wallet ? `${params.wallet}` : undefined;
-        // }));
+        this.subscription.add(this.route.queryParams.subscribe(params => {
+            this.network = params.networkId ? `${params.networkId}` : this.service.networkId().toString(); //FIXME: ?
+            this.wallet = params.wallet ? `${params.wallet}` : this.service.wallet();
+            this.networkName = METAMASK_PROVIDER_LIST[this.network];
+            this.sourceNetworks = Object.keys(METAMASK_PROVIDER_LIST).reduce(
+                (r, e) => {
+                    if (CONTRACT_ADDRESS[e] != '' && e != this.network)
+                        r.push({
+                            networkId: e,
+                            networkName: METAMASK_PROVIDER_LIST[e],
+                        });
+                    return r;
+                },
+                []
+            );
+            if (this.sourceNetworks.length != 0)
+                this.selectedNetworkId = this.sourceNetworks[0].networkId;
+        }));
+        
     }
 
     ngOnDestroy(): void {
@@ -64,10 +72,33 @@ export class PortLandsComponent implements OnInit, OnDestroy {
     }
 
     totalPrice(): Number {
-        var price = 0;
-        for(var i in this.landPrices)
-            price += Number(this.landPrices[i]['price']);
+        let price = 0;
+        for(let i in this.landPrices)
+            price = price + this.landPrices[i].price;
         return price;
+    }
+
+    port(): void{
+        this.subscription.add(
+            this.loadingService.prepare(
+                of(...this.landPrices).pipe(
+                    concatMap(landPrice => {
+                        return this.service.getSmartContract()
+                            .assignLand(this.wallet, landPrice.land.x1, landPrice.land.y1, landPrice.land.x2, landPrice.land.y2)
+                            .pipe(map((v) => {return true;}));
+                    }), catchError(e => {
+                        console.log(e);
+                        this.dialog.open(ExceptionDialogContentComponent, { data: { title: "Failed to port lands!" } });
+                        return of(false)
+                    }), takeLast(1), tap((v) => {
+                        if (v) {
+                            this.landPrices = this.tempLandPrices;
+                            this.snackBar.open(`All lands ported to target.`);
+                        }
+                    })
+                )
+            ).subscribe()
+        )
     }
     
     getPrices(): void {
@@ -92,7 +123,7 @@ export class PortLandsComponent implements OnInit, OnDestroy {
                                                         .pipe(map((price) => {
                                                                 this.tempLandPrices.push({
                                                                     name: `Land ${index + 1}`,
-                                                                    price: price,
+                                                                    price: Number(price),
                                                                     land: land
                                                                 })
                                                                 return true;
@@ -105,15 +136,15 @@ export class PortLandsComponent implements OnInit, OnDestroy {
                                                     }
                                                 })
                                             )
-                                        ).subscribe()
-                                    );
+                                    ).subscribe()
+                                );
                             }), catchError((e) => {
                                 console.log(e);
                                 this.dialog.open(ExceptionDialogContentComponent, { data: { title: 'Failed to calculate price!'} });
                                 this.landPrices = [];
                                 return of(false);
                             })
-                        )).subscribe()
+            )).subscribe()
         );
     }
 }
