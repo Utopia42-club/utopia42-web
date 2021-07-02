@@ -4,21 +4,28 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
-import { of, Subscription } from 'rxjs';
-import { catchError, concatMap, map, takeLast, tap } from 'rxjs/operators';
+import { of, Subscription, throwError } from 'rxjs';
+import {
+    catchError,
+    concatMap,
+    map,
+    switchMap,
+    takeLast,
+    tap,
+} from 'rxjs/operators';
 import { METAMASK_PROVIDER_LIST, Web3Service } from '../ehtereum/web3.service';
 import { ExceptionDialogContentComponent } from '../exception-dialog-content/exception-dialog-content.component';
 import { LoadingService } from '../loading.service';
 
 interface LandPrice {
-    name: string,
-    land: Land,
-    price: number
+    name: string;
+    land: Land;
+    price: number;
 }
 
 interface SourceNetwork {
-    networkId: string,
-    networkName: string
+    networkId: string;
+    networkName: string;
 }
 
 @Component({
@@ -35,7 +42,7 @@ export class PortLandsComponent implements OnInit, OnDestroy {
     sourceNetworks: SourceNetwork[];
     landPrices: LandPrice[] = [];
     tempLandPrices: LandPrice[] = [];
-    displayedColumns = ["Name", "x1", "y1", "x2", "y2", "Price"];
+    displayedColumns = ['Name', 'x1', 'y1', 'x2', 'y2', 'Price'];
 
     constructor(
         private route: ActivatedRoute,
@@ -46,25 +53,22 @@ export class PortLandsComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit(): void {
-        this.subscription.add(this.route.queryParams.subscribe(params => {
-            this.network = params.networkId ? `${params.networkId}` : this.service.networkId().toString(); //FIXME: ?
-            this.wallet = params.wallet ? `${params.wallet}` : this.service.wallet();
-            this.networkName = METAMASK_PROVIDER_LIST[this.network];
-            this.sourceNetworks = Object.keys(METAMASK_PROVIDER_LIST).reduce(
-                (r, e) => {
-                    if (CONTRACT_ADDRESS[e] != '' && e != this.network)
-                        r.push({
-                            networkId: e,
-                            networkName: METAMASK_PROVIDER_LIST[e],
-                        });
-                    return r;
-                },
-                []
-            );
-            if (this.sourceNetworks.length != 0)
-                this.selectedNetworkId = this.sourceNetworks[0].networkId;
-        }));
-        
+        this.network = this.service.networkId().toString();
+        this.wallet = this.service.wallet();
+        this.networkName = METAMASK_PROVIDER_LIST[this.network];
+        this.sourceNetworks = Object.keys(METAMASK_PROVIDER_LIST).reduce(
+            (r, e) => {
+                if (CONTRACT_ADDRESS[e] != '' && e != this.network)
+                    r.push({
+                        networkId: e,
+                        networkName: METAMASK_PROVIDER_LIST[e],
+                    });
+                return r;
+            },
+            []
+        );
+        if (this.sourceNetworks.length != 0)
+            this.selectedNetworkId = this.sourceNetworks[0].networkId;
     }
 
     ngOnDestroy(): void {
@@ -73,78 +77,120 @@ export class PortLandsComponent implements OnInit, OnDestroy {
 
     totalPrice(): Number {
         let price = 0;
-        for(let i in this.landPrices)
-            price = price + this.landPrices[i].price;
+        for (let i in this.landPrices) price = price + this.landPrices[i].price;
         return price;
     }
 
-    port(): void{
+    port(): void {
         this.subscription.add(
-            this.loadingService.prepare(
-                of(...this.landPrices).pipe(
-                    concatMap(landPrice => {
-                        return this.service.getSmartContract()
-                            .assignLand(this.wallet, landPrice.land.x1, landPrice.land.y1, landPrice.land.x2, landPrice.land.y2)
-                            .pipe(map((v) => {return true;}));
-                    }), catchError(e => {
-                        console.log(e);
-                        this.dialog.open(ExceptionDialogContentComponent, { data: { title: "Failed to port lands!" } });
-                        return of(false)
-                    }), takeLast(1), tap((v) => {
-                        if (v) {
-                            this.landPrices = this.tempLandPrices;
-                            this.snackBar.open(`All lands ported to target.`);
-                        }
-                    })
+            this.loadingService
+                .prepare(
+                    of(...this.landPrices).pipe(
+                        concatMap((landPrice) => {
+                            return this.service
+                                .getSmartContract()
+                                .assignLand(
+                                    this.wallet,
+                                    landPrice.land.x1,
+                                    landPrice.land.y1,
+                                    landPrice.land.x2,
+                                    landPrice.land.y2
+                                )
+                                .pipe(
+                                    map((v) => {
+                                        return true;
+                                    })
+                                );
+                        }),
+                        catchError((e) => {
+                            console.log(e);
+                            this.dialog.open(ExceptionDialogContentComponent, {
+                                data: { title: 'Failed to port lands!' },
+                            });
+                            return of(false);
+                        }),
+                        takeLast(1),
+                        tap((v) => {
+                            if (v) {
+                                this.landPrices = this.tempLandPrices;
+                                this.snackBar.open(
+                                    `All lands ported to target.`
+                                );
+                            }
+                        })
+                    )
                 )
-            ).subscribe()
-        )
+                .subscribe()
+        );
     }
-    
+
     getPrices(): void {
         this.subscription.add(
-            this.loadingService.prepare(
-                    this.service.getSmartContract(this.selectedNetworkId)
+            this.loadingService
+                .prepare(
+                    this.service
+                        .getSmartContract(this.selectedNetworkId)
                         .getOwnerLands(this.wallet)
                         .pipe(
-                            map((lands) => {
+                            switchMap((lands) => {
                                 this.landPrices = [];
                                 this.tempLandPrices = [];
                                 if (lands.length == 0) {
-                                    this.snackBar.open(`No lands found on the source network.`);
-                                    return;
+                                    this.snackBar.open(
+                                        `No lands found on the source network.`
+                                    );
+                                    return of();
                                 }
-                                this.subscription.add(
-                                    this.loadingService.prepare(
-                                            of(...lands).pipe(
-                                                concatMap((land, index) => {
-                                                    return this.service.getSmartContract()
-                                                        .getLandPrice(land.x1, land.y1, land.x2, land.y2)
-                                                        .pipe(map((price) => {
-                                                                this.tempLandPrices.push({
-                                                                    name: `Land ${index + 1}`,
-                                                                    price: Number(price),
-                                                                    land: land
-                                                                })
-                                                                return true;
-                                                            })
-                                                        );
-                                                }), takeLast(1), tap((v) => {
-                                                    if (v) {
-                                                        this.landPrices = this.tempLandPrices;
-                                                        this.snackBar.open(`All land prices calculated.`);
-                                                    }
-                                                })
+                                return of(...lands).pipe(
+                                    concatMap((land, index) => {
+                                        return this.service
+                                            .getSmartContract()
+                                            .getLandPrice(
+                                                land.x1,
+                                                land.y1,
+                                                land.x2,
+                                                land.y2
                                             )
-                                    ).subscribe()
+                                            .pipe(
+                                                map((price) => {
+                                                    this.tempLandPrices.push({
+                                                        name: `Land ${
+                                                            index + 1
+                                                        }`,
+                                                        price: Number(price),
+                                                        land: land,
+                                                    });
+                                                    return true;
+                                                })
+                                            );
+                                    })
                                 );
-                            }), catchError((e) => {
+                            }),
+                            catchError((e) => {
                                 console.log(e);
-                                this.dialog.open(ExceptionDialogContentComponent, { data: { title: 'Failed to calculate price!'} });
+                                this.dialog.open(
+                                    ExceptionDialogContentComponent,
+                                    {
+                                        data: {
+                                            title: 'Failed to calculate price!',
+                                        },
+                                    }
+                                );
                                 this.landPrices = [];
-                                return of(false);
+                                return throwError(e);
+                            }),
+                            takeLast(1),
+                            tap((v) => {
+                                if (v) {
+                                    this.landPrices = this.tempLandPrices;
+                                    this.snackBar.open(
+                                        `All land prices calculated.`
+                                    );
+                                }
                             })
-            )).subscribe()
+                        )
+                )
+                .subscribe()
         );
     }
 }
