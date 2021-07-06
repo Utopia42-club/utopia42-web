@@ -1,0 +1,22 @@
+table {
+    width: 400px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.row-content {
+    width: 100%;
+}
+
+.row-content > * {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.row-content :first-child {
+    margin-right: auto;
+}
+
+.row-content :nth-child(2) {
+    margin-left: auto;
+}

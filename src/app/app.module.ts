@@ -18,6 +18,7 @@ import { PortLandsComponent } from './port-lands/port-lands.component';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTableModule } from '@angular/material/table';
+import { BuyLandsComponent } from './buy-lands/buy-lands.component';
 
 @NgModule({
     declarations: [
@@ -28,6 +29,7 @@ import { MatTableModule } from '@angular/material/table';
         SaveLandsComponent,
         ExceptionDialogContentComponent,
         PortLandsComponent,
+        BuyLandsComponent,
     ],
     imports: [
         BrowserModule,

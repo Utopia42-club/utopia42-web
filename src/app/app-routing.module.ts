@@ -1,3 +1,4 @@
+import { BuyLandsComponent } from './buy-lands/buy-lands.component';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { ConnectedGuard } from './ehtereum/connected.guard';
@@ -15,6 +16,7 @@ const routes: Routes = [
         children: [
             { path: 'save/:ipfsKeys', component: SaveLandsComponent},
             { path: 'port', component: PortLandsComponent},
+            { path: 'buy/:coordinates', component: BuyLandsComponent},
         ]
     },
     { path: 'not-supported', component: MetaMaskNotFoundComponent, canActivate: [NotSupportGuard] },

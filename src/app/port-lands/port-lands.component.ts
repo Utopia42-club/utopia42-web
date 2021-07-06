@@ -75,7 +75,7 @@ export class PortLandsComponent implements OnInit, OnDestroy {
         this.subscription.unsubscribe();
     }
 
-    totalPrice(): Number {
+    totalPrice(): number {
         let price = 0;
         for (let i in this.landPrices) price = price + this.landPrices[i].price;
         return price;
@@ -103,7 +103,6 @@ export class PortLandsComponent implements OnInit, OnDestroy {
                                 );
                         }),
                         catchError((e) => {
-                            console.log(e);
                             this.dialog.open(ExceptionDialogContentComponent, {
                                 data: { title: 'Failed to port lands!' },
                             });
@@ -135,12 +134,11 @@ export class PortLandsComponent implements OnInit, OnDestroy {
                             switchMap((lands) => {
                                 this.landPrices = [];
                                 this.tempLandPrices = [];
-                                if (lands.length == 0) {
-                                    this.snackBar.open(
-                                        `No lands found on the source network.`
+                                if (lands.length == 0)
+                                    throw Error(
+                                        'No lands found on the source network!'
                                     );
-                                    return of();
-                                }
+                                this.tempLandPrices = [];
                                 return of(...lands).pipe(
                                     concatMap((land, index) => {
                                         return this.service
@@ -163,30 +161,33 @@ export class PortLandsComponent implements OnInit, OnDestroy {
                                                     return true;
                                                 })
                                             );
+                                    }),
+                                    takeLast(1),
+                                    tap((v) => {
+                                        if (v) {
+                                            this.landPrices =
+                                                this.tempLandPrices;
+                                            this.snackBar.open(
+                                                `All land prices calculated.`
+                                            );
+                                        }
                                     })
                                 );
                             }),
-                            catchError((e) => {
+                            catchError((e: Error) => {
                                 console.log(e);
                                 this.dialog.open(
                                     ExceptionDialogContentComponent,
                                     {
                                         data: {
-                                            title: 'Failed to calculate price!',
+                                            title:
+                                                e.message != ''
+                                                    ? e.message
+                                                    : 'Failed to calculate price!',
                                         },
                                     }
                                 );
-                                this.landPrices = [];
                                 return throwError(e);
-                            }),
-                            takeLast(1),
-                            tap((v) => {
-                                if (v) {
-                                    this.landPrices = this.tempLandPrices;
-                                    this.snackBar.open(
-                                        `All land prices calculated.`
-                                    );
-                                }
                             })
                         )
                 )
