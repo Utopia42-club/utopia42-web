@@ -51,10 +51,10 @@ export class BuyLandsComponent implements OnInit, OnDestroy {
     private wallet: string;
     landsCoordinates: LandCoordinates[] = [];
     tempLandsCoordinates: LandCoordinates[] = [];
-    displayedColumns = ['Name', 'x1', 'y1', 'x2', 'y2', 'Price']; 
+    displayedColumns = ['Name', 'x1', 'y1', 'x2', 'y2', 'Price'];
 
     constructor(
-        private route: ActivatedRoute, 
+        private route: ActivatedRoute,
         private dialog: MatDialog,
         private readonly loadingService: LoadingService,
         private readonly service: Web3Service,
@@ -65,8 +65,6 @@ export class BuyLandsComponent implements OnInit, OnDestroy {
         this.network = this.service.networkId().toString();
         this.wallet = this.service.wallet();
         this.subscription.add(
-            // this.loadingService
-            //     .prepare(
             this.route.params
                 .pipe(
                     switchMap((params) => {
@@ -84,53 +82,56 @@ export class BuyLandsComponent implements OnInit, OnDestroy {
                             throw Error('Invalid Coordinates!');
                         }
                         this.tempLandsCoordinates = [];
-                        return of(...landsCoordinates).pipe(
-                            concatMap((land, index) => {
-                                return this.service
-                                    .getSmartContract()
-                                    .getLandPrice(
-                                        land.x1,
-                                        land.y1,
-                                        land.x2,
-                                        land.y2
-                                    )
-                                    .pipe(
-                                        map((price) => {
-                                            console.log('pushed');
-                                            this.tempLandsCoordinates.push({
-                                                name: `Land ${index + 1}`,
-                                                price: Number(price),
-                                                x1: land.x1,
-                                                y1: land.y1,
-                                                x2: land.x2,
-                                                y2: land.y2,
-                                            });
-                                            return true;
-                                        })
-                                    );
-                            }),
-                            takeLast(1),
-                            tap((v) => {
-                                if (v) {
-                                    this.landsCoordinates =
-                                        this.tempLandsCoordinates;
-                                    this.snackBar.open(
-                                        `All land prices calculated.`
-                                    );
-                                }
-                            })
+                        return this.loadingService.prepare(
+                            of(...landsCoordinates).pipe(
+                                concatMap((land, index) => {
+                                    return this.service
+                                        .getSmartContract()
+                                        .getLandPrice(
+                                            land.x1,
+                                            land.y1,
+                                            land.x2,
+                                            land.y2
+                                        )
+                                        .pipe(
+                                            map((price) => {
+                                                this.tempLandsCoordinates.push({
+                                                    name: `Land ${index + 1}`,
+                                                    price: Number(price),
+                                                    x1: land.x1,
+                                                    y1: land.y1,
+                                                    x2: land.x2,
+                                                    y2: land.y2,
+                                                });
+                                                return true;
+                                            })
+                                        );
+                                }),
+                                takeLast(1),
+                                tap((v) => {
+                                    if (v) {
+                                        this.landsCoordinates =
+                                            this.tempLandsCoordinates;
+                                        this.snackBar.open(
+                                            `All land prices calculated.`
+                                        );
+                                    }
+                                })
+                            )
                         );
                     }),
                     catchError((e: Error) => {
                         this.dialog.open(ExceptionDialogContentComponent, {
                             data: {
-                                title: e.message != '' ? e.message : 'Failed to calculate price!',
+                                title:
+                                    e.message != ''
+                                        ? e.message
+                                        : 'Failed to calculate price!',
                             },
                         });
                         return throwError(e);
                     })
                 )
-                // )
                 .subscribe()
         );
     }
@@ -186,7 +187,8 @@ export class BuyLandsComponent implements OnInit, OnDestroy {
 
     totalPrice(): number {
         let price = 0;
-        for (let i in this.landsCoordinates) price = price + this.landsCoordinates[i].price;
+        for (let i in this.landsCoordinates)
+            price = price + this.landsCoordinates[i].price;
         return price;
     }
 }
