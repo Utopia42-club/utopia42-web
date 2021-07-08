@@ -6,6 +6,6 @@
         <p>{{message}}</p>
     </mat-card-content>
     <mat-card-actions>
-        <button *ngIf="canRetry" mat-raised-button color="primary" (click)="tryConnect()">Retry</button>
+        <button *ngIf="retry != null" mat-raised-button color="primary" (click)="retry()">Retry</button>
     </mat-card-actions>
 </mat-card>

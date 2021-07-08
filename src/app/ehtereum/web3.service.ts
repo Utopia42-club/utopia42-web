@@ -12,6 +12,7 @@ import { UtopiaContract } from './utopia-contract';
     providedIn: 'root'
 })
 export class Web3Service {
+    private connectedAccounts: string[] = [];
     private web3ProviderCashe = new Map<string, Web3>();
     private contractCache = new Map<string, UtopiaContract>();
     readonly win = window as any;
@@ -73,6 +74,8 @@ export class Web3Service {
                     if (p) {
                         this.metaMaskProvider = p;
                         this.metaMaskProvider.on('chainChanged', (_chainId) => window.location.reload());
+                        this.metaMaskProvider.on('accountsChanged', (accounts) => window.location.reload());
+                        this.metaMaskProvider.on('disconnect', (accounts) => window.location.reload());
                         return p;
                     }
                     this.metaMaskProvider = null;
@@ -95,7 +98,25 @@ export class Web3Service {
     }
 
     public wallet(): string {
-        return this.metaMaskProvider?.selectedAddress;
+        return this.metaMaskProvider.selectedNetworkId;
+    }
+
+    public wallets(): string[] {
+        return this.connectedAccounts;
+    }
+
+    public reconnect() {
+        return this.loadingService.prepare(
+            this.provider()
+                .pipe(switchMap(provider =>
+                    from(provider.request({
+                        method: "wallet_requestPermissions",
+                        params: [{
+                            eth_accounts: {} 
+                        }]
+                    }))
+                ))
+        );
     }
 
     public connect(networkId?: number, wallet?: string): Observable<boolean> {
@@ -107,10 +128,14 @@ export class Web3Service {
                 .pipe(
                     switchMap(provider => {
                         if (provider == null) return of(false);
-                        // if (provider.isConnected()) return of(true);
+                        console.log(provider.isConnected());
                         return from(provider.request({ method: 'eth_requestAccounts' }))
                             .pipe(
-                                map((d) => this.checkProvider(provider, networkId, wallet)),
+                                map((d) => {
+                                    this.connectedAccounts = d as any;
+                                    return this.connectedAccounts.indexOf(provider.selectedAddress) == 0
+                                        && this.checkProvider(provider, networkId, wallet);
+                                }),
                                 catchError(e => of(false))
                             );
                     })
@@ -120,7 +145,7 @@ export class Web3Service {
 
     private checkProvider(provider: any, networkId?: number, wallet?: string): boolean {
         return (networkId == null || provider.networkVersion == networkId)
-            && (wallet == null || provider.selectedAddress == wallet);
+            && (wallet == null || this.connectedAccounts.indexOf(wallet.toLowerCase()) >= 0);
     }
 }
 

@@ -3,15 +3,12 @@ import { map, mergeMap, reduce, switchMap } from "rxjs/operators";
 import Web3 from "web3";
 import { Contract } from "web3-eth-contract";
 import { LoadingService } from "../loading.service";
+import { Web3Service } from "./web3.service";
 
 export class UtopiaContract {
     constructor(readonly ethContract: Contract,
         private loadingService: LoadingService,
-        private ethereum: any) { }
-
-    public currentWallet(): string {
-        return this.ethereum.selectedAddress;
-    }
+        private web3service:Web3Service) { }
 
     public getLandPrice(x1: number, y1: number, x2: number, y2: number): Observable<string> {
         return this.loadingService.prepare(
@@ -57,8 +54,8 @@ export class UtopiaContract {
         );
     }
 
-    public updateLand(ipfsKey, index, wallet?): Observable<any> {
-        if (wallet == null) wallet = this.currentWallet();
+    public updateLand(ipfsKey, index, wallet): Observable<any> {
+        if (wallet == null) wallet = this.web3service.wallets()[0];
         return this.loadingService.prepare(
             new Observable(s => {
                 this.ethContract.methods.updateLand(ipfsKey, index).send({ from: wallet }, this.listener(s));
