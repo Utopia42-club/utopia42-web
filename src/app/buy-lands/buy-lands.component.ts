@@ -1,17 +1,13 @@
-import { NullTemplateVisitor } from '@angular/compiler';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
-import { throwError } from 'rxjs';
-import { of, Subscription } from 'rxjs';
+import { of, Subscription, throwError } from 'rxjs';
 import {
     catchError,
     concatMap,
-    map,
-    takeLast,
-    tap,
-    switchMap,
+    map, switchMap, takeLast,
+    tap
 } from 'rxjs/operators';
 import { Web3Service } from '../ehtereum/web3.service';
 import { ExceptionDialogContentComponent } from '../exception-dialog-content/exception-dialog-content.component';
@@ -30,13 +26,13 @@ const createLandCoordinates = (coordinates: string[]): LandCoordinates => {
     let l = coordinates.map((item) => Number(item));
     return l[2] > l[0] && l[3] > l[1]
         ? {
-              x1: l[0],
-              y1: l[1],
-              x2: l[2],
-              y2: l[3],
-              name: null,
-              price: null,
-          }
+            x1: l[0],
+            y1: l[1],
+            x2: l[2],
+            y2: l[3],
+            name: null,
+            price: null,
+        }
         : null;
 };
 
@@ -59,7 +55,7 @@ export class BuyLandsComponent implements OnInit, OnDestroy {
         private readonly loadingService: LoadingService,
         private readonly service: Web3Service,
         private snackBar: MatSnackBar
-    ) {}
+    ) { }
 
     ngOnInit(): void {
         this.network = this.service.networkId().toString();
@@ -73,8 +69,8 @@ export class BuyLandsComponent implements OnInit, OnDestroy {
                             .map((item, index) =>
                                 index % 4 === 0
                                     ? createLandCoordinates(
-                                          coordinates.slice(index, index + 4)
-                                      )
+                                        coordinates.slice(index, index + 4)
+                                    )
                                     : null
                             )
                             .filter((item) => item != null);
@@ -177,6 +173,7 @@ export class BuyLandsComponent implements OnInit, OnDestroy {
                             this.landsCoordinates = [];
                             if (v) {
                                 this.snackBar.open(`All lands were bought.`);
+                                window.close();
                             }
                         })
                     )

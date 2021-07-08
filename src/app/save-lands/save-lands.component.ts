@@ -57,8 +57,10 @@ export class SaveLandsComponent implements OnInit, OnDestroy {
                             this.dialog.open(ExceptionDialogContentComponent, { data: { title: "Failed to save lands!" } });
                             return of(false)
                         }), takeLast(1), tap(v => {
-                            if (v)
-                                this.snackBar.open(`All Lands saved.`)
+                            if (v) {
+                                this.snackBar.open(`All Lands saved.`);
+                                window.close();
+                            }
                         })
                     )
             ).subscribe()
