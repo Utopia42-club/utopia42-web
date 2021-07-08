@@ -98,7 +98,7 @@ export class Web3Service {
     }
 
     public wallet(): string {
-        return this.metaMaskProvider.selectedNetworkId;
+        return this.metaMaskProvider.selectedAddress;
     }
 
     public wallets(): string[] {

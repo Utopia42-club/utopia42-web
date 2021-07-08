@@ -59,6 +59,8 @@ export class BuyLandsComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.network = this.service.networkId().toString();
+        this.wallet = this.route.snapshot.params.wallet ? `${this.route.snapshot.params.wallet}` : undefined;
+
         this.subscription.add(
             this.route.params
                 .pipe(
@@ -109,7 +111,7 @@ export class BuyLandsComponent implements OnInit, OnDestroy {
                                         this.landsCoordinates =
                                             this.tempLandsCoordinates;
                                         this.snackBar.open(
-                                            `All land prices calculated.`
+                                            'All land prices calculated.'
                                         );
                                     }
                                 })
