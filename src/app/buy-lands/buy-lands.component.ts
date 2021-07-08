@@ -59,13 +59,12 @@ export class BuyLandsComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.network = this.service.networkId().toString();
-        this.wallet = this.route.snapshot.params.wallet ? `${this.route.snapshot.params.wallet}` : undefined;
-
+        this.wallet = this.route.snapshot.queryParams.wallet ? `${this.route.snapshot.queryParams.wallet}` : undefined;
         this.subscription.add(
             this.route.params
                 .pipe(
                     switchMap((params) => {
-                        this.wallet = params.wallet ? `${params.wallet}` : undefined;
+                        // this.wallet = params.wallet ? `${params.wallet}` : undefined;
                         let coordinates = `${params.coordinates}`.split(',');
                         let landsCoordinates: LandCoordinates[] = coordinates
                             .map((item, index) =>
