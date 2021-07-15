@@ -49,7 +49,7 @@ export class SaveLandsComponent implements OnInit, OnDestroy {
                                 .updateLand(key, index, this.wallet)
                                 .pipe(map(v => {
                                     status[index] = true;
-                                    this.snackBar.open(`Land ${index + 1} number saved.`)
+                                    this.snackBar.open(`Land ${index + 1} saved.`)
                                     return true;
                                 }))
                         }), catchError(e => {

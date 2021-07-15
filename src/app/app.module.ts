@@ -19,6 +19,7 @@ import { MetaMaskConnectingComponent } from './meta-mask-connecting/meta-mask-co
 import { MetaMaskNotFoundComponent } from './meta-mask-not-found/meta-mask-not-found.component';
 import { PortLandsComponent } from './port-lands/port-lands.component';
 import { SaveLandsComponent } from './save-lands/save-lands.component';
+import { UtopiaGameComponent } from './utopia-game/utopia-game.component';
 
 @NgModule({
     declarations: [
@@ -30,6 +31,7 @@ import { SaveLandsComponent } from './save-lands/save-lands.component';
         ExceptionDialogContentComponent,
         PortLandsComponent,
         BuyLandsComponent,
+        UtopiaGameComponent,
     ],
     imports: [
         BrowserModule,

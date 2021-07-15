@@ -94,7 +94,7 @@ export class Web3Service {
     }
 
     public networkId(): number {
-        return this.metaMaskProvider?.networkVersion;
+        return parseInt(this.metaMaskProvider.networkVersion);
     }
 
     public wallet(): string {
@@ -128,7 +128,6 @@ export class Web3Service {
                 .pipe(
                     switchMap(provider => {
                         if (provider == null) return of(false);
-                        console.log(provider.isConnected());
                         return from(provider.request({ method: 'eth_requestAccounts' }))
                             .pipe(
                                 map((d) => {
