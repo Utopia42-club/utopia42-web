@@ -1,32 +1,21 @@
-import { Land } from './../ehtereum/utopia-contract';
-import { CONTRACT_ADDRESS } from './../ehtereum/web3.service';
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ActivatedRoute } from '@angular/router';
-import { of, Subscription, throwError } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import {
     catchError,
     concatMap,
-    map,
-    switchMap,
-    takeLast,
+    map, takeLast,
     tap,
+    toArray
 } from 'rxjs/operators';
-import { METAMASK_PROVIDER_LIST, Web3Service } from '../ehtereum/web3.service';
+import { AppComponent } from '../app.component';
+import { Land, PricedLand } from '../ehtereum/models';
+import { Network, Networks } from '../ehtereum/network';
+import { UtopiaContract } from '../ehtereum/utopia-contract';
+import { Web3Service } from '../ehtereum/web3.service';
 import { ExceptionDialogContentComponent } from '../exception-dialog-content/exception-dialog-content.component';
 import { LoadingService } from '../loading.service';
-
-interface LandPrice {
-    name: string;
-    land: Land;
-    price: number;
-}
-
-interface SourceNetwork {
-    networkId: string;
-    networkName: string;
-}
 
 @Component({
     selector: 'app-port-lands',
@@ -35,40 +24,26 @@ interface SourceNetwork {
 })
 export class PortLandsComponent implements OnInit, OnDestroy {
     private subscription = new Subscription();
-    private wallet: string;
-    private network: string;
     networkName: string;
-    selectedNetworkId: string = '';
-    sourceNetworks: SourceNetwork[];
-    landPrices: LandPrice[] = [];
-    tempLandPrices: LandPrice[] = [];
-    displayedColumns = ['Name', 'x1', 'y1', 'x2', 'y2', 'Price'];
+    sourceNetwork: Network = null;
+    targetNetwork: Network = null;
+    networks: Network[];
+    lands: PricedLand[] = [];
+    displayedColumns = ['x1', 'y1', 'x2', 'y2', 'Price'];
 
     constructor(
-        private route: ActivatedRoute,
+        private dialogRef: MatDialogRef<any>,
         private dialog: MatDialog,
         private readonly loadingService: LoadingService,
         private readonly service: Web3Service,
-        private snackBar: MatSnackBar
-    ) {}
+        private readonly snackBar: MatSnackBar,
+        @Inject(MAT_DIALOG_DATA) private readonly appComponent: AppComponent,
+    ) { }
 
     ngOnInit(): void {
-        this.network = this.service.networkId().toString();
-        this.wallet = this.service.wallet();
-        this.networkName = METAMASK_PROVIDER_LIST[this.network];
-        this.sourceNetworks = Object.keys(METAMASK_PROVIDER_LIST).reduce(
-            (r, e) => {
-                if (CONTRACT_ADDRESS[e] != '' && e != this.network)
-                    r.push({
-                        networkId: e,
-                        networkName: METAMASK_PROVIDER_LIST[e],
-                    });
-                return r;
-            },
-            []
-        );
-        if (this.sourceNetworks.length != 0)
-            this.selectedNetworkId = this.sourceNetworks[0].networkId;
+        this.networks = Array.from(Networks.supported.values());
+        // if (this.networks.length != 0)
+        //     this.sourceNetwork = this.networks[0];
     }
 
     ngOnDestroy(): void {
@@ -77,7 +52,7 @@ export class PortLandsComponent implements OnInit, OnDestroy {
 
     totalPrice(): number {
         let price = 0;
-        for (let i in this.landPrices) price = price + this.landPrices[i].price;
+        for (let i in this.lands) price = price + this.lands[i].price;
         return price;
     }
 
@@ -85,17 +60,11 @@ export class PortLandsComponent implements OnInit, OnDestroy {
         this.subscription.add(
             this.loadingService
                 .prepare(
-                    of(...this.landPrices).pipe(
-                        concatMap((landPrice) => {
-                            return this.service
-                                .getSmartContract()
-                                .assignLand(
-                                    this.wallet,
-                                    landPrice.land.x1,
-                                    landPrice.land.y1,
-                                    landPrice.land.x2,
-                                    landPrice.land.y2
-                                )
+                    of(...this.lands).pipe(
+                        concatMap((land) => {
+                            let contract = this.service.getSmartContract();
+                            return contract
+                                .assignPricedLand(contract.defaultWallet, land)
                                 .pipe(
                                     map((v) => {
                                         return true;
@@ -103,19 +72,13 @@ export class PortLandsComponent implements OnInit, OnDestroy {
                                 );
                         }),
                         catchError((e) => {
-                            this.dialog.open(ExceptionDialogContentComponent, {
-                                data: { title: 'Failed to port lands!' },
-                            });
+                            this.openErrorDialog('Failed to port lands!');
                             return of(false);
                         }),
                         takeLast(1),
                         tap((v) => {
-                            if (v) {
-                                this.landPrices = this.tempLandPrices;
-                                this.snackBar.open(
-                                    `All lands ported to target.`
-                                );
-                            }
+                            if (v)
+                                this.snackBar.open('All lands ported to target.');
                         })
                     )
                 )
@@ -123,75 +86,75 @@ export class PortLandsComponent implements OnInit, OnDestroy {
         );
     }
 
+    private openErrorDialog(title: string) {
+        this.dialog.open(ExceptionDialogContentComponent, {
+            data: { title },
+        });
+    }
+
     getPrices(): void {
+        if (this.sourceNetwork == this.targetNetwork) {
+            this.snackBar.open("Source and target cannot be the same");
+            return;
+        }
+        // this.appComponent.getContractSafe(this.targetNetwork.id, null)
+        // .subscribe(contract => {
+        // console.log(contract);
+        // if (contract == null) return;
+        // this.doLoadLands(contract);
+        // });
         this.subscription.add(
             this.loadingService
                 .prepare(
                     this.service
-                        .getSmartContract(this.selectedNetworkId)
-                        .getOwnerLands(this.wallet)
-                        .pipe(
-                            switchMap((lands) => {
-                                this.landPrices = [];
-                                this.tempLandPrices = [];
-                                if (lands.length == 0)
-                                    throw Error(
-                                        'No lands found on the source network!'
-                                    );
-                                this.tempLandPrices = [];
-                                return of(...lands).pipe(
-                                    concatMap((land, index) => {
-                                        return this.service
-                                            .getSmartContract()
-                                            .getLandPrice(
-                                                land.x1,
-                                                land.y1,
-                                                land.x2,
-                                                land.y2
-                                            )
-                                            .pipe(
-                                                map((price) => {
-                                                    this.tempLandPrices.push({
-                                                        name: `Land ${
-                                                            index + 1
-                                                        }`,
-                                                        price: Number(price),
-                                                        land: land,
-                                                    });
-                                                    return true;
-                                                })
-                                            );
-                                    }),
-                                    takeLast(1),
-                                    tap((v) => {
-                                        if (v) {
-                                            this.landPrices =
-                                                this.tempLandPrices;
-                                            this.snackBar.open(
-                                                `All land prices calculated.`
-                                            );
-                                        }
-                                    })
-                                );
-                            }),
-                            catchError((e: Error) => {
-                                console.log(e);
-                                this.dialog.open(
-                                    ExceptionDialogContentComponent,
-                                    {
-                                        data: {
-                                            title:
-                                                e.message != ''
-                                                    ? e.message
-                                                    : 'Failed to calculate price!',
-                                        },
-                                    }
-                                );
-                                return throwError(e);
-                            })
-                        )
-                )
-                .subscribe()
+                        .getSmartContract(this.sourceNetwork.id)
+                        .getOwnerLands()
+                    // .pipe(
+                    //     switchMap((lands) => {
+                    //         if (lands.length == 0){
+                    //             this.openErrorDialog('No lands found on the source network!')
+                    //             return of()
+                    //         }
+                    //         return this.toPricedLands(lands, targetContract);
+                    //     }),
+                    //     catchError((e: Error) => {
+                    //         this.openErrorDialog(e.message != '' ? e.message : 'Failed to calculate price!');
+                    //         return throwError(e);
+                    //     })
+                    // )
+                ).subscribe(lands => {
+                    this.dialogRef.close();
+                    this.appComponent.buyLands({
+                        connection: {
+                            wallet: this.service.wallet(),
+                            network: this.targetNetwork.id
+                        },
+                        body: lands
+                    });
+                })
         );
     }
+
+    cancel(): void {
+        this.dialogRef.close();
+    }
+
+    private toPricedLands(lands: Land[], contract: UtopiaContract): Observable<PricedLand[]> {
+        return of(...lands).pipe(
+            concatMap((land) => {
+                return contract.getLandPrice(land)
+                    .pipe(
+                        map((price) => {
+                            return { ...land, price: Number(price) };
+                        })
+                    );
+            }),
+            toArray(),
+            tap((lands) => {
+                this.lands = lands;
+                this.snackBar.open('All land prices calculated.');
+            })
+        )
+    }
+
 }

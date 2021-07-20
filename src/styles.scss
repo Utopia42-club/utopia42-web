@@ -1,4 +1,42 @@
-/* You can add global styles to this file, and also import other style files */
+@import '~@angular/material/theming';
+
+@include mat-core();
+
+$primary: mat-palette($mat-deep-purple);
+$accent: mat-palette($mat-amber, A200, A100, A400);
+$warn: mat-palette($mat-red);
+$theme: mat-light-theme($primary, $accent, $warn);
+@include angular-material-theme($theme);
+
+:root{
+    --accent-color: #{mat-color($accent, default)};
+    --primary-color: #{mat-color($primary, default)};
+    --primary-contrast-color: #{mat-color($primary, default-contrast)};
+    --accent-contrast-color: #{mat-color($primary, default-contrast)};
+}
+
+$pink-palette: mat-palette($mat-pink);
+$indigo-palette: mat-palette($mat-indigo);
+
+.pink{
+    background-color: mat-color($pink-palette, default);
+    color: mat-color($pink-palette, default-contrast);
+}
+
+.indigo{
+    background-color: mat-color($indigo-palette, default);
+    color: mat-color($indigo-palette, default-contrast);
+}
+
+.primary{
+    background-color: mat-color($primary, default);
+    color: mat-color($primary, default-contrast);
+}
+
+.accent{
+    background-color: mat-color($accent, default);
+    color: mat-color($accent, default-contrast);
+}
 
 html,
 body {
@@ -16,4 +54,17 @@ body {
     width: fit-content;
     margin: auto;
     display: grid;
+}
+
+.full-content{
+    width: 100vw;
+    height: calc(100vh - 56px);
+}
+
+.loading-panel{
+    z-index: 2000;
+}
+
+.loading-back-drop{
+    z-index: 1999;
 }

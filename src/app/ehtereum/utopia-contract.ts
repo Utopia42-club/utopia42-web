@@ -3,17 +3,17 @@ import { map, mergeMap, reduce, switchMap } from "rxjs/operators";
 import Web3 from "web3";
 import { Contract } from "web3-eth-contract";
 import { LoadingService } from "../loading.service";
-import { Web3Service } from "./web3.service";
+import { Land, PricedLand } from "./models";
 
 export class UtopiaContract {
     constructor(readonly ethContract: Contract,
         private loadingService: LoadingService,
-        private web3service:Web3Service) { }
+        readonly defaultWallet: string) { }
 
-    public getLandPrice(x1: number, y1: number, x2: number, y2: number): Observable<string> {
+    public getLandPrice(land: Land): Observable<string> {
         return this.loadingService.prepare(
             new Observable((s) =>
-                this.ethContract.methods.landPrice(x1, y1, x2, y2,).call(this.listener(s))
+                this.ethContract.methods.landPrice(land.x1, land.y1, land.x2, land.y2,).call(this.listener(s))
             ).pipe(map((price: any) => Web3.utils.fromWei(price).toString()))
         );
     }
@@ -24,20 +24,25 @@ export class UtopiaContract {
         );
     }
 
-    public assignLand(wallet: string, x1: number, y1: number, x2: number, y2: number, hash?: string) {
+    public assignPricedLand(wallet: string, land: PricedLand): Observable<any> {
+        return this.assignLand(wallet, land);
+    }
+
+    public assignLand(wallet: string, land: Land): Observable<any> {
         return this.loadingService.prepare(
             new Observable(s =>
-                this.ethContract.methods.landPrice(x1, y1, x2, y2).call(this.listener(s))
+                this.ethContract.methods.landPrice(land.x1, land.y1, land.x2, land.y2).call(this.listener(s))
             ).pipe(switchMap(amount => {
                 return new Observable(s =>
-                    this.ethContract.methods.assignLand(x1, y1, x2, y2, hash || "")
+                    this.ethContract.methods.assignLand(land.x1, land.y1, land.x2, land.y2, land.ipfsKey || "")
                         .send({ from: wallet, value: amount }, this.listener(s))
                 );
             }))
         );
     }
 
-    public getOwnerLands(wallet): Observable<Land[]> {
+    public getOwnerLands(wallet?: string): Observable<Land[]> {
+        if (wallet == null) wallet = this.defaultWallet;
         return this.getLands(wallet, []);
     }
 
@@ -55,7 +60,7 @@ export class UtopiaContract {
     }
 
     public updateLand(ipfsKey, index, wallet): Observable<any> {
-        if (wallet == null) wallet = this.web3service.wallets()[0];
+        if (wallet == null) wallet = this.defaultWallet;
         return this.loadingService.prepare(
             new Observable(s => {
                 this.ethContract.methods.updateLand(ipfsKey, index).send({ from: wallet }, this.listener(s));
@@ -112,13 +117,4 @@ export class UtopiaContract {
             subscriber.complete();
         }
     }
-}
-
-export interface Land {
-    x1: number;
-    x2: number;
-    y1: number;
-    y2: number;
-    time: number;
-    ipfsKey: string;
 }

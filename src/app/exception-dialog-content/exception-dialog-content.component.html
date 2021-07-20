@@ -1,11 +1,6 @@
 <h2 mat-dialog-title>{{data.title}}</h2>
 <mat-dialog-content>
-    <ng-content></ng-content>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
     <button (click)="close()" mat-button>OK</button>
-    <!-- <ng-container *ngFor="let action of dialog.actions">
-        <button [disabled]="action.disable" *ngIf="action.visible$ | async" (click)="performAction(action, $event)"
-            mat-button>{{action.text | translate}}</button>
-    </ng-container> -->
 </mat-dialog-actions>

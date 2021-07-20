@@ -1,40 +1,20 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ActivatedRoute } from '@angular/router';
-import { of, Subscription, throwError } from 'rxjs';
+import { Observable, of, Subscription, throwError } from 'rxjs';
 import {
     catchError,
     concatMap,
-    map, switchMap, takeLast,
+    map, takeLast,
     tap
 } from 'rxjs/operators';
-import { Web3Service } from '../ehtereum/web3.service';
+import { PricedLand } from '../ehtereum/models';
 import { ExceptionDialogContentComponent } from '../exception-dialog-content/exception-dialog-content.component';
 import { LoadingService } from '../loading.service';
+import { BuyLandsData } from './buy-lands-data';
 
-interface LandCoordinates {
-    name: string;
-    x1: number;
-    y1: number;
-    x2: number;
-    y2: number;
-    price: number;
-}
 
-const createLandCoordinates = (coordinates: string[]): LandCoordinates => {
-    let l = coordinates.map((item) => Number(item));
-    return l[2] > l[0] && l[3] > l[1]
-        ? {
-            x1: l[0],
-            y1: l[1],
-            x2: l[2],
-            y2: l[3],
-            name: null,
-            price: null,
-        }
-        : null;
-};
+
 
 @Component({
     selector: 'app-buy-lands',
@@ -43,80 +23,21 @@ const createLandCoordinates = (coordinates: string[]): LandCoordinates => {
 })
 export class BuyLandsComponent implements OnInit, OnDestroy {
     private subscription = new Subscription();
-    private network: string;
-    private wallet: string;
-    landsCoordinates: LandCoordinates[] = [];
-    tempLandsCoordinates: LandCoordinates[] = [];
-    displayedColumns = ['Name', 'x1', 'y1', 'x2', 'y2', 'Price'];
+    readonly lands: PricedLand[];
+    columns = ['x1', 'y1', 'x2', 'y2', 'Price'];
 
-    constructor(
-        private route: ActivatedRoute,
+    constructor(@Inject(MAT_DIALOG_DATA) public data: BuyLandsData,
+        private dialogRef: MatDialogRef<any>,
         private dialog: MatDialog,
         private readonly loadingService: LoadingService,
-        private readonly service: Web3Service,
-        private snackBar: MatSnackBar
-    ) { }
+        private snackBar: MatSnackBar) {
+        this.lands = data.request.body;
+    }
 
     ngOnInit(): void {
-        this.network = this.service.networkId().toString();
-        this.wallet = this.route.snapshot.queryParams.wallet ? `${this.route.snapshot.queryParams.wallet}` : undefined;
         this.subscription.add(
-            this.route.params
+            this.getPrices()
                 .pipe(
-                    switchMap((params) => {
-                        // this.wallet = params.wallet ? `${params.wallet}` : undefined;
-                        let coordinates = `${params.coordinates}`.split(',');
-                        let landsCoordinates: LandCoordinates[] = coordinates
-                            .map((item, index) =>
-                                index % 4 === 0
-                                    ? createLandCoordinates(
-                                        coordinates.slice(index, index + 4)
-                                    )
-                                    : null
-                            )
-                            .filter((item) => item != null);
-                        if (coordinates.length / 4 != landsCoordinates.length) {
-                            throw Error('Invalid Coordinates!');
-                        }
-                        this.tempLandsCoordinates = [];
-                        return this.loadingService.prepare(
-                            of(...landsCoordinates).pipe(
-                                concatMap((land, index) => {
-                                    return this.service
-                                        .getSmartContract()
-                                        .getLandPrice(
-                                            land.x1,
-                                            land.y1,
-                                            land.x2,
-                                            land.y2
-                                        )
-                                        .pipe(
-                                            map((price) => {
-                                                this.tempLandsCoordinates.push({
-                                                    name: `Land ${index + 1}`,
-                                                    price: Number(price),
-                                                    x1: land.x1,
-                                                    y1: land.y1,
-                                                    x2: land.x2,
-                                                    y2: land.y2,
-                                                });
-                                                return true;
-                                            })
-                                        );
-                                }),
-                                takeLast(1),
-                                tap((v) => {
-                                    if (v) {
-                                        this.landsCoordinates =
-                                            this.tempLandsCoordinates;
-                                        this.snackBar.open(
-                                            'All land prices calculated.'
-                                        );
-                                    }
-                                })
-                            )
-                        );
-                    }),
                     catchError((e: Error) => {
                         this.dialog.open(ExceptionDialogContentComponent, {
                             data: {
@@ -128,8 +49,33 @@ export class BuyLandsComponent implements OnInit, OnDestroy {
                         });
                         return throwError(e);
                     })
+                ).subscribe()
+        );
+    }
+
+    getPrices(): Observable<any> {
+        return this.loadingService.prepare(
+            this.loadingService
+                .prepare(
+                    of(...this.lands).pipe(
+                        concatMap((land, index) => {
+                            if (land.price != null) return of(true);
+                            return this.data.contract
+                                .getLandPrice(land)
+                                .pipe(
+                                    map((price) => {
+                                        land.price = Number(price);
+                                        return true;
+                                    })
+                                );
+                        }),
+                        takeLast(1),
+                        tap((v) => {
+                            if (v)
+                                this.snackBar.open('All land prices calculated.');
+                        })
+                    )
                 )
-                .subscribe()
         );
     }
 
@@ -141,18 +87,13 @@ export class BuyLandsComponent implements OnInit, OnDestroy {
         this.subscription.add(
             this.loadingService
                 .prepare(
-                    of(...this.landsCoordinates).pipe(
+                    of(...this.lands).pipe(
                         concatMap((land, index) => {
-                            return this.service
-                                .getSmartContract()
-                                .assignLand(
-                                    this.wallet,
-                                    land.x1,
-                                    land.y1,
-                                    land.x2,
-                                    land.y2
-                                )
-                                .pipe(
+                            return this.data.contract.
+                                assignPricedLand(
+                                    this.data.request.connection.wallet,
+                                    land
+                                ).pipe(
                                     map((v) => {
                                         this.snackBar.open(
                                             `Land number ${index + 1} bought.`
@@ -171,10 +112,9 @@ export class BuyLandsComponent implements OnInit, OnDestroy {
                         }),
                         takeLast(1),
                         tap((v) => {
-                            this.landsCoordinates = [];
                             if (v) {
-                                this.snackBar.open(`All lands were bought.`);
-                                window.close();
+                                this.snackBar.open('All lands were bought.');
+                                this.dialogRef.close();
                             }
                         })
                     )
@@ -183,10 +123,14 @@ export class BuyLandsComponent implements OnInit, OnDestroy {
         );
     }
 
+    cancel(): void {
+        this.dialogRef.close();
+    }
+
     totalPrice(): number {
         let price = 0;
-        for (let i in this.landsCoordinates)
-            price = price + this.landsCoordinates[i].price;
+        for (let land of this.lands)
+            price = price + land.price;
         return price;
     }
 }

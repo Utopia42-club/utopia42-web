@@ -1,10 +1,11 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import detectEthereumProvider from '@metamask/detect-provider';
-import { from, Observable, of } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { BehaviorSubject, from, Observable, of } from 'rxjs';
+import { catchError, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import Web3 from 'web3';
 import { LoadingService } from '../loading.service';
 import { UTOPIA_ABI } from './abi';
+import { Networks } from './network';
 import { UtopiaContract } from './utopia-contract';
 
 
@@ -13,51 +14,48 @@ import { UtopiaContract } from './utopia-contract';
 })
 export class Web3Service {
     private connectedAccounts: string[] = [];
-    private web3ProviderCashe = new Map<string, Web3>();
-    private contractCache = new Map<string, UtopiaContract>();
+    private web3ProviderCashe = new Map<number, Web3>();
+    private contractCache = new Map<number, UtopiaContract>();
+    private readonly connectedSubject = new BehaviorSubject(false);
+    readonly connected$ = this.connectedSubject.asObservable().pipe(distinctUntilChanged());
+    private readonly walletSubject = new BehaviorSubject<string>(null);
+    readonly wallet$ = this.walletSubject.asObservable().pipe(distinctUntilChanged());
+    private readonly networkSubject = new BehaviorSubject<number>(null);
+    readonly network$ = this.networkSubject.asObservable().pipe(distinctUntilChanged());
     readonly win = window as any;
     private metaMaskProvider = undefined;
 
-    constructor(private loadingService: LoadingService) { }
+    constructor(private loadingService: LoadingService, private zone: NgZone) { }
 
-    private getWeb3(networkId: string): Web3 | null {
+    private getWeb3(networkId: number): Web3 | null {
         // if ((networkId == null && this.win.web3 != null)) {
         //     return new Web3(this.win.web3.currentProvider);
         // }
-        if (INFURA_NETWORK_SUBDOMAINS[networkId] == undefined)
+        if (!Networks.supported.has(networkId))
             return null;
         if (this.web3ProviderCashe.has(networkId))
             return this.web3ProviderCashe.get(networkId)!;
 
-        var httpProviderLink = `https://${INFURA_NETWORK_SUBDOMAINS[networkId]}.infura.io/v3/b12c1b1e6b2e4f58af559a67fe46104e`;
-        if (INFURA_NETWORK_SUBDOMAINS[networkId] == 'bsctest') {
-            // testnet
-            httpProviderLink = 'https://data-seed-prebsc-1-s1.binance.org:8545';
-        }
-        if (INFURA_NETWORK_SUBDOMAINS[networkId] == 'bsc') {
-            // mainnet 
-            httpProviderLink = 'https://bsc-dataseed1.binance.org:443';
-        }
-        this.web3ProviderCashe.set(networkId, new Web3(new Web3.providers.HttpProvider(httpProviderLink)));
+        let network = Networks.all.get(networkId);
+        this.web3ProviderCashe.set(networkId, new Web3(new Web3.providers.HttpProvider(network.provider)));
         return this.web3ProviderCashe.get(networkId)!;
     }
 
-
-    public getDomainName(): string {
-        const networkId = this.win.ethereum != undefined ? this.win.ethereum.networkVersion : '1';
-        return INFURA_NETWORK_SUBDOMAINS[networkId];
-    }
-
-    public getSmartContract(networkId?: string): UtopiaContract {
-        // networkId = '1';
-        if (networkId == null || `${this.metaMaskProvider?.networkVersion}` == `${networkId}`) {
-            networkId = this.metaMaskProvider != undefined ? this.metaMaskProvider.networkVersion : '1';
-            if (!this.web3ProviderCashe.has(networkId!))
-                this.web3ProviderCashe.set(networkId!, new Web3(this.metaMaskProvider));
+    public getSmartContract(networkId?: number): UtopiaContract {
+        if (networkId == null || this.networkId() == networkId) {
+            networkId = this.metaMaskProvider != undefined ? this.networkId() : Networks.MainNet.id;
+            if (!this.web3ProviderCashe.has(networkId))
+                this.web3ProviderCashe.set(networkId, new Web3(this.metaMaskProvider));
         }
-        if (!this.contractCache.has(networkId!)) {
-            const web3 = this.getWeb3(networkId!)!;
-            this.contractCache.set(networkId!, new UtopiaContract(new web3.eth.Contract(UTOPIA_ABI, CONTRACT_ADDRESS[networkId!]), this.loadingService, this.metaMaskProvider));
+
+        if (!Networks.supported.has(networkId)) return null;
+
+        if (!this.contractCache.has(networkId)) {
+            const web3 = this.getWeb3(networkId)!;
+            var network = Networks.all.get(networkId);
+            this.contractCache.set(networkId,
+                new UtopiaContract(new web3.eth.Contract(UTOPIA_ABI, network.contractAddress),
+                    this.loadingService, this.wallet()));
         }
         return this.contractCache.get(networkId!)!;
     }
@@ -69,13 +67,17 @@ export class Web3Service {
     public provider(): Observable<any> {
         if (this.metaMaskProvider !== undefined) return of(this.metaMaskProvider);
         return this.loadingService.prepare(
-            from(detectEthereumProvider())
+            this.from(detectEthereumProvider())
                 .pipe(map(p => {
                     if (p) {
-                        this.metaMaskProvider = p;
-                        this.metaMaskProvider.on('chainChanged', (_chainId) => window.location.reload());
-                        this.metaMaskProvider.on('accountsChanged', (accounts) => window.location.reload());
-                        this.metaMaskProvider.on('disconnect', (accounts) => window.location.reload());
+                        if (this.metaMaskProvider == null) {
+                            this.metaMaskProvider = p;
+                            this.resetObservables();
+                            this.metaMaskProvider.on('chainChanged', (_chainId) => this.resetObservables());
+                            this.metaMaskProvider.on('accountsChanged', (account) => this.resetObservables());
+                            this.metaMaskProvider.on('disconnect', (arg) => this.resetObservables());
+                            this.metaMaskProvider.on('connect', (arg) => this.resetObservables());
+                        }
                         return p;
                     }
                     this.metaMaskProvider = null;
@@ -84,35 +86,42 @@ export class Web3Service {
         );
     }
 
+    private resetObservables() {
+        setTimeout(() => {
+            //FIXME
+            //workaround for metamask wallet and networkId not available without interaction
+            this.zone.run(() => {
+                this.walletSubject.next(this.metaMaskProvider.selectedAddress);
+                this.networkSubject.next(parseInt(this.metaMaskProvider.networkVersion));
+                this.connectedSubject.next(this.isConnectedInstant());
+            });
+        }, 0.1);
+    }
+
+    private isConnectedInstant(networkId?: number, wallet?: string): boolean {
+        return this.metaMaskProvider != null && this.checkProvider(networkId, wallet);
+    }
+
+
     public isConnected(networkId?: number, wallet?: string): Observable<boolean> {
         return this.loadingService.prepare(
             this.provider()
-                .pipe(map(p =>
-                    p != null && p.isConnected() && this.checkProvider(p, networkId, wallet)
-                ))
+                .pipe(map(p => this.isConnectedInstant(networkId, wallet)))
         );
-    }
-
-    public networkId(): number {
-        return parseInt(this.metaMaskProvider.networkVersion);
-    }
-
-    public wallet(): string {
-        return this.metaMaskProvider.selectedAddress;
     }
 
     public wallets(): string[] {
         return this.connectedAccounts;
     }
 
-    public reconnect() {
+    public reconnect(): Observable<any> {
         return this.loadingService.prepare(
             this.provider()
                 .pipe(switchMap(provider =>
-                    from(provider.request({
+                    this.from(provider.request({
                         method: "wallet_requestPermissions",
                         params: [{
-                            eth_accounts: {} 
+                            eth_accounts: {}
                         }]
                     }))
                 ))
@@ -121,19 +130,20 @@ export class Web3Service {
 
     public connect(networkId?: number, wallet?: string): Observable<boolean> {
         if (this.metaMaskProvider === null) return of(false);
-        // if (this.metaMaskProvider !== undefined && this.metaMaskProvider.isConnected())
+        if (this.isConnectedInstant(networkId, wallet)) return of(true);
         //     return of(true);
         return this.loadingService.prepare(
             this.provider()
                 .pipe(
                     switchMap(provider => {
                         if (provider == null) return of(false);
-                        return from(provider.request({ method: 'eth_requestAccounts' }))
+                        return this.from(provider.request({ method: 'eth_requestAccounts' }))
                             .pipe(
                                 map((d) => {
                                     this.connectedAccounts = d as any;
+                                    this.connectedSubject.next(this.isConnectedInstant());
                                     return this.connectedAccounts.indexOf(provider.selectedAddress) == 0
-                                        && this.checkProvider(provider, networkId, wallet);
+                                        && this.checkProvider(networkId, wallet);
                                 }),
                                 catchError(e => of(false))
                             );
@@ -142,39 +152,27 @@ export class Web3Service {
         );
     }
 
-    private checkProvider(provider: any, networkId?: number, wallet?: string): boolean {
-        return (networkId == null || provider.networkVersion == networkId)
+    private checkProvider(networkId?: number, wallet?: string): boolean {
+        return !isNaN(this.networkId()) && this.wallet() != null &&
+            (networkId == null || this.networkId() == networkId)
             && (wallet == null || this.connectedAccounts.indexOf(wallet.toLowerCase()) >= 0);
     }
-}
 
+    private from(f) {
+        return new Observable(s => {
+            return from(f).subscribe(
+                v => this.zone.run(() => s.next(v)),
+                err => this.zone.run(() => s.error(err)),
+                () => this.zone.run(() => s.complete())
+            );
+        });
+    }
 
-export const CONTRACT_ADDRESS: { [idx: string]: string } = {
-    '1': '0x56040d44f407fa6f33056d4f352d2e919a0d99fb', // Main Net
-    '3': '0x9344CdEc9cf176E3162758D23d1FC806a0AE08cf', // Ropsten
-    '4': '0x801fC75707BEB6d2aE8863D7A3B66047A705ffc0', //'0xe72853152988fffb374763ad67ae577686cefa1a', // Rinkeby
-    '5': '', // Goerli
-    '42': '', // Kovan
-    '56': '',
-    '97': '0x044630826A56C768D3FAC17f907EA38aE90BE2B3'
-};
+    wallet(): string {
+        return this.walletSubject.getValue();
+    }
 
-export const METAMASK_PROVIDER_LIST: { [idx: string]: string } = {
-    '1': "Ethereum Main Network",
-    '3': "Ropsten Test Network",
-    '4': "Rinkeby Test Network",
-    '5': "Goerli Test Network",
-    '42': "Kovan Test Network",
-    '56': "Binance Smart Chain",
-    '97': "Binance Smart Chain Test"
-};
-
-const INFURA_NETWORK_SUBDOMAINS: { [idx: string]: string } = {
-    '1': "mainnet",
-    '3': "ropsten",
-    '4': "rinkeby",
-    '5': "goerli",
-    '42': "kovan",
-    '56': "bsc",
-    '97': "bsctest"
+    networkId(): number {
+        return this.networkSubject.getValue();
+    }
 }

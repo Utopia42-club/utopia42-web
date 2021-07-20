@@ -1,12 +1,11 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ActivatedRoute } from '@angular/router';
 import { of, Subscription } from 'rxjs';
 import { catchError, concatMap, map, takeLast, tap } from 'rxjs/operators';
-import { Web3Service } from '../ehtereum/web3.service';
 import { ExceptionDialogContentComponent } from '../exception-dialog-content/exception-dialog-content.component';
 import { LoadingService } from '../loading.service';
+import { SaveLandsData } from './save-lands-data';
 
 @Component({
     selector: 'app-save-lands',
@@ -15,27 +14,25 @@ import { LoadingService } from '../loading.service';
 })
 export class SaveLandsComponent implements OnInit, OnDestroy {
     private subscription = new Subscription();
-    private network: string;
-    private wallet: string;
-    ipfsKeys: string[];
+    readonly ipfsKeys: string[];
 
-    constructor(private route: ActivatedRoute, private dialog: MatDialog, private readonly loadingService: LoadingService,
-        private readonly service: Web3Service, private snackBar: MatSnackBar) {
+    constructor(@Inject(MAT_DIALOG_DATA) public data: SaveLandsData,
+        private dialogRef: MatDialogRef<any>,
+        private dialog: MatDialog,
+        private readonly loadingService: LoadingService,
+        private snackBar: MatSnackBar) {
+        this.ipfsKeys = data.request.body;
     }
 
     ngOnInit(): void {
-        this.subscription.add(this.route.params.subscribe(params => {
-            this.ipfsKeys = `${params.ipfsKeys}`.split(',');
-            console.log(this.ipfsKeys);
-        }));
-        this.subscription.add(this.route.queryParams.subscribe(params => {
-            this.network = params.networkId ? `${params.networkId}` : undefined;
-            this.wallet = params.wallet ? `${params.wallet}` : undefined;
-        }));
     }
 
     ngOnDestroy(): void {
         this.subscription.unsubscribe();
+    }
+
+    cancel(): void {
+        this.dialogRef.close();
     }
 
     save(): void {
@@ -45,8 +42,8 @@ export class SaveLandsComponent implements OnInit, OnDestroy {
                 of(...this.ipfsKeys)
                     .pipe(
                         concatMap((key, index) => {
-                            return this.service.getSmartContract()
-                                .updateLand(key, index, this.wallet)
+                            return this.data.contract
+                                .updateLand(key, index, this.data.request.connection.wallet)
                                 .pipe(map(v => {
                                     status[index] = true;
                                     this.snackBar.open(`Land ${index + 1} saved.`)
@@ -59,7 +56,7 @@ export class SaveLandsComponent implements OnInit, OnDestroy {
                         }), takeLast(1), tap(v => {
                             if (v) {
                                 this.snackBar.open(`All Lands saved.`);
-                                window.close();
+                                this.dialogRef.close();
                             }
                         })
                     )

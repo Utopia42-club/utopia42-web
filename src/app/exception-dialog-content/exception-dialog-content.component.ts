@@ -8,7 +8,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 })
 export class ExceptionDialogContentComponent implements OnInit {
 
-    constructor(private readonly dialogRef: MatDialogRef<ExceptionDialogContentComponent>,@Inject(MAT_DIALOG_DATA) public data: any) {
+    constructor(private readonly dialogRef: MatDialogRef<ExceptionDialogContentComponent>, @Inject(MAT_DIALOG_DATA) public data: any) {
     }
 
     ngOnInit(): void {
