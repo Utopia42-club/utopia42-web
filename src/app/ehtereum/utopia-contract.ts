@@ -68,6 +68,15 @@ export class UtopiaContract {
         );
     }
 
+    public transferLand(index, to, wallet): Observable<any> {
+        if (wallet == null) wallet = this.defaultWallet;
+        return this.loadingService.prepare(
+            new Observable(s => {
+                this.ethContract.methods.transferLand(index, to).send({ from: wallet }, this.listener(s));
+            })
+        );
+    }
+
     public getOwnerLand(wallet: string, landIndex: number): Observable<Land> {
         return this.loadingService.prepare(
             new Observable(s =>

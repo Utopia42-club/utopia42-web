@@ -1,3 +1,4 @@
+import { TransferLandComponent } from './transfer-land/transfer-land.component';
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -6,13 +7,13 @@ import { map, switchMap } from 'rxjs/operators';
 import { BuyLandsData } from './buy-lands/buy-lands-data';
 import { BuyLandsComponent } from './buy-lands/buy-lands.component';
 import { ConnectionDetail } from './ehtereum/connection-detail';
-import { Land } from './ehtereum/models';
 import { UtopiaContract } from './ehtereum/utopia-contract';
 import { Web3Service } from './ehtereum/web3.service';
 import { MetaMaskConnectingComponent } from './meta-mask-connecting/meta-mask-connecting.component';
 import { SaveLandsData } from './save-lands/save-lands-data';
 import { SaveLandsComponent } from './save-lands/save-lands.component';
-import { GameRequest } from './utopia-game/game-request';
+import { TransferLandData } from './transfer-land/transfer-land-data';
+import { BuyLandsRequest, SaveLandsRequest, SaveLandsRequestBodyType, TransferLandRequest } from './utopia-game/utopia-bridge.service';
 
 @Component({
     selector: 'app-root',
@@ -62,17 +63,25 @@ export class AppComponent
                     });
                 }
                 else if (params.method == "save") {
+                    const body: SaveLandsRequestBodyType = {};
+                    `${params.param}`.split(',').map(l => {
+                        const values = l.split('_');
+                        body[Number(values[0])] = values[1];
+                    })
+                    
                     this.saveLands({
-                        connection, body: null //`${params.param}`.split(',') //FIXME
+                        connection, body: body
                     });
                 } else if (params.method == "transfer") {
-                    //TODO
+                    this.transferLand({
+                        connection, body: Number(`${params.param}`)
+                    })
                 }
             }
         });
     }
 
-    public buyLands(request: GameRequest<Land[]>): void
+    public buyLands(request: BuyLandsRequest): void 
     {
         this.getContractSafe(request.connection.network, request.connection.wallet)
             .subscribe(contract =>
@@ -86,7 +95,7 @@ export class AppComponent
             });
     }
 
-    public saveLands(request: GameRequest<Map<number, string>>): void
+    public saveLands(request: SaveLandsRequest): void
     {
         this.getContractSafe(request.connection.network, request.connection.wallet)
             .subscribe(contract =>
@@ -94,6 +103,20 @@ export class AppComponent
                 if (contract != null) {
                     this.dialog.open(SaveLandsComponent, {
                         data: { request, contract } as SaveLandsData,
+                        disableClose: true
+                    });
+                }
+            });
+    }
+
+    public transferLand(request: TransferLandRequest): void
+    {
+        this.getContractSafe(request.connection.network, request.connection.wallet)
+            .subscribe(contract =>
+            {
+                if (contract != null) {
+                    this.dialog.open(TransferLandComponent, {
+                        data: { request, contract } as TransferLandData,
                         disableClose: true
                     });
                 }

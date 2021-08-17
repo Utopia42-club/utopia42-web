@@ -24,6 +24,9 @@ import { MetaMaskConnectingComponent } from './meta-mask-connecting/meta-mask-co
 import { PortLandsComponent } from './port-lands/port-lands.component';
 import { SaveLandsComponent } from './save-lands/save-lands.component';
 import { UtopiaGameComponent } from './utopia-game/utopia-game.component';
+import { TransferLandComponent } from './transfer-land/transfer-land.component';
+import { FormsModule } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
 
 @NgModule({
     declarations: [
@@ -36,6 +39,7 @@ import { UtopiaGameComponent } from './utopia-game/utopia-game.component';
         BuyLandsComponent,
         UtopiaGameComponent,
         ConnectionStatusIndicatorComponent,
+        TransferLandComponent,
     ],
     imports: [
         BrowserModule,
@@ -54,6 +58,8 @@ import { UtopiaGameComponent } from './utopia-game/utopia-game.component';
         MatIconModule,
         MatTooltipModule,
         MatRippleModule,
+        FormsModule,
+        MatInputModule
     ],
     providers: [
         { provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: { duration: 2500 } }

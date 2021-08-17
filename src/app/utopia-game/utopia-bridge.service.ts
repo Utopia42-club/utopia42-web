@@ -13,19 +13,19 @@ export class UtopiaBridgeService
     public unityInstance;
     constructor(private web3service: Web3Service, private app: AppComponent) { }
 
-    public buy(payload: GameRequest<Land[]>): void
+    public buy(payload: BuyLandsRequest): void
     {
         this.app.buyLands(payload);
     }
 
-    public save(payload: GameRequest<Map<number, string>>): void
-    {
+    public save(payload: SaveLandsRequest): void
+    { 
         this.app.saveLands(payload);
     }
 
-    public transfer(payload: GameRequest<number>): void
+    public transfer(payload: TransferLandRequest): void
     {
-        //TODO
+        this.app.transferLand(payload);
     }
 
     public connectMetamask(payload: GameRequest<string>): Observable<ConnectionDetail>
@@ -42,3 +42,10 @@ export class UtopiaBridgeService
             }));
     }
 }
+
+export type BuyLandsRequest = GameRequest<Land[]>;
+
+export type SaveLandsRequestBodyType = {[key:number]:string};
+export type SaveLandsRequest = GameRequest<SaveLandsRequestBodyType>;
+
+export type TransferLandRequest = GameRequest<number>;

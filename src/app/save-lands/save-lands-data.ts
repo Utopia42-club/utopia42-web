@@ -1,7 +1,7 @@
 import { UtopiaContract } from "../ehtereum/utopia-contract";
-import { GameRequest } from "../utopia-game/game-request";
+import { SaveLandsRequest } from "../utopia-game/utopia-bridge.service";
 
 export interface SaveLandsData {
-    request: GameRequest<string[]>;
+    request: SaveLandsRequest;
     contract: UtopiaContract;
 }
