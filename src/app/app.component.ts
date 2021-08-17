@@ -19,24 +19,29 @@ import { GameRequest } from './utopia-game/game-request';
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent
+{
     actions: Action[] = [];
     subscription = new Subscription();
 
     constructor(private service: Web3Service,
         private dialog: MatDialog,
         private route: ActivatedRoute,
-        router: Router) {
+        router: Router)
+    {
         this.actions.push({
             icon: 'home',
-            perform() {
+            perform()
+            {
                 router.navigate(['home']);
             }
         });
     }
 
-    ngOnInit(): void {
-        this.route.queryParams.subscribe(params => {
+    ngOnInit(): void
+    {
+        this.route.queryParams.subscribe(params =>
+        {
             if (params.method != null && params.param != null
                 && params.wallet != null && params.network != null) {
                 let connection: ConnectionDetail = {
@@ -47,8 +52,9 @@ export class AppComponent {
                     this.buyLands({
                         connection,
                         body: `${params.param}`.split(",")
-                            .map(l => {
-                                let coords = l.split("_").map(v=>Number(v));
+                            .map(l =>
+                            {
+                                let coords = l.split("_").map(v => Number(v));
                                 return {
                                     x1: coords[0], y1: coords[1], x2: coords[2], y2: coords[3]
                                 };
@@ -57,16 +63,20 @@ export class AppComponent {
                 }
                 else if (params.method == "save") {
                     this.saveLands({
-                        connection, body: `${params.param}`.split(',')
+                        connection, body: null //`${params.param}`.split(',') //FIXME
                     });
+                } else if (params.method == "transfer") {
+                    //TODO
                 }
             }
         });
     }
 
-    public buyLands(request: GameRequest<Land[]>): void {
+    public buyLands(request: GameRequest<Land[]>): void
+    {
         this.getContractSafe(request.connection.network, request.connection.wallet)
-            .subscribe(contract => {
+            .subscribe(contract =>
+            {
                 if (contract != null) {
                     this.dialog.open(BuyLandsComponent, {
                         data: { request, contract } as BuyLandsData,
@@ -76,9 +86,11 @@ export class AppComponent {
             });
     }
 
-    public saveLands(request: GameRequest<string[]>): void {
+    public saveLands(request: GameRequest<Map<number, string>>): void
+    {
         this.getContractSafe(request.connection.network, request.connection.wallet)
-            .subscribe(contract => {
+            .subscribe(contract =>
+            {
                 if (contract != null) {
                     this.dialog.open(SaveLandsComponent, {
                         data: { request, contract } as SaveLandsData,
@@ -88,14 +100,17 @@ export class AppComponent {
             });
     }
 
-    public getContractSafe(network: number, wallet: string): Observable<UtopiaContract> {
+    public getContractSafe(network: number, wallet: string): Observable<UtopiaContract>
+    {
         return this.service.connect(network, wallet)
             .pipe(
-                switchMap(v => {
+                switchMap(v =>
+                {
                     if (!v) return this.connect(network, wallet);
                     return of(true);
                 }),
-                map((connected) => {
+                map((connected) =>
+                {
                     if (connected)
                         return this.service.getSmartContract();
                     return null;
@@ -103,7 +118,8 @@ export class AppComponent {
             );
     }
 
-    private connect(network: number, wallet: string): Observable<boolean> {
+    private connect(network: number, wallet: string): Observable<boolean>
+    {
         let dialogRef = this.dialog.open(MetaMaskConnectingComponent, {
             disableClose: true,
             data: { wallet, network } as ConnectionDetail
@@ -112,7 +128,8 @@ export class AppComponent {
     }
 }
 
-export interface Action {
+export interface Action
+{
     icon: string;
     perform();
 }

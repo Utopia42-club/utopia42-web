@@ -12,48 +12,58 @@ import { SaveLandsData } from './save-lands-data';
     templateUrl: './save-lands.component.html',
     styleUrls: ['./save-lands.component.scss']
 })
-export class SaveLandsComponent implements OnInit, OnDestroy {
+export class SaveLandsComponent implements OnInit, OnDestroy
+{
     private subscription = new Subscription();
-    readonly ipfsKeys: string[];
+    readonly ipfsKeys: Map<number, string>;
 
     constructor(@Inject(MAT_DIALOG_DATA) public data: SaveLandsData,
         private dialogRef: MatDialogRef<any>,
         private dialog: MatDialog,
         private readonly loadingService: LoadingService,
-        private snackBar: MatSnackBar) {
-        this.ipfsKeys = data.request.body;
+        private snackBar: MatSnackBar)
+    {
+        // this.ipfsKeys = data.request.body; //FIXME
     }
 
-    ngOnInit(): void {
+    ngOnInit(): void
+    {
     }
 
-    ngOnDestroy(): void {
+    ngOnDestroy(): void
+    {
         this.subscription.unsubscribe();
     }
 
-    cancel(): void {
+    cancel(): void
+    {
         this.dialogRef.close();
     }
 
-    save(): void {
-        const status = this.ipfsKeys.map(k => false);
+    save(): void
+    {
+        const status = Array.from(this.ipfsKeys.keys()).map(k => false);
         this.subscription.add(
             this.loadingService.prepare(
-                of(...this.ipfsKeys)
+                of(...this.ipfsKeys)//FIXME
                     .pipe(
-                        concatMap((key, index) => {
+                        concatMap((key, index) =>
+                        {
                             return this.data.contract
                                 .updateLand(key, index, this.data.request.connection.wallet)
-                                .pipe(map(v => {
+                                .pipe(map(v =>
+                                {
                                     status[index] = true;
-                                    this.snackBar.open(`Land ${index + 1} saved.`)
+                                    this.snackBar.open(`Land ${index + 1} saved.`);
                                     return true;
-                                }))
-                        }), catchError(e => {
+                                }));
+                        }), catchError(e =>
+                        {
                             console.log(e);
                             this.dialog.open(ExceptionDialogContentComponent, { data: { title: "Failed to save lands!" } });
-                            return of(false)
-                        }), takeLast(1), tap(v => {
+                            return of(false);
+                        }), takeLast(1), tap(v =>
+                        {
                             if (v) {
                                 this.snackBar.open(`All Lands saved.`);
                                 this.dialogRef.close();

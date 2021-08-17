@@ -8,22 +8,32 @@ import { Web3Service } from '../ehtereum/web3.service';
 import { GameRequest } from './game-request';
 
 @Injectable()
-export class UtopiaBridgeService {
+export class UtopiaBridgeService
+{
     public unityInstance;
     constructor(private web3service: Web3Service, private app: AppComponent) { }
 
-    public buy(payload: GameRequest<Land[]>): void {
+    public buy(payload: GameRequest<Land[]>): void
+    {
         this.app.buyLands(payload);
     }
 
-    public save(payload: GameRequest<string[]>): void {
+    public save(payload: GameRequest<Map<number, string>>): void
+    {
         this.app.saveLands(payload);
     }
 
-    public connectMetamask(payload: GameRequest<string>): Observable<ConnectionDetail> {
+    public transfer(payload: GameRequest<number>): void
+    {
+        //TODO
+    }
+
+    public connectMetamask(payload: GameRequest<string>): Observable<ConnectionDetail>
+    {
         // return this.web3service.connect()
         return this.web3service.isConnected()
-            .pipe(map(v => {
+            .pipe(map(v =>
+            {
                 if (!v) return null;
                 return {
                     network: this.web3service.networkId(),
