@@ -1,3 +1,4 @@
+import { UpdateProfileComponent } from './update-profile/update-profile.component';
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
@@ -27,6 +28,7 @@ import { UtopiaGameComponent } from './utopia-game/utopia-game.component';
 import { TransferLandComponent } from './transfer-land/transfer-land.component';
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
     declarations: [
@@ -40,6 +42,7 @@ import { MatInputModule } from '@angular/material/input';
         UtopiaGameComponent,
         ConnectionStatusIndicatorComponent,
         TransferLandComponent,
+        UpdateProfileComponent
     ],
     imports: [
         BrowserModule,
@@ -59,7 +62,8 @@ import { MatInputModule } from '@angular/material/input';
         MatTooltipModule,
         MatRippleModule,
         FormsModule,
-        MatInputModule
+        MatInputModule,
+        HttpClientModule
     ],
     providers: [
         { provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: { duration: 2500 } }

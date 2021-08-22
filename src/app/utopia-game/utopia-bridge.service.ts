@@ -28,6 +28,11 @@ export class UtopiaBridgeService
         this.app.transferLand(payload);
     }
 
+    public profile(payload: UpdateProfileRequest): void //FIXME: method name?
+    {
+        this.app.updateProfile(payload);
+    }
+
     public connectMetamask(payload: GameRequest<string>): Observable<ConnectionDetail>
     {
         // return this.web3service.connect()
@@ -49,3 +54,5 @@ export type SaveLandsRequestBodyType = {[key:number]:string};
 export type SaveLandsRequest = GameRequest<SaveLandsRequestBodyType>;
 
 export type TransferLandRequest = GameRequest<number>;
+
+export type UpdateProfileRequest = GameRequest<undefined>;
