@@ -1,179 +1,283 @@
 import { ExceptionDialogContentComponent } from './../exception-dialog-content/exception-dialog-content.component';
-import { takeLast, tap, catchError, map, concatMap } from 'rxjs/operators';
+import { tap, catchError, concatMap } from 'rxjs/operators';
 import { ProfileService } from './profile.service';
 import { Web3Service } from './../ehtereum/web3.service';
-import { UpdateProfileData } from './update-profile-data';
+import { EditProfileData } from './update-profile-data';
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import {
+    MatDialog,
+    MatDialogRef,
+    MAT_DIALOG_DATA,
+} from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { from, of, Subscription, throwError } from 'rxjs';
+import { of, Subscription } from 'rxjs';
 import { LoadingService } from '../loading.service';
 
 @Component({
-  selector: 'app-update-profile',
-  templateUrl: './update-profile.component.html',
-  styleUrls: ['./update-profile.component.scss']
+    selector: 'app-update-profile',
+    templateUrl: './update-profile.component.html',
+    styleUrls: ['./update-profile.component.scss'],
 })
-export class UpdateProfileComponent implements OnInit, OnDestroy {
-
+export class EditProfileComponent implements OnInit, OnDestroy {
     private subscription = new Subscription();
     readonly walletId: string;
-    profile: Profile;
-    linkMedias: Media[] = [TELEGRAM, DISCORD, FACEBOOK, TWITTER, INSTAGRAM, OTHER]
-    // TODO: add more
+    private tokenAuth: string;
+    private imageFile: File;
+    readonly defaultImageUrl: string | ArrayBuffer = 'assets/images/unknown.jpg';
 
-    constructor(@Inject(MAT_DIALOG_DATA) public data: UpdateProfileData,
+    profile: Profile;
+    imageUrl: string | ArrayBuffer;
+    linkMedias: Media[] = [
+        Media.Telegram,
+        Media.Discord,
+        Media.Facebook,
+        Media.Twitter,
+        Media.Instagram,
+        Media.Other,
+    ];
+
+    constructor(
+        @Inject(MAT_DIALOG_DATA) public data: EditProfileData,
         private dialogRef: MatDialogRef<any>,
         private dialog: MatDialog,
         private readonly web3Service: Web3Service,
         private readonly profileService: ProfileService,
         private readonly loadingService: LoadingService,
-        private snackBar: MatSnackBar)
-    {
-        this.walletId = data.request.connection.wallet; //TODO: remove?
-        this.profile = getProfileInfo(this.walletId);
+        private snackBar: MatSnackBar
+    ) {
+        this.walletId = data.request.connection.wallet;
+        this.profile = {
+            walletId: this.walletId,
+            bio: '',
+            links: [
+                {
+                    link: '',
+                    media: Media.Instagram,
+                },
+            ],
+            name: '',
+        };
+        this.get();
     }
 
-    ngOnInit(): void
-    {
-    }
+    ngOnInit(): void {}
 
-    ngOnDestroy(): void
-    {
+    ngOnDestroy(): void {
         this.subscription.unsubscribe();
     }
 
-    removeLink(index: number): void
-    {
+    removeLink(index: number): void {
         this.profile.links.splice(index, 1);
     }
 
-    addLink(): void
-    {
+    addLink(): void {
         this.profile.links.push({
-            link: "",
-            media: INSTAGRAM
-        })
+            link: '',
+            media: Media.Instagram,
+        });
     }
 
-    linksValid(): boolean
-    {
-        // TODO: return false if not changed
-        // TODO: return false if url not valid
+    mediaToString(media: Media): string {
+        return (
+            media.toString()[0].toUpperCase() +
+            media.toString().toLowerCase().substring(1)
+        );
+    }
+
+    isValidUrl(urlString: string): boolean {
+        try {
+            let pattern = new RegExp(
+                '(https?://)?([\\da-z.-]+)\\.([a-z.]{2,6})[/\\w .-]*/?'
+            );
+            return pattern.test(urlString);
+        } catch (TypeError) {
+            return false;
+        }
+    }
+
+    linksValid(): boolean {
+        if (this.profile.name.trim() === '') return false;
         for (const link of this.profile.links) {
-            if(link.link.trim() === "") return false;
+            if (!this.isValidUrl(link.link.trim())) {
+                console.log('false', link.link);
+                return false;
+            }
         }
         return true;
     }
 
-    cancel(): void
-    {
+    onImageChange(file: File): void {
+        if (file) {
+            if (file.size > 2 ** 20) {
+                this.dialog.open(ExceptionDialogContentComponent, {
+                    data: {
+                        title: 'Chosen image size exceeds the limit of 1 MB!',
+                    },
+                });
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+
+            reader.onload = (_) => {
+                this.imageUrl = reader.result;
+                this.imageFile = file;
+            };
+        }
+    }
+
+    cancel(): void {
         this.dialogRef.close();
     }
 
-    update(): void
-    {
+    get(): void {
+        let provider: any;
         this.subscription.add(
-            this.loadingService.prepare(
-                this.web3Service.provider()
-                    .pipe(
-                        concatMap((provider) =>
-                        {
-                            // FIXME: ?
-                            return this.profileService.requestNonce({}).pipe(map(data => {
-                                console.log(data)
-                                from(provider.request({
-                                    method: 'eth_signTypedData_v4',
-                                    params: [provider.selectedAddress, JSON.stringify(data)],
-                                    from: provider.selectedAddress
-                                })).pipe(map(signature => {
-                                    console.log('sig', signature)
-                                    this.profileService.login(provider.selectedAddress, <string> signature).pipe(map(v => {
-                                        console.log("login res", v);
-                                        return true;
-                                    }))
-                                }))
-                                throw Error;
-                            }))
-                        }), catchError(e =>
-                        {
-                            this.dialog.open(ExceptionDialogContentComponent, { data: { title: "Failed to login!" } }); // TODO: change
+            this.loadingService
+                .prepare(
+                    this.web3Service.provider().pipe(
+                        concatMap((p) => {
+                            provider = p;
+                            return this.profileService.requestNonce(
+                                provider.networkVersion,
+                                provider.selectedAddress.toLowerCase()
+                            );
+                        }),
+
+                        concatMap((data) => {
+                            return provider.request({
+                                method: 'eth_signTypedData_v4',
+                                params: [
+                                    provider.selectedAddress.toLowerCase(),
+                                    JSON.stringify(data),
+                                ],
+                                from: provider.selectedAddress.toLowerCase(),
+                            });
+                        }),
+
+                        concatMap((signature) => {
+                            return this.profileService.login(
+                                provider.selectedAddress,
+                                <string>signature
+                            );
+                        }),
+
+                        concatMap((res) => {
+                            this.tokenAuth = res.headers.get('X-Auth-Token');
+                            return this.profileService.getProfile(
+                                provider.selectedAddress,
+                                this.tokenAuth
+                            );
+                        }),
+
+                        concatMap((profile: Profile) => {
+                            if (profile) {
+                                this.profile = profile;
+                                if (this.profile.imageUrl)
+                                    return this.profileService.getAvatar(
+                                        <string>this.profile.imageUrl,
+                                        this.tokenAuth
+                                    );
+                            }
                             return of(false);
-                        }), takeLast(1), tap(v =>
-                        {
+                        }),
+
+                        concatMap((image: File) => {
+                            if (image) {
+                                const reader = new FileReader();
+                                reader.readAsDataURL(image);
+                                reader.onload = (_) => {
+                                    this.imageUrl = reader.result;
+                                };
+                            }
+                            return of(true);
+                        }),
+
+                        catchError((e) => {
+                            if (e?.status === 404) return of(true);
+
+                            this.dialog.open(ExceptionDialogContentComponent, {
+                                data: {
+                                    title: 'Failed to retrieve user profile!',
+                                },
+                            });
+                            this.dialogRef.close();
+                            return of(false);
+                        }),
+
+                        tap((v) => {
                             if (v) {
-                                this.snackBar.open(`Logged in successfully.`);
-                                this.dialogRef.close();
+                                this.snackBar.open(
+                                    `User profile retrieved successfully`
+                                );
                             }
                         })
                     )
-            ).subscribe()
+                )
+                .subscribe()
+        );
+    }
+
+    update(): void {
+        this.profile.imageUrl = undefined;
+        this.subscription.add(
+            this.loadingService
+                .prepare(
+                    this.profileService
+                        .setProfile(this.profile, this.tokenAuth)
+                        .pipe(
+                            concatMap((_) => {
+                                if (this.imageFile)
+                                    return this.profileService.setAvatar(
+                                        this.imageFile,
+                                        this.walletId,
+                                        this.tokenAuth
+                                    );
+                                return of(true);
+                            }),
+                            catchError((e) => {
+                                this.dialog.open(
+                                    ExceptionDialogContentComponent,
+                                    {
+                                        data: {
+                                            title: 'Failed to update user profile!',
+                                        },
+                                    }
+                                );
+                                return of(false);
+                            }),
+                            tap((_) => {
+                                this.snackBar.open(
+                                    `User profile updated successfully`
+                                );
+                                this.dialogRef.close();
+                            })
+                        )
+                )
+                .subscribe()
         );
     }
 }
 
-function getProfileInfo(walletId: string): Profile{
-    return {
-        bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-        imageUrl: "https://www.jennstrends.com/wp-content/uploads/2013/10/bad-profile-pic-2-768x768.jpeg",
-        links: [
-            {
-                link: "instagram.com/dummy",
-                media: INSTAGRAM
-            },
-            {
-                link: "telegram.me/dummy",
-                media: TELEGRAM
-            }
-        ],
-        name: "Dummy Dum",
-
-    }
+export interface Profile {
+    walletId: string;
+    name?: string;
+    bio?: string;
+    links: Link[];
+    imageUrl?: string | ArrayBuffer;
 }
 
-interface Profile{
-    name: string,
-    bio: string,
-    links: Link[],
-    imageUrl: string,
+interface Link {
+    link: string;
+    media: Media;
 }
 
-interface Link{
-    link: string,
-    media: Media
-}
-
-interface Media{
-    index: number,
-    name: string
-}
-
-const TELEGRAM: Media = { 
-    index: 0,
-    name: "Telegram"
-}
-
-const DISCORD: Media = {
-    index: 0,
-    name: "Discord"
-}
-
-const FACEBOOK: Media = {
-    index: 0,
-    name: "Facebook"
-}
-
-const TWITTER: Media = {
-    index: 0,
-    name: "Twitter"
-}
-
-const INSTAGRAM: Media = {
-    index: 0,
-    name: "Instagram"
-}
-
-const OTHER: Media = {
-    index: 0,
-    name: "Link"
+enum Media {
+    Telegram = 'TELEGRAM',
+    Discord = 'DISCORD',
+    Facebook = 'FACEBOOK',
+    Twitter = 'TWITTER',
+    Instagram = 'INSTAGRAM',
+    Other = 'OTHER',
 }

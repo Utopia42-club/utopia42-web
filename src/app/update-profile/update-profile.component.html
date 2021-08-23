@@ -1,9 +1,9 @@
-<h2 mat-dialog-title>Update profile info</h2>
+<h2 mat-dialog-title>Edit user profile</h2>
 
 <mat-dialog-content>
     <div fxLayout="row" fxLayoutGap="30px" fxLayoutAlign="center center">
-        <div fxLayout="column" fxLayoutAlign="center center">
-            <mat-form-field appearance="standard" [style.fontSize.px]="14">
+        <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="0">
+            <mat-form-field appearance="standard" [style.fontSize.px]="14" style="width: 100% !important; min-width: unset !important;">
                 <mat-hint>Name</mat-hint>
                 <input matInput [(ngModel)]="profile.name" />
             </mat-form-field>
@@ -16,78 +16,110 @@
                 <mat-hint>Bio</mat-hint>
                 <textarea
                     matInput
-                    rows="4"
+                    rows="2"
                     [(ngModel)]="profile.bio"
                 ></textarea>
             </mat-form-field>
+
         </div>
 
         <div
             fxLayout="column"
             fxLayoutGap="20px"
             fxLayoutAlign="center center"
-            style="width: 120px; margin-left: auto; margin-right: 0"
+            style="width: 200px; margin-left: auto; margin-right: 0"
         >
             <img
                 style="
-                    width: 100%;
+                    width: 120px;
                     height: auto;
                     border-radius: 10px;
-                    /* border-style: solid; */
-                    /* border-color: primary; */
                 "
-                src="{{ profile.imageUrl }}"
+                src="{{ imageUrl ? imageUrl : defaultImageUrl}}"
             />
 
-            <button mat-raised-button color="primary">Upload</button>
+            
+            <input
+                class="file-input"
+                type="file"
+                multiple accept="image/*"
+                #fileInput
+                (change)="onImageChange(fileInput.files[0])"
+                style = "width: 100%;"
+            />
         </div>
     </div>
 
-
-
-    <div *ngFor="let link of profile.links; let i = index;" fxLayout="row" fxLayoutGap="15px" fxLayoutAlign="center center" style="padding: 0;">
-        
-        <button mat-button color="warn" style="height: 25px; width: 25px!important; min-width: unset!important; align-items: center;" color="white" (click)="removeLink(i)" fxLayoutAlign="center center">
+    <div
+        *ngFor="let link of profile.links; let i = index"
+        fxLayout="row"
+        fxLayoutAlign="center center"
+        style="padding: 0; margin-top: 20px;"
+    >
+        <button
+            mat-button
+            color="warn"
+            style="
+                height: 25px;
+                width: 25px !important;
+                min-width: unset !important;
+                align-items: center;
+                margin-right: 30px;
+            "
+            color="white"
+            (click)="removeLink(i)"
+            fxLayoutAlign="center center"
+        >
             <img
-                style="
-                    width: auto;
-                    height: 12px;
-                "
+                style="width: auto; height: 12px"
                 src="assets/images/delete.png"
             />
         </button>
-        
-        <mat-form-field style="width: 100px;">
-            <mat-label>Media</mat-label>
+
+        <mat-form-field style="width: 100px">
             <mat-select required="true" [(value)]="link.media">
                 <mat-option *ngFor="let media of linkMedias" [value]="media">
-                    {{ media.name }}
+                    {{ mediaToString(media)}}
                 </mat-option>
             </mat-select>
         </mat-form-field>
 
-        <mat-form-field 
-            style="width: 100%; padding-bottom: 11px;"
+        <mat-form-field
+            style="width: 100% !important; padding-bottom: 11px; min-width: unset !important;"
             appearance="standard"
             fxLayoutAlign="center"
             [style.fontSize.px]="14"
         >
             <mat-hint>Url</mat-hint>
-            <input matInput type="url" required="true" [(ngModel)]="link.link" pattern="[-a-zA-Z0-9@:%_+.~#?&//=]{2,256}(.[a-z]{2,4})?\b(/[-a-zA-Z0-9@:%_+.~#?&//=]*)?"/>
+            <input
+                matInput
+                [(ngModel)]="link.link"
+            />
         </mat-form-field>
     </div>
 
-    <button mat-button color="warn" style="margin-left: 1px; margin-left: auto; margin-right: auto;" color="white" (click)="addLink()" fxLayoutAlign="center center">
+    <button
+        mat-button
+        color="warn"
+        style="margin-left: 1px; margin-left: auto; margin-right: auto; margin-top: 10px; margin-bottom: 10px;"
+        color="white"
+        (click)="addLink()"
+        fxLayoutAlign="center center"
+    >
         Add a new link
     </button>
-
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
     <button tabindex="-1" mat-button color="warn" (click)="cancel()">
         Cancel
     </button>
-    <button [disabled]="!linksValid()" mat-raised-button color="primary" (click)="update()">
-        Transfer
+    <button
+        [disabled]="!linksValid()"
+        mat-raised-button
+        color="primary"
+        (click)="update()"
+    >
+        Update
     </button>
 </mat-dialog-actions>

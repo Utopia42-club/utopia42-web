@@ -1,4 +1,4 @@
-import { UpdateProfileComponent } from './update-profile/update-profile.component';
+import { EditProfileComponent } from './update-profile/update-profile.component';
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
@@ -42,7 +42,7 @@ import { HttpClientModule } from '@angular/common/http';
         UtopiaGameComponent,
         ConnectionStatusIndicatorComponent,
         TransferLandComponent,
-        UpdateProfileComponent
+        EditProfileComponent
     ],
     imports: [
         BrowserModule,
