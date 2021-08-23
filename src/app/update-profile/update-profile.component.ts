@@ -20,10 +20,11 @@ import { LoadingService } from '../loading.service';
 })
 export class EditProfileComponent implements OnInit, OnDestroy {
     private subscription = new Subscription();
-    readonly walletId: string;
     private tokenAuth: string;
     private imageFile: File;
-    readonly defaultImageUrl: string | ArrayBuffer = 'assets/images/unknown.jpg';
+    readonly walletId: string;
+    readonly defaultImageUrl: string | ArrayBuffer =
+        'assets/images/unknown.jpg';
 
     profile: Profile;
     imageUrl: string | ArrayBuffer;
@@ -132,52 +133,16 @@ export class EditProfileComponent implements OnInit, OnDestroy {
     }
 
     get(): void {
-        let provider: any;
         this.subscription.add(
             this.loadingService
                 .prepare(
-                    this.web3Service.provider().pipe(
-                        concatMap((p) => {
-                            provider = p;
-                            return this.profileService.requestNonce(
-                                provider.networkVersion,
-                                provider.selectedAddress.toLowerCase()
-                            );
-                        }),
-
-                        concatMap((data) => {
-                            return provider.request({
-                                method: 'eth_signTypedData_v4',
-                                params: [
-                                    provider.selectedAddress.toLowerCase(),
-                                    JSON.stringify(data),
-                                ],
-                                from: provider.selectedAddress.toLowerCase(),
-                            });
-                        }),
-
-                        concatMap((signature) => {
-                            return this.profileService.login(
-                                provider.selectedAddress,
-                                <string>signature
-                            );
-                        }),
-
-                        concatMap((res) => {
-                            this.tokenAuth = res.headers.get('X-Auth-Token');
-                            return this.profileService.getProfile(
-                                provider.selectedAddress,
-                                this.tokenAuth
-                            );
-                        }),
-
+                    this.profileService.getProfile(this.walletId).pipe(
                         concatMap((profile: Profile) => {
                             if (profile) {
                                 this.profile = profile;
                                 if (this.profile.imageUrl)
                                     return this.profileService.getAvatar(
-                                        <string>this.profile.imageUrl,
-                                        this.tokenAuth
+                                        <string>this.profile.imageUrl
                                     );
                             }
                             return of(false);
@@ -220,40 +185,70 @@ export class EditProfileComponent implements OnInit, OnDestroy {
     }
 
     update(): void {
+        let provider: any;
         this.profile.imageUrl = undefined;
         this.subscription.add(
             this.loadingService
                 .prepare(
-                    this.profileService
-                        .setProfile(this.profile, this.tokenAuth)
-                        .pipe(
-                            concatMap((_) => {
-                                if (this.imageFile)
-                                    return this.profileService.setAvatar(
-                                        this.imageFile,
-                                        this.walletId,
-                                        this.tokenAuth
-                                    );
-                                return of(true);
-                            }),
-                            catchError((e) => {
-                                this.dialog.open(
-                                    ExceptionDialogContentComponent,
-                                    {
-                                        data: {
-                                            title: 'Failed to update user profile!',
-                                        },
-                                    }
+                    this.web3Service.provider().pipe(
+                        concatMap((p) => {
+                            provider = p;
+                            return this.profileService.requestNonce(
+                                provider.networkVersion,
+                                provider.selectedAddress.toLowerCase()
+                            );
+                        }),
+
+                        concatMap((data) => {
+                            return provider.request({
+                                method: 'eth_signTypedData_v4',
+                                params: [
+                                    provider.selectedAddress.toLowerCase(),
+                                    JSON.stringify(data),
+                                ],
+                                from: provider.selectedAddress.toLowerCase(),
+                            });
+                        }),
+
+                        concatMap((signature) => {
+                            return this.profileService.login(
+                                provider.selectedAddress,
+                                <string>signature
+                            );
+                        }),
+
+                        concatMap((res) => {
+                            this.tokenAuth = res.headers.get('X-Auth-Token');
+                            return this.profileService.setProfile(
+                                this.profile,
+                                this.tokenAuth
+                            );
+                        }),
+
+                        concatMap((_) => {
+                            if (this.imageFile)
+                                return this.profileService.setAvatar(
+                                    this.imageFile,
+                                    this.walletId,
+                                    this.tokenAuth
                                 );
-                                return of(false);
-                            }),
-                            tap((_) => {
-                                this.snackBar.open(
-                                    `User profile updated successfully`
-                                );
-                                this.dialogRef.close();
-                            })
-                        )
+                            return of(true);
+                        }),
+                        catchError((e) => {
+                            this.dialog.open(ExceptionDialogContentComponent, {
+                                data: {
+                                    title: 'Failed to update user profile!',
+                                },
+                            });
+                            return of(false);
+                        }),
+                        tap((_) => {
+                            this.snackBar.open(
+                                `User profile updated successfully`
+                            );
+                            this.dialogRef.close();
+                        })
+                    )
                 )
                 .subscribe()
         );

@@ -7,7 +7,7 @@ import { Profile } from './update-profile.component';
     providedIn: 'root',
 })
 export class ProfileService {
-    readonly endpoint = 'http://horizon.madreza.ir:8082'; // FIXME: change
+    readonly endpoint = 'http://app.utopia42.club:5025';
 
     constructor(private httpClient: HttpClient) {}
 
@@ -30,18 +30,18 @@ export class ProfileService {
         );
     }
 
-    public getAvatar(imageUrl: string, authToken: string): Observable<any> {
+    public getAvatar(imageUrl: string): Observable<any> {
         return this.httpClient.get<any>(
             this.endpoint + `/profile/avatar/${imageUrl}`,
-            {headers: new HttpHeaders().set("X-Auth-Token", authToken), responseType: 'blob' as 'json'}
+            {responseType: 'blob' as 'json'}
         );
     }
 
-    public getProfile(walletId: string, authToken: string): Observable<Profile> {
+    public getProfile(walletId: string): Observable<Profile> {
         return this.httpClient.post<any>(
             this.endpoint + `/profile`,
             walletId,
-            {headers: new HttpHeaders().set('Content-Type','application/json').set("X-Auth-Token", authToken)}
+            {headers: new HttpHeaders().set('Content-Type','application/json')}
         );
     }
 
