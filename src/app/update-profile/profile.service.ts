@@ -7,7 +7,7 @@ import { Profile } from './update-profile.component';
     providedIn: 'root',
 })
 export class ProfileService {
-    readonly endpoint = 'http://horizon.madreza.ir:8082'; // FIXME: change
+    readonly endpoint = 'http://app.utopia42.club:5025';
 
     constructor(private httpClient: HttpClient) {}
 
