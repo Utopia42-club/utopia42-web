@@ -28,6 +28,11 @@ export class UtopiaBridgeService
         this.app.transferLand(payload);
     }
 
+    public editProfile(payload: EditProfileRequest): void
+    {
+        this.app.editProfile(payload);
+    }
+
     public connectMetamask(payload: GameRequest<string>): Observable<ConnectionDetail>
     {
         // return this.web3service.connect()
@@ -49,3 +54,5 @@ export type SaveLandsRequestBodyType = {[key:number]:string};
 export type SaveLandsRequest = GameRequest<SaveLandsRequestBodyType>;
 
 export type TransferLandRequest = GameRequest<number>;
+
+export type EditProfileRequest = GameRequest<string>; // FIXME: string --change to--> undefined (wallet id can be retrieved from connection)

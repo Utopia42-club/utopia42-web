@@ -1,3 +1,4 @@
+import { EditProfileComponent } from './update-profile/update-profile.component';
 import { TransferLandComponent } from './transfer-land/transfer-land.component';
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
@@ -13,7 +14,8 @@ import { MetaMaskConnectingComponent } from './meta-mask-connecting/meta-mask-co
 import { SaveLandsData } from './save-lands/save-lands-data';
 import { SaveLandsComponent } from './save-lands/save-lands.component';
 import { TransferLandData } from './transfer-land/transfer-land-data';
-import { BuyLandsRequest, SaveLandsRequest, SaveLandsRequestBodyType, TransferLandRequest } from './utopia-game/utopia-bridge.service';
+import { BuyLandsRequest, SaveLandsRequest, SaveLandsRequestBodyType, TransferLandRequest, EditProfileRequest } from './utopia-game/utopia-bridge.service';
+import { EditProfileData } from './update-profile/update-profile-data';
 
 @Component({
     selector: 'app-root',
@@ -76,6 +78,10 @@ export class AppComponent
                     this.transferLand({
                         connection, body: Number(`${params.param}`)
                     })
+                } else if (params.method == "editProfile") {
+                    this.editProfile({
+                        connection, body: undefined
+                    })
                 }
             }
         });
@@ -117,6 +123,20 @@ export class AppComponent
                 if (contract != null) {
                     this.dialog.open(TransferLandComponent, {
                         data: { request, contract } as TransferLandData,
+                        disableClose: true
+                    });
+                }
+            });
+    }
+
+    public editProfile(request: EditProfileRequest): void
+    {
+        this.getContractSafe(request.connection.network, request.connection.wallet)
+            .subscribe(contract =>
+            {
+                if (contract != null) {
+                    this.dialog.open(EditProfileComponent, {
+                        data: { request, contract } as EditProfileData,
                         disableClose: true
                     });
                 }
