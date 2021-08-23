@@ -1,5 +1,3 @@
-import { EditProfileComponent } from './update-profile/update-profile.component';
-import { TransferLandComponent } from './transfer-land/transfer-land.component';
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -14,8 +12,10 @@ import { MetaMaskConnectingComponent } from './meta-mask-connecting/meta-mask-co
 import { SaveLandsData } from './save-lands/save-lands-data';
 import { SaveLandsComponent } from './save-lands/save-lands.component';
 import { TransferLandData } from './transfer-land/transfer-land-data';
-import { BuyLandsRequest, SaveLandsRequest, SaveLandsRequestBodyType, TransferLandRequest, EditProfileRequest } from './utopia-game/utopia-bridge.service';
+import { TransferLandComponent } from './transfer-land/transfer-land.component';
 import { EditProfileData } from './update-profile/update-profile-data';
+import { EditProfileComponent } from './update-profile/update-profile.component';
+import { BuyLandsRequest, EditProfileRequest, SaveLandsRequest, SaveLandsRequestBodyType, TransferLandRequest } from './utopia-game/utopia-bridge.service';
 
 @Component({
     selector: 'app-root',
@@ -45,43 +45,46 @@ export class AppComponent
     {
         this.route.queryParams.subscribe(params =>
         {
-            if (params.method != null && params.param != null
-                && params.wallet != null && params.network != null) {
+            if (params.method != null && params.wallet != null && params.network != null) {
                 let connection: ConnectionDetail = {
                     wallet: `${params.wallet}`.toLowerCase(),
                     network: parseInt(`${params.network}`)
                 };
-                if (params.method == "buy") {
-                    this.buyLands({
-                        connection,
-                        body: `${params.param}`.split(",")
-                            .map(l =>
-                            {
-                                let coords = l.split("_").map(v => Number(v));
-                                return {
-                                    x1: coords[0], y1: coords[1], x2: coords[2], y2: coords[3]
-                                };
-                            })
-                    });
+                if (params.param != null) {
+                    if (params.method == "buy") {
+                        this.buyLands({
+                            connection,
+                            body: `${params.param}`.split(",")
+                                .map(l =>
+                                {
+                                    let coords = l.split("_").map(v => Number(v));
+                                    return {
+                                        x1: coords[0], y1: coords[1], x2: coords[2], y2: coords[3]
+                                    };
+                                })
+                        });
+                    }
+                    else if (params.method == "save") {
+                        const body: SaveLandsRequestBodyType = {};
+                        `${params.param}`.split(',').map(l =>
+                        {
+                            const values = l.split('_');
+                            body[Number(values[0])] = values[1];
+                        });
+
+                        this.saveLands({
+                            connection, body: body
+                        });
+                    } else if (params.method == "transfer") {
+                        this.transferLand({
+                            connection, body: Number(`${params.param}`)
+                        });
+                    }
                 }
-                else if (params.method == "save") {
-                    const body: SaveLandsRequestBodyType = {};
-                    `${params.param}`.split(',').map(l => {
-                        const values = l.split('_');
-                        body[Number(values[0])] = values[1];
-                    })
-                    
-                    this.saveLands({
-                        connection, body: body
-                    });
-                } else if (params.method == "transfer") {
-                    this.transferLand({
-                        connection, body: Number(`${params.param}`)
-                    })
-                } else if (params.method == "editProfile") {
+                else if (params.method == "editProfile") {
                     this.editProfile({
                         connection, body: undefined
-                    })
+                    });
                 }
             }
         });
