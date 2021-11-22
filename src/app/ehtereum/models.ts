@@ -6,6 +6,9 @@ export interface Land {
     y2: number;
     time?: number;
     ipfsKey?: string;
+    isNFT?: boolean;
+    owner?: string;
+    ownerIndex?: number;
 }
 
 export interface PricedLand extends Land {

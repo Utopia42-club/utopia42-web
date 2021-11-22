@@ -51,14 +51,14 @@ export class SaveLandsComponent implements OnInit, OnDestroy
             this.loadingService.prepare(
                 of(...Object.keys(this.ipfsKeys))
                     .pipe(
-                        concatMap((index, i) =>
+                        concatMap((landId, i) =>
                         {
                             return this.data.contract
-                                .updateLand(this.ipfsKeys[index], index, this.data.request.connection.wallet)
+                                .updateLand(this.ipfsKeys[landId], landId, this.data.request.connection.wallet)
                                 .pipe(map(v =>
                                 {
                                     status[i] = true;
-                                    this.snackBar.open(`Land ${index} saved.`);
+                                    this.snackBar.open(`Land ${landId} saved.`);
                                     return true;
                                 }));
                         }), catchError(e =>

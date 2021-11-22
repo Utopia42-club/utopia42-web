@@ -15,7 +15,7 @@ import { TransferLandData } from './transfer-land-data';
 export class TransferLandComponent implements OnInit, OnDestroy
 {
     private subscription = new Subscription();
-    readonly landIndex: number;
+    readonly landId: number;
     destinationAddress: string;
 
     constructor(@Inject(MAT_DIALOG_DATA) public data: TransferLandData,
@@ -24,7 +24,7 @@ export class TransferLandComponent implements OnInit, OnDestroy
         private readonly loadingService: LoadingService,
         private snackBar: MatSnackBar)
     {
-        this.landIndex = data.request.body;
+        this.landId = data.request.body;
     }
 
     ngOnInit(): void
@@ -52,7 +52,7 @@ export class TransferLandComponent implements OnInit, OnDestroy
                         concatMap((to) =>
                         {
                             return this.data.contract
-                                .transferLand(this.landIndex, to, this.data.request.connection.wallet)
+                                .transferLand(this.landId, to, this.data.request.connection.wallet)
                                 .pipe(map(v =>
                                 {
                                     status[0] = true;
