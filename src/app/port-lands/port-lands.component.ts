@@ -42,6 +42,7 @@ export class PortLandsComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.networks = Array.from(Networks.supported.values());
+
         // if (this.networks.length != 0)
         //     this.sourceNetwork = this.networks[0];
     }

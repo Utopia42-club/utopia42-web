@@ -51,6 +51,18 @@ export class UtopiaContract
         );
     }
 
+    public lastLandId(): Observable<any>
+    {
+        // if (wallet == null) wallet = this.defaultWallet;
+        return this.loadingService.prepare(
+            new Observable(s =>
+            {
+                console.log(this.ethContract.methods.lastLandId);
+                this.ethContract.methods.lastLandId().call(this.listener(s));
+            })
+        );
+    }
+
     public transferLand(landId, to, wallet): Observable<any>
     {
         if (wallet == null) wallet = this.defaultWallet;
