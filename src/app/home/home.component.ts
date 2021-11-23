@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { AppComponent } from '../app.component';
+import { ManageNftsComponent } from '../manage-nfts/manage-nfts.component';
 import { PortLandsComponent } from '../port-lands/port-lands.component';
 
 
@@ -22,8 +23,13 @@ export class HomeComponent implements OnInit {
     portLands() {
         this.dialog.open(PortLandsComponent, { data: this.app });
     }
-
+    
     startGame() {
         this.router.navigate(['game']);
     }
+    
+    manageNFTs() {
+        this.dialog.open(ManageNftsComponent, { data: this.app });
+    }
 }
+

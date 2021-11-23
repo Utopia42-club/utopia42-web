@@ -29,6 +29,7 @@ import { TransferLandComponent } from './transfer-land/transfer-land.component';
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { HttpClientModule } from '@angular/common/http';
+import { ManageNftsComponent } from './manage-nfts/manage-nfts.component';
 
 @NgModule({
     declarations: [
@@ -42,7 +43,8 @@ import { HttpClientModule } from '@angular/common/http';
         UtopiaGameComponent,
         ConnectionStatusIndicatorComponent,
         TransferLandComponent,
-        EditProfileComponent
+        EditProfileComponent,
+        ManageNftsComponent
     ],
     imports: [
         BrowserModule,

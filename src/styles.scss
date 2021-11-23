@@ -17,6 +17,7 @@ $theme: mat-light-theme($primary, $accent, $warn);
 
 $pink-palette: mat-palette($mat-pink);
 $indigo-palette: mat-palette($mat-indigo);
+$orange-palette: mat-palette($mat-blue);
 
 .pink{
     background-color: mat-color($pink-palette, default);
@@ -26,6 +27,11 @@ $indigo-palette: mat-palette($mat-indigo);
 .indigo{
     background-color: mat-color($indigo-palette, default);
     color: mat-color($indigo-palette, default-contrast);
+}
+
+.orange{
+    background-color: mat-color($orange-palette, default);
+    color: mat-color($orange-palette, default-contrast);
 }
 
 .primary{
