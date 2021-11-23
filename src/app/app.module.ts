@@ -30,6 +30,7 @@ import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { HttpClientModule } from '@angular/common/http';
 import { ManageNftsComponent } from './manage-nfts/manage-nfts.component';
+import { SetNftComponent } from './set-nft/set-nft.component';
 
 @NgModule({
     declarations: [
@@ -44,7 +45,8 @@ import { ManageNftsComponent } from './manage-nfts/manage-nfts.component';
         ConnectionStatusIndicatorComponent,
         TransferLandComponent,
         EditProfileComponent,
-        ManageNftsComponent
+        ManageNftsComponent,
+        SetNftComponent
     ],
     imports: [
         BrowserModule,

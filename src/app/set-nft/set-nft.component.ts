@@ -1,33 +1,36 @@
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { of, Subscription } from 'rxjs';
-import { catchError, concatMap, map, takeLast, tap } from 'rxjs/operators';
+import { concatMap, map, catchError, takeLast, tap } from 'rxjs/operators';
 import { ExceptionDialogContentComponent } from '../exception-dialog-content/exception-dialog-content.component';
 import { LoadingService } from '../loading.service';
-import { TransferRequestBodyType } from '../utopia-game/utopia-bridge.service';
-import { TransferLandData } from './transfer-land-data';
+import { SetNftRequestBodyType } from '../utopia-game/utopia-bridge.service';
+import { SetNftData } from './set-nft-data';
 
 @Component({
-  selector: 'app-transfer-land',
-  templateUrl: './transfer-land.component.html',
-  styleUrls: ['./transfer-land.component.scss']
+  selector: 'app-set-nft',
+  templateUrl: './set-nft.component.html',
+  styleUrls: ['./set-nft.component.scss']
 })
-export class TransferLandComponent implements OnInit, OnDestroy
+export class SetNftComponent implements OnInit, OnDestroy
 {
     private subscription = new Subscription();
-    readonly transferRequestData: TransferRequestBodyType;
+    readonly setNftRequestData: SetNftRequestBodyType;
     destinationAddress: string;
-    landId: number;
+    heading: string;
 
-    constructor(@Inject(MAT_DIALOG_DATA) public data: TransferLandData,
+    constructor(@Inject(MAT_DIALOG_DATA) public data: SetNftData,
         private dialogRef: MatDialogRef<any>,
         private dialog: MatDialog,
         private readonly loadingService: LoadingService,
         private snackBar: MatSnackBar)
     {
-        this.transferRequestData = data.request.body;
-        this.landId = data.request.body.landId;
+        this.setNftRequestData = data.request.body;
+        if(this.setNftRequestData.isNft)
+          this.heading = 'Converting land to nft';
+        else
+          this.heading = 'Converting nft to land';
     }
 
     ngOnInit(): void
@@ -44,18 +47,18 @@ export class TransferLandComponent implements OnInit, OnDestroy
         this.dialogRef.close();
     }
 
-    transfer(): void
+    toggleNft(): void
     {
         const status = [false];
 
         this.subscription.add(
             this.loadingService.prepare(
-                of(this.destinationAddress.trim())
+                of(this.setNftRequestData)
                     .pipe(
-                        concatMap((to) =>
+                        concatMap((requestData) =>
                         {
                             return this.data.contract
-                                .transferLand(this.transferRequestData.landId, to, this.data.request.connection.wallet, this.transferRequestData.isNft)
+                                .toggleNft(requestData.landId, this.data.request.connection.wallet, requestData.isNft)
                                 .pipe(map(v =>
                                 {
                                     status[0] = true;
@@ -64,12 +67,12 @@ export class TransferLandComponent implements OnInit, OnDestroy
                         }), catchError(e =>
                         {
                             console.log(e);
-                            this.dialog.open(ExceptionDialogContentComponent, { data: { title: "Failed to transfer land!" } });
+                            this.dialog.open(ExceptionDialogContentComponent, { data: { title: "Land/NFT conversion failed!" } });
                             return of(false);
                         }), takeLast(1), tap(v =>
                         {
                             if (v) {
-                                this.snackBar.open(`Land transferred successfully.`);
+                                this.snackBar.open(`Conversion successfully done.`);
                                 this.dialogRef.close();
                             }
                         })
@@ -77,4 +80,5 @@ export class TransferLandComponent implements OnInit, OnDestroy
             ).subscribe()
         );
     }
+
 }

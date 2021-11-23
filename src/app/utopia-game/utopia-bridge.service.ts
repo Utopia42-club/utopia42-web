@@ -53,6 +53,19 @@ export type BuyLandsRequest = GameRequest<Land[]>;
 export type SaveLandsRequestBodyType = {[key:number]:string};
 export type SaveLandsRequest = GameRequest<SaveLandsRequestBodyType>;
 
-export type TransferLandRequest = GameRequest<number>;
+export interface SetNftRequestBodyType
+{
+    landId: number,
+    isNft: boolean
+}
+export type SetNftRequest = GameRequest<SetNftRequestBodyType>;
+
+export interface TransferRequestBodyType 
+{
+    landId: number,
+    isNft: boolean
+}
+    
+export type TransferLandRequest = GameRequest<TransferRequestBodyType>;
 
 export type EditProfileRequest = GameRequest<string>; // FIXME: string --change to--> undefined (wallet id can be retrieved from connection)

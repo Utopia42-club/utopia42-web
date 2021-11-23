@@ -51,25 +51,30 @@ export class UtopiaContract
         );
     }
 
-    public lastLandId(): Observable<any>
-    {
-        // if (wallet == null) wallet = this.defaultWallet;
-        return this.loadingService.prepare(
-            new Observable(s =>
-            {
-                console.log(this.ethContract.methods.lastLandId);
-                this.ethContract.methods.lastLandId().call(this.listener(s));
-            })
-        );
-    }
-
-    public transferLand(landId, to, wallet): Observable<any>
+    public transferLand(landId, to, wallet, isNFT): Observable<any>
     {
         if (wallet == null) wallet = this.defaultWallet;
         return this.loadingService.prepare(
             new Observable(s =>
             {
-                this.ethContract.methods.transferLand(landId, to).send({ from: wallet }, this.listener(s));
+                if(isNFT)
+                    this.ethContract.methods.transferNFTLand(landId, to).send({ from: wallet }, this.listener(s));
+                else
+                    this.ethContract.methods.transferLand(landId, to).send({ from: wallet }, this.listener(s));
+            })
+        );
+    }
+
+    public toggleNft(landId, wallet, isNFT): Observable<any>
+    {
+        if (wallet == null) wallet = this.defaultWallet;
+        return this.loadingService.prepare(
+            new Observable(s =>
+            {
+                if(isNFT)
+                    this.ethContract.methods.NFTToLand(landId).send({ from: wallet }, this.listener(s));
+                else
+                    this.ethContract.methods.landToNFT(landId).send({ from: wallet }, this.listener(s));
             })
         );
     }

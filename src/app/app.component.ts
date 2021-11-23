@@ -13,9 +13,11 @@ import { SaveLandsData } from './save-lands/save-lands-data';
 import { SaveLandsComponent } from './save-lands/save-lands.component';
 import { TransferLandData } from './transfer-land/transfer-land-data';
 import { TransferLandComponent } from './transfer-land/transfer-land.component';
+import { SetNftComponent } from './set-nft/set-nft.component';
 import { EditProfileData } from './update-profile/update-profile-data';
+import { SetNftData } from './set-nft/set-nft-data';
 import { EditProfileComponent } from './update-profile/update-profile.component';
-import { BuyLandsRequest, EditProfileRequest, SaveLandsRequest, SaveLandsRequestBodyType, TransferLandRequest } from './utopia-game/utopia-bridge.service';
+import { BuyLandsRequest, EditProfileRequest, SaveLandsRequest, SaveLandsRequestBodyType, SetNftRequest, TransferLandRequest } from './utopia-game/utopia-bridge.service';
 
 @Component({
     selector: 'app-root',
@@ -76,10 +78,24 @@ export class AppComponent
                             connection, body: body
                         });
                     } else if (params.method == "transfer") {
+                        const values = `${params.param}`.split('_');
+
                         this.transferLand({
-                            connection, body: Number(`${params.param}`)
+                            connection, body: {
+                                landId: Number(values[0]),
+                                isNft: Boolean(values[1])
+                            }
                         });
-                    }
+                    } else if (params.method == "SetNft") {
+                        const values = `${params.param}`.split('_');
+                        
+                        this.SetNft({
+                            connection, body: {
+                                landId: Number(values[0]),
+                                isNft: Boolean(values[1])
+                            }
+                        });
+                    } 
                 }
                 else if (params.method == "editProfile") {
                     this.editProfile({
@@ -126,6 +142,20 @@ export class AppComponent
                 if (contract != null) {
                     this.dialog.open(TransferLandComponent, {
                         data: { request, contract } as TransferLandData,
+                        disableClose: true
+                    });
+                }
+            });
+    }
+
+    public SetNft(request: SetNftRequest): void
+    {
+        this.getContractSafe(request.connection.network, request.connection.wallet)
+            .subscribe(contract =>
+            {
+                if (contract != null) {
+                    this.dialog.open(SetNftComponent, {
+                        data: { request, contract } as SetNftData,
                         disableClose: true
                     });
                 }
