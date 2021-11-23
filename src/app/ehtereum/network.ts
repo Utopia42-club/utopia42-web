@@ -20,7 +20,7 @@ export namespace Networks {
     export const supported: Map<number, Network> = new Map();
     export const MainNet = new Network(1, "0x56040d44f407fa6f33056d4f352d2e919a0d99fb", "Ethereum Main Network", false, "mainnet");
     export const RinkebyTest = new Network(4, "0x801fC75707BEB6d2aE8863D7A3B66047A705ffc0", "Rinkeby Test Network", false, "rinkeby");
-    export const BinanceTest = new Network(97, "0x4f2BF5efbefa41506c5D1Ebbc0CBFe74461A1c74", "Binance Smart Chain Test", true, null, "https://data-seed-prebsc-1-s2.binance.org:8545");
+    export const BinanceTest = new Network(97, "0x4f2BF5efbefa41506c5D1Ebbc0CBFe74461A1c74", "Binance Smart Chain Test", true, null, "https://data-seed-prebsc-1-s3.binance.org:8545");
     export const RopstenTest = new Network(3, '0x9344CdEc9cf176E3162758D23d1FC806a0AE08cf', "Ropsten Test Network", false, "ropsten");
     export const GoerliTest = new Network(5, null, "Goerli Test Network", false, "goerli");
     export const KovanTest = new Network(42, null, "Kovan Test Network", false, "kovan");
