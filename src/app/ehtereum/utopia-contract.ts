@@ -65,13 +65,13 @@ export class UtopiaContract
         );
     }
 
-    public toggleNft(landId, wallet, isNFT): Observable<any>
+    public setNft(landId, wallet, nft): Observable<any>
     {
         if (wallet == null) wallet = this.defaultWallet;
         return this.loadingService.prepare(
             new Observable(s =>
             {
-                if(isNFT)
+                if(nft)
                     this.ethContract.methods.landToNFT(landId).send({ from: wallet }, this.listener(s));
                 else
                     this.ethContract.methods.NFTToLand(landId).send({ from: wallet }, this.listener(s));

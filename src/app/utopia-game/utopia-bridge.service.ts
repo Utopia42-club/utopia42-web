@@ -60,7 +60,7 @@ export type SaveLandsRequest = GameRequest<SaveLandsRequestBodyType>;
 export interface SetNftRequestBodyType
 {
     landId: number,
-    isNft: boolean
+    nft: boolean
 }
 export type SetNftRequest = GameRequest<SetNftRequestBodyType>;
 

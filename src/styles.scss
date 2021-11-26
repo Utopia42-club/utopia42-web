@@ -8,7 +8,7 @@ $warn: mat-palette($mat-red);
 $theme: mat-light-theme($primary, $accent, $warn);
 @include angular-material-theme($theme);
 
-:root{
+:root {
     --accent-color: #{mat-color($accent, default)};
     --primary-color: #{mat-color($primary, default)};
     --primary-contrast-color: #{mat-color($primary, default-contrast)};
@@ -19,27 +19,31 @@ $pink-palette: mat-palette($mat-pink);
 $indigo-palette: mat-palette($mat-indigo);
 $orange-palette: mat-palette($mat-blue);
 
-.pink{
+//.dark-background {
+//    background: #424242;
+//}
+
+.pink {
     background-color: mat-color($pink-palette, default);
     color: mat-color($pink-palette, default-contrast);
 }
 
-.indigo{
+.indigo {
     background-color: mat-color($indigo-palette, default);
     color: mat-color($indigo-palette, default-contrast);
 }
 
-.orange{
+.orange {
     background-color: mat-color($orange-palette, default);
     color: mat-color($orange-palette, default-contrast);
 }
 
-.primary{
+.primary {
     background-color: mat-color($primary, default);
     color: mat-color($primary, default-contrast);
 }
 
-.accent{
+.accent {
     background-color: mat-color($accent, default);
     color: mat-color($accent, default-contrast);
 }
@@ -48,13 +52,14 @@ html,
 body {
     height: 100%;
 }
+
 body {
     margin: 0;
     font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
 
-.page-content{
+.page-content {
     margin-top: 4rem !important;
     max-width: 100%;
     width: fit-content;
@@ -62,15 +67,16 @@ body {
     display: grid;
 }
 
-.full-content{
+.full-content {
     width: 100vw;
     height: calc(100vh - 56px);
 }
 
-.loading-panel{
+.loading-panel {
     z-index: 2000;
 }
 
-.loading-back-drop{
+.loading-back-drop {
     z-index: 1999;
 }
+

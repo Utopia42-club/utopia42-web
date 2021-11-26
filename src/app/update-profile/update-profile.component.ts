@@ -58,10 +58,11 @@ export class EditProfileComponent implements OnInit, OnDestroy {
             ],
             name: '',
         };
-        this.get();
     }
 
-    ngOnInit(): void {}
+    ngOnInit(): void {
+        this.loadData();
+    }
 
     ngOnDestroy(): void {
         this.subscription.unsubscribe();
@@ -132,7 +133,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
         this.dialogRef.close();
     }
 
-    get(): void {
+    loadData(): void {
         this.subscription.add(
             this.loadingService
                 .prepare(

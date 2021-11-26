@@ -79,20 +79,19 @@ export class AppComponent
                         });
                     } else if (params.method == "transfer") {
                         const values = `${params.param}`.split('_');
-
                         this.transferLand({
                             connection, body: {
                                 landId: Number(values[0]),
-                                isNft: Boolean(values[1])
+                                isNft: values[1].toLowerCase() === "true"
                             }
                         });
-                    } else if (params.method == "SetNft") {
+                    } else if (params.method == "setNft") {
                         const values = `${params.param}`.split('_');
 
                         this.setNft({
                             connection, body: {
                                 landId: Number(values[0]),
-                                isNft: Boolean(values[1])
+                                nft: values[1].toLowerCase() === "true"
                             }
                         });
                     }

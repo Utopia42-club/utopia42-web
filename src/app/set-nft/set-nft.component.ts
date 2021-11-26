@@ -27,7 +27,8 @@ export class SetNftComponent implements OnInit, OnDestroy
         private snackBar: MatSnackBar)
     {
         this.setNftRequestData = data.request.body;
-        if(this.setNftRequestData.isNft)
+        console.log(this.setNftRequestData);
+        if(this.setNftRequestData.nft)
           this.heading = 'Converting land to nft';
         else
           this.heading = 'Converting nft to land';
@@ -58,7 +59,7 @@ export class SetNftComponent implements OnInit, OnDestroy
                         concatMap((requestData) =>
                         {
                             return this.data.contract
-                                .toggleNft(requestData.landId, this.data.request.connection.wallet, requestData.isNft)
+                                .setNft(requestData.landId, this.data.request.connection.wallet, requestData.nft)
                                 .pipe(map(v =>
                                 {
                                     status[0] = true;
