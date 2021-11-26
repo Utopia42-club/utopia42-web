@@ -88,14 +88,14 @@ export class AppComponent
                         });
                     } else if (params.method == "SetNft") {
                         const values = `${params.param}`.split('_');
-                        
-                        this.SetNft({
+
+                        this.setNft({
                             connection, body: {
                                 landId: Number(values[0]),
                                 isNft: Boolean(values[1])
                             }
                         });
-                    } 
+                    }
                 }
                 else if (params.method == "editProfile") {
                     this.editProfile({
@@ -106,7 +106,7 @@ export class AppComponent
         });
     }
 
-    public buyLands(request: BuyLandsRequest): void 
+    public buyLands(request: BuyLandsRequest): void
     {
         this.getContractSafe(request.connection.network, request.connection.wallet)
             .subscribe(contract =>
@@ -148,7 +148,7 @@ export class AppComponent
             });
     }
 
-    public SetNft(request: SetNftRequest): void
+    public setNft(request: SetNftRequest): void
     {
         this.getContractSafe(request.connection.network, request.connection.wallet)
             .subscribe(contract =>

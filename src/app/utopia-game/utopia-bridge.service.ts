@@ -19,7 +19,7 @@ export class UtopiaBridgeService
     }
 
     public save(payload: SaveLandsRequest): void
-    { 
+    {
         this.app.saveLands(payload);
     }
 
@@ -31,6 +31,10 @@ export class UtopiaBridgeService
     public editProfile(payload: EditProfileRequest): void
     {
         this.app.editProfile(payload);
+    }
+
+    public setNft(request: SetNftRequest): void{
+        this.app.setNft(request);
     }
 
     public connectMetamask(payload: GameRequest<string>): Observable<ConnectionDetail>
@@ -60,12 +64,12 @@ export interface SetNftRequestBodyType
 }
 export type SetNftRequest = GameRequest<SetNftRequestBodyType>;
 
-export interface TransferRequestBodyType 
+export interface TransferRequestBodyType
 {
     landId: number,
     isNft: boolean
 }
-    
+
 export type TransferLandRequest = GameRequest<TransferRequestBodyType>;
 
 export type EditProfileRequest = GameRequest<string>; // FIXME: string --change to--> undefined (wallet id can be retrieved from connection)

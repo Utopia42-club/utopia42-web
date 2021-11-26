@@ -72,9 +72,9 @@ export class UtopiaContract
             new Observable(s =>
             {
                 if(isNFT)
-                    this.ethContract.methods.NFTToLand(landId).send({ from: wallet }, this.listener(s));
-                else
                     this.ethContract.methods.landToNFT(landId).send({ from: wallet }, this.listener(s));
+                else
+                    this.ethContract.methods.NFTToLand(landId).send({ from: wallet }, this.listener(s));
             })
         );
     }
