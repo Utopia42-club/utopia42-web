@@ -1,5 +1,5 @@
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { of, Subscription } from 'rxjs';
 import { catchError, concatMap, map, takeLast, tap } from 'rxjs/operators';
@@ -9,9 +9,9 @@ import { TransferRequestBodyType } from '../utopia-game/utopia-bridge.service';
 import { TransferLandData } from './transfer-land-data';
 
 @Component({
-  selector: 'app-transfer-land',
-  templateUrl: './transfer-land.component.html',
-  styleUrls: ['./transfer-land.component.scss']
+    selector: 'app-transfer-land',
+    templateUrl: './transfer-land.component.html',
+    styleUrls: ['./transfer-land.component.scss']
 })
 export class TransferLandComponent implements OnInit, OnDestroy
 {
@@ -21,10 +21,10 @@ export class TransferLandComponent implements OnInit, OnDestroy
     landId: number;
 
     constructor(@Inject(MAT_DIALOG_DATA) public data: TransferLandData,
-        private dialogRef: MatDialogRef<any>,
-        private dialog: MatDialog,
-        private readonly loadingService: LoadingService,
-        private snackBar: MatSnackBar)
+                private dialogRef: MatDialogRef<any>,
+                private dialog: MatDialog,
+                private readonly loadingService: LoadingService,
+                private snackBar: MatSnackBar)
     {
         this.transferRequestData = data.request.body;
         this.landId = data.request.body.landId;
@@ -52,22 +52,18 @@ export class TransferLandComponent implements OnInit, OnDestroy
             this.loadingService.prepare(
                 of(this.destinationAddress.trim())
                     .pipe(
-                        concatMap((to) =>
-                        {
+                        concatMap((target) => {
                             return this.data.contract
-                                .transferLand(this.transferRequestData.landId, to, this.data.request.connection.wallet, this.transferRequestData.isNft)
-                                .pipe(map(v =>
-                                {
+                                .transferLand(this.transferRequestData.landId, target, this.data.request.connection.wallet)
+                                .pipe(map(v => {
                                     status[0] = true;
                                     return true;
                                 }));
-                        }), catchError(e =>
-                        {
+                        }), catchError(e => {
                             console.log(e);
                             this.dialog.open(ExceptionDialogContentComponent, { data: { title: "Failed to transfer land!" } });
                             return of(false);
-                        }), takeLast(1), tap(v =>
-                        {
+                        }), takeLast(1), tap(v => {
                             if (v) {
                                 this.snackBar.open(`Land transferred successfully.`);
                                 this.dialogRef.close();

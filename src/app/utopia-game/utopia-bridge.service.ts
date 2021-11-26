@@ -11,7 +11,10 @@ import { GameRequest } from './game-request';
 export class UtopiaBridgeService
 {
     public unityInstance;
-    constructor(private web3service: Web3Service, private app: AppComponent) { }
+
+    constructor(private web3service: Web3Service, private app: AppComponent)
+    {
+    }
 
     public buy(payload: BuyLandsRequest): void
     {
@@ -33,7 +36,8 @@ export class UtopiaBridgeService
         this.app.editProfile(payload);
     }
 
-    public setNft(request: SetNftRequest): void{
+    public setNft(request: SetNftRequest): void
+    {
         this.app.setNft(request);
     }
 
@@ -41,8 +45,7 @@ export class UtopiaBridgeService
     {
         // return this.web3service.connect()
         return this.web3service.isConnected()
-            .pipe(map(v =>
-            {
+            .pipe(map(v => {
                 if (!v) return null;
                 return {
                     network: this.web3service.networkId(),
@@ -54,7 +57,7 @@ export class UtopiaBridgeService
 
 export type BuyLandsRequest = GameRequest<Land[]>;
 
-export type SaveLandsRequestBodyType = {[key:number]:string};
+export type SaveLandsRequestBodyType = { [key: number]: string };
 export type SaveLandsRequest = GameRequest<SaveLandsRequestBodyType>;
 
 export interface SetNftRequestBodyType
@@ -62,12 +65,12 @@ export interface SetNftRequestBodyType
     landId: number,
     nft: boolean
 }
+
 export type SetNftRequest = GameRequest<SetNftRequestBodyType>;
 
 export interface TransferRequestBodyType
 {
-    landId: number,
-    isNft: boolean
+    landId: number
 }
 
 export type TransferLandRequest = GameRequest<TransferRequestBodyType>;

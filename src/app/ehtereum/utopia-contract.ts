@@ -1,4 +1,4 @@
-import { Observable, of, Subscriber } from "rxjs";
+import { Observable, Subscriber } from "rxjs";
 import { map, switchMap } from "rxjs/operators";
 import Web3 from "web3";
 import { Contract } from "web3-eth-contract";
@@ -8,8 +8,10 @@ import { Land, PricedLand } from "./models";
 export class UtopiaContract
 {
     constructor(readonly ethContract: Contract,
-        private loadingService: LoadingService,
-        readonly defaultWallet: string) { }
+                private loadingService: LoadingService,
+                readonly defaultWallet: string)
+    {
+    }
 
     public getLandPrice(land: Land): Observable<string>
     {
@@ -30,8 +32,7 @@ export class UtopiaContract
         return this.loadingService.prepare(
             new Observable(s =>
                 this.ethContract.methods.landPrice(land.x1, land.x2, land.y1, land.y2).call(this.listener(s))
-            ).pipe(switchMap(amount =>
-            {
+            ).pipe(switchMap(amount => {
                 return new Observable(s =>
                     this.ethContract.methods.assignLand(land.x1, land.x2, land.y1, land.y2, land.ipfsKey || "")
                         .send({ from: wallet, value: amount }, this.listener(s))
@@ -44,34 +45,28 @@ export class UtopiaContract
     {
         if (wallet == null) wallet = this.defaultWallet;
         return this.loadingService.prepare(
-            new Observable(s =>
-            {
+            new Observable(s => {
                 this.ethContract.methods.updateLand(ipfsKey, landId).send({ from: wallet }, this.listener(s));
             })
         );
     }
 
-    public transferLand(landId, to, wallet, isNFT): Observable<any>
+    public transferLand(landId: number, to: string, wallet: string): Observable<any>
     {
         if (wallet == null) wallet = this.defaultWallet;
         return this.loadingService.prepare(
-            new Observable(s =>
-            {
-                if(isNFT)
-                    this.ethContract.methods.transferNFTLand(landId, to).send({ from: wallet }, this.listener(s));
-                else
-                    this.ethContract.methods.transferLand(landId, to).send({ from: wallet }, this.listener(s));
+            new Observable(s => {
+                this.ethContract.methods.transferLand(landId, to).send({ from: wallet }, this.listener(s));
             })
         );
     }
 
-    public setNft(landId, wallet, nft): Observable<any>
+    public setNft(landId: number, wallet: string, nft: boolean): Observable<any>
     {
         if (wallet == null) wallet = this.defaultWallet;
         return this.loadingService.prepare(
-            new Observable(s =>
-            {
-                if(nft)
+            new Observable(s => {
+                if (nft)
                     this.ethContract.methods.landToNFT(landId).send({ from: wallet }, this.listener(s));
                 else
                     this.ethContract.methods.NFTToLand(landId).send({ from: wallet }, this.listener(s));
@@ -87,20 +82,19 @@ export class UtopiaContract
             new Observable(s =>
                 this.ethContract.methods.getLands(wallet).call(this.listener(s))
             ).pipe(map((rs: any[]) =>
-                rs.map(r =>
-                {
-                    return {
-                        x1: parseInt(r.x1),
-                        y1: parseInt(r.y1),
-                        x2: parseInt(r.x2),
-                        y2: parseInt(r.y2),
-                        time: parseInt(r.time),
-                        ipfsKey: r.hash,
-                        isNFT: r.isNFT == "true",
-                        owner: r.owner,
-                        ownerIndex: parseInt(r.ownerIndex)
-                    };
-                }
+                rs.map(r => {
+                        return {
+                            x1: parseInt(r.x1),
+                            y1: parseInt(r.y1),
+                            x2: parseInt(r.x2),
+                            y2: parseInt(r.y2),
+                            time: parseInt(r.time),
+                            ipfsKey: r.hash,
+                            isNFT: r.isNFT == "true",
+                            owner: r.owner,
+                            ownerIndex: parseInt(r.ownerIndex)
+                        };
+                    }
                 ))
             )
         );
@@ -108,8 +102,7 @@ export class UtopiaContract
 
     private listener(subscriber: Subscriber<any>)
     {
-        return (error: any, value: any) =>
-        {
+        return (error: any, value: any) => {
             if (error)
                 return subscriber.error(error);
             // it returns tx hash because sending tx
