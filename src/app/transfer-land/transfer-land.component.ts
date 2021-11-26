@@ -5,7 +5,6 @@ import { of, Subscription } from 'rxjs';
 import { catchError, concatMap, map, takeLast, tap } from 'rxjs/operators';
 import { ExceptionDialogContentComponent } from '../exception-dialog-content/exception-dialog-content.component';
 import { LoadingService } from '../loading.service';
-import { TransferRequestBodyType } from '../utopia-game/utopia-bridge.service';
 import { TransferLandData } from './transfer-land-data';
 
 @Component({
@@ -16,7 +15,6 @@ import { TransferLandData } from './transfer-land-data';
 export class TransferLandComponent implements OnInit, OnDestroy
 {
     private subscription = new Subscription();
-    readonly transferRequestData: TransferRequestBodyType;
     destinationAddress: string;
     landId: number;
 
@@ -26,8 +24,7 @@ export class TransferLandComponent implements OnInit, OnDestroy
                 private readonly loadingService: LoadingService,
                 private snackBar: MatSnackBar)
     {
-        this.transferRequestData = data.request.body;
-        this.landId = data.request.body.landId;
+        this.landId = data.request.body;
     }
 
     ngOnInit(): void
@@ -54,7 +51,7 @@ export class TransferLandComponent implements OnInit, OnDestroy
                     .pipe(
                         concatMap((target) => {
                             return this.data.contract
-                                .transferLand(this.transferRequestData.landId, target, this.data.request.connection.wallet)
+                                .transferLand(this.landId, target, this.data.request.connection.wallet)
                                 .pipe(map(v => {
                                     status[0] = true;
                                     return true;

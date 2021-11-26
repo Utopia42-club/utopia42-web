@@ -1,0 +1,18 @@
+.link-form {
+    padding: 0;
+    width: 100%;
+
+    &:not(:last-child) {
+        margin-bottom: -2em;
+    }
+}
+
+.link-field {
+    ::ng-deep .mat-form-field-wrapper {
+        width: 100%;
+    }
+
+    margin-left: 4px;
+    padding-bottom: 11px;
+    min-width: unset !important;
+}

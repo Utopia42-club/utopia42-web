@@ -68,11 +68,6 @@ export interface SetNftRequestBodyType
 
 export type SetNftRequest = GameRequest<SetNftRequestBodyType>;
 
-export interface TransferRequestBodyType
-{
-    landId: number
-}
-
-export type TransferLandRequest = GameRequest<TransferRequestBodyType>;
+export type TransferLandRequest = GameRequest<number>;
 
 export type EditProfileRequest = GameRequest<string>; // FIXME: string --change to--> undefined (wallet id can be retrieved from connection)

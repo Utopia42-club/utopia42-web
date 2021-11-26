@@ -3,109 +3,60 @@
 <mat-dialog-content>
     <div fxLayout="row" fxLayoutGap="30px" fxLayoutAlign="center center">
         <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="0">
-            <mat-form-field appearance="standard" [style.fontSize.px]="14" style="width: 100% !important; min-width: unset !important;">
-                <mat-hint>Name</mat-hint>
-                <input matInput [(ngModel)]="profile.name" />
+            <mat-form-field appearance="standard"
+                            style="width: 100% !important; min-width: unset !important;">
+                <mat-label>Name</mat-label>
+                <input matInput [(ngModel)]="profile.name"/>
             </mat-form-field>
 
-            <mat-form-field
-                style="width: 100%"
-                appearance="standard"
-                [style.fontSize.px]="14"
-            >
-                <mat-hint>Bio</mat-hint>
-                <textarea
-                    matInput
-                    rows="2"
-                    [(ngModel)]="profile.bio"
-                ></textarea>
+            <mat-form-field style="width: 100%" appearance="standard">
+                <mat-label>Bio</mat-label>
+                <textarea matInput rows="2" [(ngModel)]="profile.bio"></textarea>
             </mat-form-field>
 
         </div>
 
-        <div
-            fxLayout="column"
-            fxLayoutGap="20px"
-            fxLayoutAlign="center center"
-            style="width: 200px; margin-left: auto; margin-right: 0"
-        >
-            <img
-                style="
-                    width: 120px;
-                    height: auto;
-                    border-radius: 10px;
-                "
-                src="{{ imageUrl ? imageUrl : defaultImageUrl}}"
-            />
+        <div fxLayout="column" fxLayoutGap="20px" fxLayoutAlign="center center"
+             style="width: 200px; margin-left: auto; margin-right: 0">
+            <img style="width: 120px;height: auto;border-radius: 10px;"
+                 src="{{ imageUrl ? imageUrl : defaultImageUrl}}"/>
 
-            
+
             <input
-                class="file-input"
-                type="file"
-                multiple accept="image/*"
-                #fileInput
-                (change)="onImageChange(fileInput.files[0])"
-                style = "width: 100%;"
-            />
+                class="file-input" type="file" multiple accept="image/*" #fileInput
+                (change)="onImageChange(fileInput.files[0])" style="width: 100%;"/>
         </div>
     </div>
-
-    <div
-        *ngFor="let link of profile.links; let i = index"
-        fxLayout="row"
-        fxLayoutAlign="center center"
-        style="padding: 0; margin-top: 20px;"
-    >
-        <button
-            mat-button
-            color="warn"
-            style="
+    <div fxLayout="column" style="width: 100%" fxLayoutAlign="center center">
+        <div *ngFor="let link of profile.links; let i = index" fxLayout="row" fxLayoutAlign="center center"
+             class="link-form">
+            <button
+                mat-button color="warn" style="
                 height: 25px;
                 width: 25px !important;
                 min-width: unset !important;
                 align-items: center;
-                margin-right: 30px;
-            "
-            color="white"
-            (click)="removeLink(i)"
-            fxLayoutAlign="center center"
-        >
-            <img
-                style="width: auto; height: 12px"
-                src="assets/images/delete.png"
-            />
-        </button>
+            " color="white" (click)="removeLink(i)" fxLayoutAlign="center center">
+                <img style="width: auto; height: 12px" src="assets/images/delete.png"/>
+            </button>
 
-        <mat-form-field style="width: 100px">
-            <mat-select required="true" [(value)]="link.media">
-                <mat-option *ngFor="let media of linkMedias" [value]="media">
-                    {{ mediaToString(media)}}
-                </mat-option>
-            </mat-select>
-        </mat-form-field>
+            <mat-form-field style="width: 100px">
+                <mat-select required="true" [(value)]="link.media">
+                    <mat-option *ngFor="let media of linkMedias" [value]="media">
+                        {{ mediaToString(media)}}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
 
-        <mat-form-field
-            style="width: 100% !important; padding-bottom: 11px; min-width: unset !important;"
-            appearance="standard"
-            fxLayoutAlign="center"
-            [style.fontSize.px]="14"
-        >
-            <mat-hint>Url</mat-hint>
-            <input
-                matInput
-                [(ngModel)]="link.link"
-            />
-        </mat-form-field>
+            <mat-form-field class="link-field" fxFlex appearance="standard" fxLayoutAlign="center">
+                <input placeholder="Url" matInput [(ngModel)]="link.link"/>
+                <mat-hint class="mat-error" *ngIf="!isValidUrl(link.link.trim())">Not a valid url</mat-hint>
+            </mat-form-field>
+        </div>
     </div>
-
-    <button
-        mat-button
-        color="warn"
-        style="margin-left: 1px; margin-left: auto; margin-right: auto; margin-top: 10px; margin-bottom: 10px;"
-        color="white"
-        (click)="addLink()"
-        fxLayoutAlign="center center"
-    >
+    <button mat-button color="warn"
+            style="margin-left: 1px; margin-left: auto; margin-right: auto; margin-top: 10px; margin-bottom: 10px;"
+            color="white" (click)="addLink()" fxLayoutAlign="center center">
         Add a new link
     </button>
 </mat-dialog-content>
@@ -114,12 +65,7 @@
     <button tabindex="-1" mat-button color="warn" (click)="cancel()">
         Cancel
     </button>
-    <button
-        [disabled]="!linksValid()"
-        mat-raised-button
-        color="primary"
-        (click)="update()"
-    >
+    <button [disabled]="!linksValid()" mat-raised-button color="primary" (click)="update()">
         Update
     </button>
 </mat-dialog-actions>

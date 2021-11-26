@@ -79,9 +79,7 @@ export class AppComponent
                         });
                     } else if (params.method == "transfer") {
                         this.transferLand({
-                            connection, body: {
-                                landId: Number(`${params.param}`)
-                            }
+                            connection, body: Number(`${params.param}`)
                         });
                     } else if (params.method == "setNft") {
                         const values = `${params.param}`.split('_');
