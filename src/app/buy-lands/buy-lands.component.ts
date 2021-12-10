@@ -1,17 +1,18 @@
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Observable, of, Subscription, throwError } from 'rxjs';
+import { of, Subscription } from 'rxjs';
 import {
     catchError,
     concatMap,
-    map, takeLast,
     tap
 } from 'rxjs/operators';
-import { PricedLand } from '../ehtereum/models';
+import { Land, PricedLand } from '../ehtereum/models';
 import { ExceptionDialogContentComponent } from '../exception-dialog-content/exception-dialog-content.component';
 import { LoadingService } from '../loading.service';
+import { BuyLandValidation } from './buy-land-validation';
 import { BuyLandsData } from './buy-lands-data';
+import { BuyLandsService } from './buy-lands.service';
 
 
 
@@ -30,53 +31,46 @@ export class BuyLandsComponent implements OnInit, OnDestroy {
         private dialogRef: MatDialogRef<any>,
         private dialog: MatDialog,
         private readonly loadingService: LoadingService,
-        private snackBar: MatSnackBar) {
+        private snackBar: MatSnackBar,
+        private readonly buyLandsService: BuyLandsService) {
         this.lands = data.request.body;
     }
 
     ngOnInit(): void {
         this.subscription.add(
-            this.getPrices()
-                .pipe(
+            this.loadingService.prepare(
+                of(this.lands).pipe(
+                    concatMap((lands: Land[]) => {
+                        if(lands.length == 1) return of(lands[0]);
+                        throw new Error('Exactly one land should be selected for buying');
+                    }),
+                    concatMap((land: Land) => {
+                        return this.buyLandsService.validate(land);
+                    }),
+                    concatMap((validation: BuyLandValidation) => {
+                        return of(validation.valid && validation.conflictingLand == undefined);
+                    }),
+                    concatMap((valid: boolean) => {
+                        if(!valid) throw new Error('Conflict detected. Buying cancelled');
+                        return this.data.contract.getLandPrice(this.lands[0]);
+                    }),
+                    concatMap((price: string) => {
+                        this.lands[0].price = Number(price);
+                        return of(true);
+                    }),
                     catchError((e: Error) => {
                         this.dialog.open(ExceptionDialogContentComponent, {
                             data: {
-                                title:
-                                    e.message != ''
-                                        ? e.message
-                                        : 'Failed to calculate price!',
+                                title: "Error",
+                                content: e.message
                             },
                         });
-                        return throwError(e);
+                        this.dialogRef.close();
+                        return of(false);
                     })
-                ).subscribe()
-        );
-    }
-
-    getPrices(): Observable<any> {
-        return this.loadingService.prepare(
-            this.loadingService
-                .prepare(
-                    of(...this.lands).pipe(
-                        concatMap((land, index) => {
-                            if (land.price != null) return of(true);
-                            return this.data.contract
-                                .getLandPrice(land)
-                                .pipe(
-                                    map((price) => {
-                                        land.price = Number(price);
-                                        return true;
-                                    })
-                                );
-                        }),
-                        takeLast(1),
-                        tap((v) => {
-                            if (v)
-                                this.snackBar.open('All land prices calculated.');
-                        })
-                    )
                 )
-        );
+            ).subscribe()
+        )
     }
 
     ngOnDestroy(): void {
@@ -85,41 +79,32 @@ export class BuyLandsComponent implements OnInit, OnDestroy {
 
     buy(): void {
         this.subscription.add(
-            this.loadingService
-                .prepare(
-                    of(...this.lands).pipe(
-                        concatMap((land, index) => {
-                            return this.data.contract.
-                                assignPricedLand(
-                                    this.data.request.connection.wallet,
-                                    land
-                                ).pipe(
-                                    map((v) => {
-                                        this.snackBar.open(
-                                            `Land number ${index + 1} bought.`
-                                        );
-                                        return true;
-                                    })
-                                );
-                        }),
-                        catchError((e) => {
-                            this.dialog.open(ExceptionDialogContentComponent, {
-                                data: {
-                                    title: 'Failed to buy all the lands!',
-                                },
-                            });
-                            return throwError(e);
-                        }),
-                        takeLast(1),
-                        tap((v) => {
-                            if (v) {
-                                this.snackBar.open('All lands were bought.');
-                                this.dialogRef.close();
-                            }
-                        })
-                    )
+            this.loadingService.prepare(
+                of(this.lands[0]).pipe(
+                    concatMap((land: Land) => {
+                        return this.data.contract.assignPricedLand(
+                            this.data.request.connection.wallet, land
+                        )
+                    }),
+                    catchError((_) => {
+                        this.dialog.open(ExceptionDialogContentComponent, {
+                            data: {
+                                title: "Failed to buy the land",
+                            },
+                        });
+                        this.dialogRef.close();
+                        return of(false);
+                    }),
+                    tap((v) => {
+                        if (v) {
+                            this.snackBar.open(
+                                `Land bought successfully`
+                            );
+                        }
+                        this.dialogRef.close();
+                    })
                 )
-                .subscribe()
+            ).subscribe()
         );
     }
 

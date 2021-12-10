@@ -54,7 +54,7 @@
             </mat-form-field>
         </div>
     </div>
-    <button mat-button color="warn"
+    <button mat-stroked-button
             style="margin-left: 1px; margin-left: auto; margin-right: auto; margin-top: 10px; margin-bottom: 10px;"
             color="white" (click)="addLink()" fxLayoutAlign="center center">
         Add a new link
@@ -62,10 +62,10 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-    <button tabindex="-1" mat-button color="warn" (click)="cancel()">
-        Cancel
+    <button tabindex="-1" mat-stroked-button (click)="cancel()">
+        CANCEL
     </button>
     <button [disabled]="!linksValid()" mat-raised-button color="primary" (click)="update()">
-        Update
+        UPDATE
     </button>
 </mat-dialog-actions>

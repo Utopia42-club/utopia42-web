@@ -6,7 +6,7 @@ export interface Land {
     y2: number;
     time?: number;
     ipfsKey?: string;
-    isNFT?: boolean;
+    isNft?: boolean;
     owner?: string;
     ownerIndex?: number;
 }

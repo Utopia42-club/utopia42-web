@@ -90,7 +90,7 @@ export class UtopiaContract
                             y2: parseInt(r.y2),
                             time: parseInt(r.time),
                             ipfsKey: r.hash,
-                            isNFT: r.isNFT == "true",
+                            isNft: r.isNFT == "true",
                             owner: r.owner,
                             ownerIndex: parseInt(r.ownerIndex)
                         };
