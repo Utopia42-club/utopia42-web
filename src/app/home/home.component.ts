@@ -3,6 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { AppComponent } from '../app.component';
 import { PortLandsComponent } from '../port-lands/port-lands.component';
+import { Configurations } from "../configurations";
 
 
 @Component({
@@ -12,6 +13,9 @@ import { PortLandsComponent } from '../port-lands/port-lands.component';
 })
 export class HomeComponent implements OnInit
 {
+    readonly windowsUrl = Configurations.WINDOWS_URL;
+
+
     constructor(private router: Router,
                 private dialog: MatDialog,
                 private app: AppComponent)

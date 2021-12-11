@@ -4,10 +4,11 @@ import { MatDialog } from "@angular/material/dialog";
 import { catchError, tap } from "rxjs/operators";
 import { ExceptionDialogContentComponent } from "../exception-dialog-content/exception-dialog-content.component";
 import { of } from "rxjs";
+import { Configurations } from "../configurations";
 
 export function NetsInitializer(http: HttpClient, dialog: MatDialog)
 {
-    return () => http.get<NetworkConfig[]>("http://app.utopia42.club/networks.json")
+    return () => http.get<NetworkConfig[]>(Configurations.NETS_URL)
         .pipe(tap(nets => {
             if (nets != null) {
                 for (let net of nets) {
