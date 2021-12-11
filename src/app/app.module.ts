@@ -1,15 +1,15 @@
 import { EditProfileComponent } from './update-profile/update-profile.component';
-import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
+import { APP_INITIALIZER, CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatRippleModule } from '@angular/material/core';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
-import { MatSnackBarModule, MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
+import { MAT_SNACK_BAR_DEFAULT_OPTIONS, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -28,9 +28,10 @@ import { UtopiaGameComponent } from './utopia-game/utopia-game.component';
 import { TransferLandComponent } from './transfer-land/transfer-land.component';
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { ManageNftsComponent } from './manage-nfts/manage-nfts.component';
 import { SetNftComponent } from './set-nft/set-nft.component';
+import { NetsInitializer } from "./ehtereum/networks-loader.guard";
 
 @NgModule({
     declarations: [
@@ -70,6 +71,12 @@ import { SetNftComponent } from './set-nft/set-nft.component';
         HttpClientModule
     ],
     providers: [
+        {
+            provide: APP_INITIALIZER,
+            useFactory: NetsInitializer,
+            deps: [HttpClient, MatDialog],
+            multi: true
+        },
         { provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: { duration: 2500 } }
     ],
     bootstrap: [AppComponent],
@@ -77,8 +84,10 @@ import { SetNftComponent } from './set-nft/set-nft.component';
         CUSTOM_ELEMENTS_SCHEMA
     ],
 })
-export class AppModule {
+export class AppModule
+{
 
-    constructor() {
+    constructor()
+    {
     }
 }

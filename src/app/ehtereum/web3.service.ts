@@ -43,7 +43,7 @@ export class Web3Service {
 
     public getSmartContract(networkId?: number): UtopiaContract {
         if (networkId == null || this.networkId() == networkId) {
-            networkId = this.metaMaskProvider != undefined ? this.networkId() : Networks.MainNet.id;
+            networkId = this.metaMaskProvider != undefined ? this.networkId() : Networks.MainNet().id;
             if (!this.web3ProviderCashe.has(networkId))
                 this.web3ProviderCashe.set(networkId, new Web3(this.metaMaskProvider));
         }
