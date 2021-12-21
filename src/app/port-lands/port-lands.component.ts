@@ -58,33 +58,33 @@ export class PortLandsComponent implements OnInit, OnDestroy {
     }
 
     port(): void {
-        this.subscription.add(
-            this.loadingService
-                .prepare(
-                    of(...this.lands).pipe(
-                        concatMap((land) => {
-                            let contract = this.service.getSmartContract();
-                            return contract
-                                .assignPricedLand(contract.defaultWallet, land)
-                                .pipe(
-                                    map((v) => {
-                                        return true;
-                                    })
-                                );
-                        }),
-                        catchError((e) => {
-                            this.openErrorDialog('Failed to port lands!');
-                            return of(false);
-                        }),
-                        takeLast(1),
-                        tap((v) => {
-                            if (v)
-                                this.snackBar.open('All lands ported to target.');
-                        })
-                    )
-                )
-                .subscribe()
-        );
+        // this.subscription.add(
+        //     this.loadingService
+        //         .prepare(
+        //             of(...this.lands).pipe(
+        //                 concatMap((land) => {
+        //                     let contract = this.service.getSmartContract();
+        //                     return contract
+        //                         .assignPricedLand(contract.defaultWallet, land)
+        //                         .pipe(
+        //                             map((v) => {
+        //                                 return true;
+        //                             })
+        //                         );
+        //                 }),
+        //                 catchError((e) => {
+        //                     this.openErrorDialog('Failed to port lands!');
+        //                     return of(false);
+        //                 }),
+        //                 takeLast(1),
+        //                 tap((v) => {
+        //                     if (v)
+        //                         this.snackBar.open('All lands ported to target.');
+        //                 })
+        //             )
+        //         )
+        //         .subscribe()
+        // );
     }
 
     private openErrorDialog(title: string) {

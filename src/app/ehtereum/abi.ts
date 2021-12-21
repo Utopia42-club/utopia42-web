@@ -10,6 +10,87 @@ export const UTOPIA_ABI: AbiItem[] = [
         anonymous: false,
         inputs: [
             {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'landId',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'int256',
+                name: 'x1',
+                type: 'int256',
+            },
+            {
+                indexed: false,
+                internalType: 'int256',
+                name: 'x2',
+                type: 'int256',
+            },
+            {
+                indexed: false,
+                internalType: 'int256',
+                name: 'y1',
+                type: 'int256',
+            },
+            {
+                indexed: false,
+                internalType: 'int256',
+                name: 'y2',
+                type: 'int256',
+            },
+            {
+                indexed: false,
+                internalType: 'address',
+                name: 'owner',
+                type: 'address',
+            },
+            {
+                indexed: false,
+                internalType: 'string',
+                name: 'hash',
+                type: 'string',
+            },
+        ],
+        name: 'Assign',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'landId',
+                type: 'uint256',
+            },
+        ],
+        name: 'Burn',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'landId',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'string',
+                name: 'hash',
+                type: 'string',
+            },
+        ],
+        name: 'LandUpdate',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
                 indexed: true,
                 internalType: 'bytes32',
                 name: 'role',
@@ -84,6 +165,32 @@ export const UTOPIA_ABI: AbiItem[] = [
     {
         inputs: [],
         name: 'ADMIN_ROLE',
+        outputs: [
+            {
+                internalType: 'bytes32',
+                name: '',
+                type: 'bytes32',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'BURN_ROLE',
+        outputs: [
+            {
+                internalType: 'bytes32',
+                name: '',
+                type: 'bytes32',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'CONFLICT_ROLE',
         outputs: [
             {
                 internalType: 'bytes32',
@@ -206,6 +313,32 @@ export const UTOPIA_ABI: AbiItem[] = [
     {
         inputs: [
             {
+                internalType: 'bool',
+                name: 'val',
+                type: 'bool',
+            },
+        ],
+        name: 'adminEnableLandToNFT',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'bool',
+                name: 'val',
+                type: 'bool',
+            },
+        ],
+        name: 'adminEnableWithoutSig',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
                 internalType: 'address payable',
                 name: '_DAOWallet',
                 type: 'address',
@@ -225,6 +358,19 @@ export const UTOPIA_ABI: AbiItem[] = [
             },
         ],
         name: 'adminSetIsPublic',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'uint256',
+                name: 'val',
+                type: 'uint256',
+            },
+        ],
+        name: 'adminSetLandToNFTMinDelay',
         outputs: [],
         stateMutability: 'nonpayable',
         type: 'function',
@@ -253,19 +399,6 @@ export const UTOPIA_ABI: AbiItem[] = [
         name: 'adminSetUnitLandPrice',
         outputs: [],
         stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'allowPublicAssign',
-        outputs: [
-            {
-                internalType: 'bool',
-                name: '',
-                type: 'bool',
-            },
-        ],
-        stateMutability: 'view',
         type: 'function',
     },
     {
@@ -299,6 +432,75 @@ export const UTOPIA_ABI: AbiItem[] = [
         name: 'assignLand',
         outputs: [],
         stateMutability: 'payable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'int256',
+                name: 'x1',
+                type: 'int256',
+            },
+            {
+                internalType: 'int256',
+                name: 'x2',
+                type: 'int256',
+            },
+            {
+                internalType: 'int256',
+                name: 'y1',
+                type: 'int256',
+            },
+            {
+                internalType: 'int256',
+                name: 'y2',
+                type: 'int256',
+            },
+            {
+                internalType: 'string',
+                name: 'hash',
+                type: 'string',
+            },
+            {
+                internalType: 'uint256',
+                name: 'lastLandChecked',
+                type: 'uint256',
+            },
+            {
+                internalType: 'bytes',
+                name: 'sig',
+                type: 'bytes',
+            },
+        ],
+        name: 'assignLandConflictFree',
+        outputs: [],
+        stateMutability: 'payable',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'assignLandWithoutSigEnabled',
+        outputs: [
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'uint256',
+                name: 'landId',
+                type: 'uint256',
+            },
+        ],
+        name: 'burnLand',
+        outputs: [],
+        stateMutability: 'nonpayable',
         type: 'function',
     },
     {
@@ -483,6 +685,45 @@ export const UTOPIA_ABI: AbiItem[] = [
     {
         inputs: [
             {
+                internalType: 'int256',
+                name: 'x1',
+                type: 'int256',
+            },
+            {
+                internalType: 'int256',
+                name: 'x2',
+                type: 'int256',
+            },
+            {
+                internalType: 'int256',
+                name: 'y1',
+                type: 'int256',
+            },
+            {
+                internalType: 'int256',
+                name: 'y2',
+                type: 'int256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'lastLandChecked',
+                type: 'uint256',
+            },
+        ],
+        name: 'hasConflict',
+        outputs: [
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
                 internalType: 'bytes32',
                 name: 'role',
                 type: 'bytes32',
@@ -549,6 +790,32 @@ export const UTOPIA_ABI: AbiItem[] = [
         name: 'landToNFT',
         outputs: [],
         stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'landToNFTEnabled',
+        outputs: [
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'landToNFTMinDelay',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
+        stateMutability: 'view',
         type: 'function',
     },
     {
@@ -629,6 +896,19 @@ export const UTOPIA_ABI: AbiItem[] = [
         type: 'function',
     },
     {
+        inputs: [],
+        name: 'nftContract',
+        outputs: [
+            {
+                internalType: 'address',
+                name: '',
+                type: 'address',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
         inputs: [
             {
                 internalType: 'address',
@@ -647,6 +927,19 @@ export const UTOPIA_ABI: AbiItem[] = [
                 internalType: 'uint256',
                 name: '',
                 type: 'uint256',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'publicAssignEnabled',
+        outputs: [
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
             },
         ],
         stateMutability: 'view',

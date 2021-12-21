@@ -2,6 +2,7 @@ import { Land } from "../ehtereum/models";
 
 export interface BuyLandValidation {
     valid: boolean;
-    lastCheckedLandId?:number;
+    signature: string;
+    lastCheckedLandId:number;
     conflictingLand?: Land
 }
