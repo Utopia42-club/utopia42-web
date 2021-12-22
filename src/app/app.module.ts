@@ -9,7 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
-import { MAT_SNACK_BAR_DEFAULT_OPTIONS, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -32,6 +32,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { ManageNftsComponent } from './manage-nfts/manage-nfts.component';
 import { SetNftComponent } from './set-nft/set-nft.component';
 import { NetsInitializer } from "./ehtereum/networks-loader.guard";
+import { ToastrModule } from "ngx-toastr";
 
 @NgModule({
     declarations: [
@@ -58,7 +59,6 @@ import { NetsInitializer } from "./ehtereum/networks-loader.guard";
         FlexLayoutModule,
         MatDialogModule,
         MatProgressSpinnerModule,
-        MatSnackBarModule,
         MatSelectModule,
         MatFormFieldModule,
         MatTableModule,
@@ -68,7 +68,8 @@ import { NetsInitializer } from "./ehtereum/networks-loader.guard";
         MatRippleModule,
         FormsModule,
         MatInputModule,
-        HttpClientModule
+        HttpClientModule,
+        ToastrModule.forRoot()
     ],
     providers: [
         {

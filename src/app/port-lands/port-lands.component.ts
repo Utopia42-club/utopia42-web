@@ -1,14 +1,7 @@
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Observable, of, Subscription } from 'rxjs';
-import {
-    catchError,
-    concatMap,
-    map, takeLast,
-    tap,
-    toArray
-} from 'rxjs/operators';
+import { concatMap, map, tap, toArray } from 'rxjs/operators';
 import { AppComponent } from '../app.component';
 import { Land, PricedLand } from '../ehtereum/models';
 import { Network, Networks } from '../ehtereum/network';
@@ -16,13 +9,15 @@ import { UtopiaContract } from '../ehtereum/utopia-contract';
 import { Web3Service } from '../ehtereum/web3.service';
 import { ExceptionDialogContentComponent } from '../exception-dialog-content/exception-dialog-content.component';
 import { LoadingService } from '../loading.service';
+import { ToastrService } from "ngx-toastr";
 
 @Component({
     selector: 'app-port-lands',
     templateUrl: './port-lands.component.html',
     styleUrls: ['./port-lands.component.scss'],
 })
-export class PortLandsComponent implements OnInit, OnDestroy {
+export class PortLandsComponent implements OnInit, OnDestroy
+{
     private subscription = new Subscription();
     networkName: string;
     sourceNetwork: Network = null;
@@ -36,28 +31,34 @@ export class PortLandsComponent implements OnInit, OnDestroy {
         private dialog: MatDialog,
         private readonly loadingService: LoadingService,
         private readonly service: Web3Service,
-        private readonly snackBar: MatSnackBar,
+        private readonly toaster: ToastrService,
         @Inject(MAT_DIALOG_DATA) private readonly appComponent: AppComponent,
-    ) { }
+    )
+    {
+    }
 
-    ngOnInit(): void {
+    ngOnInit(): void
+    {
         this.networks = Array.from(Networks.supported.values());
 
         // if (this.networks.length != 0)
         //     this.sourceNetwork = this.networks[0];
     }
 
-    ngOnDestroy(): void {
+    ngOnDestroy(): void
+    {
         this.subscription.unsubscribe();
     }
 
-    totalPrice(): number {
+    totalPrice(): number
+    {
         let price = 0;
         for (let i in this.lands) price = price + this.lands[i].price;
         return price;
     }
 
-    port(): void {
+    port(): void
+    {
         // this.subscription.add(
         //     this.loadingService
         //         .prepare(
@@ -87,15 +88,17 @@ export class PortLandsComponent implements OnInit, OnDestroy {
         // );
     }
 
-    private openErrorDialog(title: string) {
+    private openErrorDialog(title: string)
+    {
         this.dialog.open(ExceptionDialogContentComponent, {
             data: { title },
         });
     }
 
-    getPrices(): void {
+    getPrices(): void
+    {
         if (this.sourceNetwork == this.targetNetwork) {
-            this.snackBar.open("Source and target cannot be the same");
+            this.toaster.info("Source and target cannot be the same");
             return;
         }
         // this.appComponent.getContractSafe(this.targetNetwork.id, null)
@@ -124,23 +127,25 @@ export class PortLandsComponent implements OnInit, OnDestroy {
                     //     })
                     // )
                 ).subscribe(lands => {
-                    this.dialogRef.close();
-                    this.appComponent.buyLands({
-                        connection: {
-                            wallet: this.service.wallet(),
-                            network: this.targetNetwork.id
-                        },
-                        body: lands
-                    });
-                })
+                this.dialogRef.close();
+                this.appComponent.buyLands({
+                    connection: {
+                        wallet: this.service.wallet(),
+                        network: this.targetNetwork.id
+                    },
+                    body: lands
+                });
+            })
         );
     }
 
-    cancel(): void {
+    cancel(): void
+    {
         this.dialogRef.close();
     }
 
-    private toPricedLands(lands: Land[], contract: UtopiaContract): Observable<PricedLand[]> {
+    private toPricedLands(lands: Land[], contract: UtopiaContract): Observable<PricedLand[]>
+    {
         return of(...lands).pipe(
             concatMap((land) => {
                 return contract.getLandPrice(land)
@@ -153,7 +158,7 @@ export class PortLandsComponent implements OnInit, OnDestroy {
             toArray(),
             tap((lands) => {
                 this.lands = lands;
-                this.snackBar.open('All land prices calculated.');
+                this.toaster.info('All land prices calculated.');
             })
         )
     }

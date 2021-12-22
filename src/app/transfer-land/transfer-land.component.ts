@@ -1,11 +1,11 @@
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { of, Subscription } from 'rxjs';
 import { catchError, concatMap, map, takeLast, tap } from 'rxjs/operators';
 import { ExceptionDialogContentComponent } from '../exception-dialog-content/exception-dialog-content.component';
 import { LoadingService } from '../loading.service';
 import { TransferLandData } from './transfer-land-data';
+import { ToastrService } from "ngx-toastr";
 
 @Component({
     selector: 'app-transfer-land',
@@ -22,7 +22,7 @@ export class TransferLandComponent implements OnInit, OnDestroy
                 private dialogRef: MatDialogRef<any>,
                 private dialog: MatDialog,
                 private readonly loadingService: LoadingService,
-                private snackBar: MatSnackBar)
+                private readonly toaster: ToastrService)
     {
         this.landId = data.request.body;
     }
@@ -62,7 +62,7 @@ export class TransferLandComponent implements OnInit, OnDestroy
                             return of(false);
                         }), takeLast(1), tap(v => {
                             if (v) {
-                                this.snackBar.open(`Land transferred successfully.`);
+                                this.toaster.info('Request successfully sent.');
                                 this.dialogRef.close();
                             }
                         })

@@ -1,24 +1,21 @@
 import { ExceptionDialogContentComponent } from './../exception-dialog-content/exception-dialog-content.component';
-import { tap, catchError, concatMap } from 'rxjs/operators';
+import { catchError, concatMap, tap } from 'rxjs/operators';
 import { ProfileService } from './profile.service';
 import { Web3Service } from './../ehtereum/web3.service';
 import { EditProfileData } from './update-profile-data';
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import {
-    MatDialog,
-    MatDialogRef,
-    MAT_DIALOG_DATA,
-} from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef, } from '@angular/material/dialog';
 import { of, Subscription } from 'rxjs';
 import { LoadingService } from '../loading.service';
+import { ToastrService } from "ngx-toastr";
 
 @Component({
     selector: 'app-update-profile',
     templateUrl: './update-profile.component.html',
     styleUrls: ['./update-profile.component.scss'],
 })
-export class EditProfileComponent implements OnInit, OnDestroy {
+export class EditProfileComponent implements OnInit, OnDestroy
+{
     private subscription = new Subscription();
     private tokenAuth: string;
     private imageFile: File;
@@ -44,8 +41,9 @@ export class EditProfileComponent implements OnInit, OnDestroy {
         private readonly web3Service: Web3Service,
         private readonly profileService: ProfileService,
         private readonly loadingService: LoadingService,
-        private snackBar: MatSnackBar
-    ) {
+        private readonly toaster: ToastrService
+    )
+    {
         this.walletId = data.request.connection.wallet;
         this.profile = {
             walletId: this.walletId,
@@ -60,33 +58,39 @@ export class EditProfileComponent implements OnInit, OnDestroy {
         };
     }
 
-    ngOnInit(): void {
+    ngOnInit(): void
+    {
         this.loadData();
     }
 
-    ngOnDestroy(): void {
+    ngOnDestroy(): void
+    {
         this.subscription.unsubscribe();
     }
 
-    removeLink(index: number): void {
+    removeLink(index: number): void
+    {
         this.profile.links.splice(index, 1);
     }
 
-    addLink(): void {
+    addLink(): void
+    {
         this.profile.links.push({
             link: '',
             media: Media.Instagram,
         });
     }
 
-    mediaToString(media: Media): string {
+    mediaToString(media: Media): string
+    {
         return (
             media.toString()[0].toUpperCase() +
             media.toString().toLowerCase().substring(1)
         );
     }
 
-    isValidUrl(urlString: string): boolean {
+    isValidUrl(urlString: string): boolean
+    {
         try {
             let pattern = new RegExp(
                 '(https?://)?([\\da-z.-]+)\\.([a-z.]{2,6})[/\\w .-]*/?'
@@ -97,7 +101,8 @@ export class EditProfileComponent implements OnInit, OnDestroy {
         }
     }
 
-    linksValid(): boolean {
+    linksValid(): boolean
+    {
         if (this.profile.name.trim() === '') return false;
         for (const link of this.profile.links) {
             if (!this.isValidUrl(link.link.trim())) {
@@ -108,7 +113,8 @@ export class EditProfileComponent implements OnInit, OnDestroy {
         return true;
     }
 
-    onImageChange(file: File): void {
+    onImageChange(file: File): void
+    {
         if (file) {
             if (file.size > 2 ** 20) {
                 this.dialog.open(ExceptionDialogContentComponent, {
@@ -129,11 +135,13 @@ export class EditProfileComponent implements OnInit, OnDestroy {
         }
     }
 
-    cancel(): void {
+    cancel(): void
+    {
         this.dialogRef.close();
     }
 
-    loadData(): void {
+    loadData(): void
+    {
         this.subscription.add(
             this.loadingService
                 .prepare(
@@ -174,9 +182,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
 
                         tap((v) => {
                             if (v) {
-                                this.snackBar.open(
-                                    `User profile retrieved successfully`
-                                );
+                                this.toaster.info('User profile retrieved successfully');
                             }
                         })
                     )
@@ -185,7 +191,8 @@ export class EditProfileComponent implements OnInit, OnDestroy {
         );
     }
 
-    update(): void {
+    update(): void
+    {
         let provider: any;
         this.profile.imageUrl = undefined;
         this.subscription.add(
@@ -244,9 +251,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
                             return of(false);
                         }),
                         tap((_) => {
-                            this.snackBar.open(
-                                `User profile updated successfully`
-                            );
+                            this.toaster.info(`User profile updated successfully`);
                             this.dialogRef.close();
                         })
                     )
@@ -256,7 +261,8 @@ export class EditProfileComponent implements OnInit, OnDestroy {
     }
 }
 
-export interface Profile {
+export interface Profile
+{
     walletId: string;
     name?: string;
     bio?: string;
@@ -264,12 +270,14 @@ export interface Profile {
     imageUrl?: string | ArrayBuffer;
 }
 
-interface Link {
+interface Link
+{
     link: string;
     media: Media;
 }
 
-enum Media {
+enum Media
+{
     Telegram = 'TELEGRAM',
     Discord = 'DISCORD',
     Facebook = 'FACEBOOK',

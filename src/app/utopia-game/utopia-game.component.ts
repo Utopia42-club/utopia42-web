@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Action, AppComponent } from '../app.component';
 import { UtopiaBridgeService } from './utopia-bridge.service';
+import { ToastrService } from "ngx-toastr";
 
 @Component({
     selector: 'app-utopia-game',
@@ -8,31 +9,45 @@ import { UtopiaBridgeService } from './utopia-bridge.service';
     styleUrls: ['./utopia-game.component.scss'],
     providers: [UtopiaBridgeService]
 })
-export class UtopiaGameComponent implements OnInit, OnDestroy {
-    fullScreenAction: Action = { icon: 'fullscreen', perform: () => { } };
+export class UtopiaGameComponent implements OnInit, OnDestroy
+{
+    fullScreenAction: Action = {
+        icon: 'fullscreen', perform: () => {
+        }
+    };
     progress = 0;
 
-    constructor(private bridge: UtopiaBridgeService, private appComponent: AppComponent) {
+    constructor(private bridge: UtopiaBridgeService,
+                private appComponent: AppComponent,
+                private readonly toaster: ToastrService)
+    {
         window.bridge = bridge;
     }
 
-    ngOnDestroy(): void {
+    ngOnDestroy(): void
+    {
         let idx = this.appComponent.actions.indexOf(this.fullScreenAction);
         if (idx >= 0)
             this.appComponent.actions.splice(idx, 1);
     }
 
-    ngOnInit(): void {
+    ngOnInit(): void
+    {
         this.appComponent.getContractSafe(null, null).subscribe(() => this.startGame());
     }
 
-    private startGame() {
+    private startGame()
+    {
         var buildUrl = "/assets/game/Build";
         var config = {
             dataUrl: buildUrl + "/web.data",
             frameworkUrl: buildUrl + "/web.framework.js",
             codeUrl: buildUrl + "/web.wasm",
             streamingAssetsUrl: "StreamingAssets",
+            companyName: "Utopia 42",
+            productName: "Utopia 42",
+            productVersion: "0.2",
+            showBanner: (m, t) => this.showBanner(m, t),
         };
 
         var canvas = document.querySelector("#unity-canvas") as any;
@@ -57,11 +72,23 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
             // loadingBar.style.display = "none";
             this.bridge.unityInstance = unityInstance;
             this.fullScreenAction.perform = () => unityInstance.SetFullscreen(1);
+            const idx = this.appComponent.actions.indexOf(this.fullScreenAction);
+            if (idx >= 0)
+                this.appComponent.actions.splice(idx, 1);
             this.appComponent.actions.push(this.fullScreenAction);
         }).catch((message: any) => {
             alert(message);
         });
     }
 
-
+    showBanner(msg, type)
+    {
+        if (type == 'error') {
+            this.toaster.error(msg, "", {
+                disableTimeOut: true
+            });
+        } else {
+            this.toaster.info(msg);
+        }
+    }
 }
