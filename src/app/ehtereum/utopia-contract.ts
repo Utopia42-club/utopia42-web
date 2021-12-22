@@ -1,4 +1,4 @@
-import { Observable, of, Subscriber } from "rxjs";
+import { from, Observable, of, Subscriber } from "rxjs";
 import { map, switchMap } from "rxjs/operators";
 import Web3 from "web3";
 import { Contract } from "web3-eth-contract";
@@ -9,7 +9,8 @@ export class UtopiaContract
 {
     constructor(readonly ethContract: Contract,
                 private loadingService: LoadingService,
-                readonly defaultWallet: string)
+                readonly defaultWallet: string,
+                readonly web3: Web3 | null)
     {
     }
 
@@ -25,20 +26,27 @@ export class UtopiaContract
     public assignPricedLand(wallet: string, land: PricedLand, lastLandCheckedId: number, signature: string): Observable<any>
     {
         let amount: string;
+        let balance: string;
         return this.loadingService.prepare(
-            new Observable(s =>
-                this.ethContract.methods.landPrice(land.x1, land.x2, land.y1, land.y2).call(this.listener(s))
+                from(this.web3.eth.getBalance(wallet))
             ).pipe(
+                switchMap(b => {
+                    balance = b as string;
+                    return new Observable(s =>
+                        this.ethContract.methods.landPrice(land.x1, land.x2, land.y1, land.y2).call(this.listener(s)));
+                }),
                 switchMap(a => {
                     amount = a as string;
+                    if(Number(Web3.utils.fromWei(amount)) > Number(Web3.utils.fromWei(balance)))
+                        throw new Error('Insufficient balance (account balance < land price)');
                     return this.assignLandEstimateGas(wallet, land, lastLandCheckedId, signature, amount as string);
-            }),
-            switchMap(gasAmount => {
-                return new Observable(s =>
-                    this.ethContract.methods.assignLandConflictFree(land.x1, land.x2, land.y1, land.y2, land.ipfsKey || "", lastLandCheckedId, signature)
-                        .send({ from: wallet, value: amount, gasLimit: (3*Number(gasAmount)).toString() }, this.listener(s))
-                );
-            }))
+                }),
+                switchMap(gasAmount => {
+                    return new Observable(s =>
+                        this.ethContract.methods.assignLandConflictFree(land.x1, land.x2, land.y1, land.y2, land.ipfsKey || "", lastLandCheckedId, signature)
+                            .send({ from: wallet, value: amount, gasLimit: (3*Number(gasAmount)).toString() }, this.listener(s))
+                    );
+                })
         );
     }
 

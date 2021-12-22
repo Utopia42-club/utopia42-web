@@ -50,7 +50,10 @@ export class BuyLandsComponent implements OnInit, OnDestroy {
                         return this.buyLandsService.validate(land);
                     }),
                     concatMap((validation: BuyLandValidation) => {
-                        if(validation.valid && validation.conflictingLand == undefined){
+                        if(!validation.valid){
+                            throw new Error('Invalid land coordinates. Buying cancelled');
+                        }
+                        if(validation.conflictingLand == undefined){
                             if(validation.signature){
                                 this.signature = validation.signature;
                                 this.lastLandCheckedId = validation.lastCheckedLandId;
@@ -92,10 +95,11 @@ export class BuyLandsComponent implements OnInit, OnDestroy {
                             this.data.request.connection.wallet, land, this.lastLandCheckedId, this.signature
                         )
                     }),
-                    catchError((_) => {
+                    catchError((e) => {
                         this.dialog.open(ExceptionDialogContentComponent, {
                             data: {
-                                title: "Failed to buy the land",
+                                title: "Error",
+                                content: e.message ? e.message : "Failed to buy the land"
                             },
                         });
                         this.dialogRef.close();

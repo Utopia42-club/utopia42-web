@@ -55,7 +55,7 @@ export class Web3Service {
             var network = Networks.all.get(networkId);
             this.contractCache.set(networkId,
                 new UtopiaContract(new web3.eth.Contract(UTOPIA_ABI, network.contractAddress),
-                    this.loadingService, this.wallet()));
+                    this.loadingService, this.wallet(), web3));
         }
         return this.contractCache.get(networkId!)!;
     }
