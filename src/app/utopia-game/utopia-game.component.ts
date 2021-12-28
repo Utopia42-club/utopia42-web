@@ -38,7 +38,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
 
     private startGame()
     {
-        var buildUrl = "/assets/game/Build";
+        var buildUrl = "/assets/game/v0.2/Build";
         var config = {
             dataUrl: buildUrl + "/web.data",
             frameworkUrl: buildUrl + "/web.framework.js",
