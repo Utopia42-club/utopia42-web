@@ -46,7 +46,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
             streamingAssetsUrl: "StreamingAssets",
             companyName: "Utopia 42",
             productName: "Utopia 42",
-            productVersion: "0.2",
+            productVersion: "0.3",
             showBanner: (m, t) => this.showBanner(m, t),
         };
 
