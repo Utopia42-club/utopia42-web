@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Action, AppComponent } from '../app.component';
 import { UtopiaBridgeService } from './utopia-bridge.service';
 import { ToastrService } from "ngx-toastr";
+import { ActivatedRoute } from "@angular/router";
 
 @Component({
     selector: 'app-utopia-game',
@@ -19,7 +20,8 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
 
     constructor(private bridge: UtopiaBridgeService,
                 private appComponent: AppComponent,
-                private readonly toaster: ToastrService)
+                private readonly toaster: ToastrService,
+                private readonly route: ActivatedRoute)
     {
         window.bridge = bridge;
     }
@@ -34,11 +36,17 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
     ngOnInit(): void
     {
         this.appComponent.getContractSafe(null, null).subscribe(() => this.startGame());
+        this.route.queryParams.subscribe(params => {
+            const position = params.position;
+            if (position != null) {
+                this.bridge.movePlayerTo(position);
+            }
+        });
     }
 
     private startGame()
     {
-        var buildUrl = "/assets/game/v0.2/Build";
+        var buildUrl = "/assets/game/v0.7/Build";
         var config = {
             dataUrl: buildUrl + "/web.data",
             frameworkUrl: buildUrl + "/web.framework.js",
@@ -46,7 +54,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
             streamingAssetsUrl: "StreamingAssets",
             companyName: "Utopia 42",
             productName: "Utopia 42",
-            productVersion: "0.3",
+            productVersion: "0.7",
             showBanner: (m, t) => this.showBanner(m, t),
         };
 
