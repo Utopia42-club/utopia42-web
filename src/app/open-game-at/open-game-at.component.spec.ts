@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ManageNftsComponent } from './manage-nfts.component';
+import { OpenGameAtComponent } from './open-game-at.component';
 
-describe('ManageNftsComponent', () => {
-  let component: ManageNftsComponent;
-  let fixture: ComponentFixture<ManageNftsComponent>;
+describe('OpenGameAtComponent', () => {
+  let component: OpenGameAtComponent;
+  let fixture: ComponentFixture<OpenGameAtComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ManageNftsComponent ]
+      declarations: [ OpenGameAtComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ManageNftsComponent);
+    fixture = TestBed.createComponent(OpenGameAtComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -29,10 +29,10 @@ import { TransferLandComponent } from './transfer-land/transfer-land.component';
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { ManageNftsComponent } from './manage-nfts/manage-nfts.component';
 import { SetNftComponent } from './set-nft/set-nft.component';
 import { NetsInitializer } from "./ehtereum/networks-loader.guard";
 import { ToastrModule } from "ngx-toastr";
+import { OpenGameAtComponent } from './open-game-at/open-game-at.component';
 
 @NgModule({
     declarations: [
@@ -47,8 +47,8 @@ import { ToastrModule } from "ngx-toastr";
         ConnectionStatusIndicatorComponent,
         TransferLandComponent,
         EditProfileComponent,
-        ManageNftsComponent,
-        SetNftComponent
+        SetNftComponent,
+        OpenGameAtComponent
     ],
     imports: [
         BrowserModule,

@@ -73,7 +73,7 @@ export class UtopiaBridgeService
         this.state$.pipe(
             filter(s => s == GameState.PLAYING)
             , take(1)).subscribe(() => {
-            this.unityInstance.SendMessage('UtopiaApi', 'MovePlayerTo', position);
+            this.unityInstance.SendMessage('GameManager', 'MovePlayerTo', position);
         });
     }
 }

@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { AppComponent } from '../app.component';
 import { PortLandsComponent } from '../port-lands/port-lands.component';
 import { Configurations } from "../configurations";
+import { OpenGameAtComponent } from '../open-game-at/open-game-at.component';
 
 
 @Component({
@@ -36,9 +37,9 @@ export class HomeComponent implements OnInit
         this.router.navigate(['game']);
     }
 
-    //
-    // manageNFTs() {
-    //     this.dialog.open(ManageNftsComponent, { data: this.app });
-    // }
+    
+    startGameAt() {
+        this.dialog.open(OpenGameAtComponent, { data: this.app });
+    }
 }
 
