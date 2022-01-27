@@ -1,93 +1,92 @@
 import { Injectable } from '@angular/core';
-import { Observable, ReplaySubject } from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { AppComponent } from '../app.component';
 import { ConnectionDetail } from '../ehtereum/connection-detail';
 import { Land } from '../ehtereum/models';
 import { Web3Service } from '../ehtereum/web3.service';
 import { GameRequest } from './game-request';
-
-export enum GameState
-{
-    PLAYING = "PLAYING"
-    //TODO add all values
-}
+import { Clipboard } from '@angular/cdk/clipboard';
 
 @Injectable()
-export class UtopiaBridgeService
-{
-    private readonly stateSubject = new ReplaySubject<GameState>(1);
-    public state$ = this.stateSubject.asObservable();
+export class UtopiaBridgeService {
     public unityInstance;
+    private position?: Position;
 
+    constructor(
+        private web3service: Web3Service,
+        private app: AppComponent,
+        private clipboard: Clipboard
+    ) {}
 
-    constructor(private web3service: Web3Service, private app: AppComponent)
-    {
-    }
-
-    public stateChanged(payload: StateChangeRequest): void
-    {
-        this.stateSubject.next(payload.body);
-    }
-
-    public buy(payload: BuyLandsRequest): void
-    {
+    public buy(payload: BuyLandsRequest): void {
         this.app.buyLands(payload);
     }
 
-    public save(payload: SaveLandsRequest): void
-    {
+    public save(payload: SaveLandsRequest): void {
         this.app.saveLands(payload);
     }
 
-    public transfer(payload: TransferLandRequest): void
-    {
+    public transfer(payload: TransferLandRequest): void {
         this.app.transferLand(payload);
     }
 
-    public editProfile(payload: EditProfileRequest): void
-    {
+    public editProfile(payload: EditProfileRequest): void {
         this.app.editProfile(payload);
     }
 
-    public setNft(request: SetNftRequest): void
-    {
+    public setNft(request: SetNftRequest): void {
         this.app.setNft(request);
     }
 
-    public connectMetamask(payload: GameRequest<string>): Observable<ConnectionDetail>
-    {
+    public connectMetamask(
+        payload: GameRequest<string>
+    ): Observable<ConnectionDetail> {
         // return this.web3service.connect()
-        return this.web3service.isConnected()
-            .pipe(map(v => {
+        return this.web3service.isConnected().pipe(
+            map((v) => {
                 if (!v) return null;
                 return {
                     network: this.web3service.networkId(),
-                    wallet: this.web3service.wallet()
+                    wallet: this.web3service.wallet(),
                 };
-            }));
+            })
+        );
     }
 
-    public movePlayerTo(position: string):void
-    {
-        this.state$.pipe(
-            filter(s => s == GameState.PLAYING)
-            , take(1)).subscribe(() => {
-            this.unityInstance.SendMessage('GameManager', 'MovePlayerTo', position);
-        });
+    public copyToClipboard(payload: GameRequest<string>): void {
+        this.clipboard.copy(payload.body);
+    }
+
+    public getStartingPosition(
+        payload: GameRequest<string>
+    ): Observable<Position> {
+        return of(this.position);
+    }
+
+    public setStartingPosition(position: string) {
+        const parameters = position.split('_');
+        if (parameters.length == 3) {
+            const x = parseFloat(parameters[0]);
+            const y = parseFloat(parameters[1]);
+            const z = parseFloat(parameters[2]);
+            if (x && y && z) {
+                this.position = { x: x, y: y, z: z };
+                return;
+            }
+        }
+        this.position = null;
     }
 }
 
 export type BuyLandsRequest = GameRequest<Land[]>;
-export type StateChangeRequest = GameRequest<GameState>;
 
 export type SaveLandsRequestBodyType = { [key: number]: string };
 export type SaveLandsRequest = GameRequest<SaveLandsRequestBodyType>;
 
-export interface SetNftRequestBodyType
-{
-    landId: number,
-    nft: boolean
+export interface SetNftRequestBodyType {
+    landId: number;
+    nft: boolean;
 }
 
 export type SetNftRequest = GameRequest<SetNftRequestBodyType>;
@@ -95,3 +94,9 @@ export type SetNftRequest = GameRequest<SetNftRequestBodyType>;
 export type TransferLandRequest = GameRequest<number>;
 
 export type EditProfileRequest = GameRequest<string>; // FIXME: string --change to--> undefined (wallet id can be retrieved from connection)
+
+export interface Position {
+    x: number;
+    y: number;
+    z: number;
+}

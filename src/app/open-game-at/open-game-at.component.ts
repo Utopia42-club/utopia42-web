@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
     styleUrls: ['./open-game-at.component.scss'],
 })
 export class OpenGameAtComponent implements OnInit {
-    readonly position = { x: null, y: null };
+    readonly position = { x: null, y: null, z: null};
 
     constructor(
         private dialogRef: MatDialogRef<any>,
@@ -18,7 +18,7 @@ export class OpenGameAtComponent implements OnInit {
     ngOnInit(): void {}
 
     positionValid(): boolean {
-        return this.position.x && this.position.y;
+        return this.position.x && this.position.y && this.position.z;
     }
 
     start(): void {
@@ -33,6 +33,6 @@ export class OpenGameAtComponent implements OnInit {
     }
 
     private getPosition(): string {
-        return `${this.position.x}_${this.position.y}`;
+        return `${this.position.x}_${this.position.y}_${this.position.z}`;
     }
 }

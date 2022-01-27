@@ -39,7 +39,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
         this.route.queryParams.subscribe(params => {
             const position = params.position;
             if (position != null) {
-                this.bridge.movePlayerTo(position);
+                this.bridge.setStartingPosition(position);
             }
         });
     }

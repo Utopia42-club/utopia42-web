@@ -1,13 +1,17 @@
 <h2 >Start game at position</h2>
 <mat-dialog-content>
     <div fxLayout="row" fxLayoutAlign="center" fxLayoutGap="25px">
-        <mat-form-field style="width: 100px;">
+        <mat-form-field style="width: 70px;">
             <mat-label>X</mat-label>
             <input matInput [(ngModel)]="position.x" type="number" />
         </mat-form-field>
-        <mat-form-field style="width: 100px;">
+        <mat-form-field style="width: 70px;">
             <mat-label>Y</mat-label>
             <input matInput [(ngModel)]="position.y" type="number" />
+        </mat-form-field>
+        <mat-form-field style="width: 70px;">
+            <mat-label>Z</mat-label>
+            <input matInput [(ngModel)]="position.z" type="number" />
         </mat-form-field>
     </div>
 </mat-dialog-content>
