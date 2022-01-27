@@ -46,7 +46,6 @@ export class SaveLandsComponent implements OnInit, OnDestroy
     save(): void
     {
         const status = Array.from(Object.keys(this.ipfsKeys)).map(k => false);
-
         this.subscription.add(
             this.loadingService.prepare(
                 of(...Object.keys(this.ipfsKeys))
@@ -56,7 +55,7 @@ export class SaveLandsComponent implements OnInit, OnDestroy
                                 .updateLand(this.ipfsKeys[landId], landId, this.data.request.connection.wallet)
                                 .pipe(map(v => {
                                     status[i] = true;
-                                    this.toaster.info(`Land ${landId} saved.`);
+                                    this.toaster.info(`Saving Land ${landId} requested.`);
                                     return true;
                                 }));
                         }), catchError(e => {
@@ -65,7 +64,6 @@ export class SaveLandsComponent implements OnInit, OnDestroy
                             return of(false);
                         }), takeLast(1), tap(v => {
                             if (v) {
-                                this.toaster.info('All Lands saved.');
                                 this.dialogRef.close();
                             }
                         })

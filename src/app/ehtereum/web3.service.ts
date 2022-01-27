@@ -1,5 +1,6 @@
 import { Injectable, NgZone } from '@angular/core';
 import detectEthereumProvider from '@metamask/detect-provider';
+import { ToastrService } from 'ngx-toastr';
 import { BehaviorSubject, from, Observable, of } from 'rxjs';
 import { catchError, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import Web3 from 'web3';
@@ -25,7 +26,7 @@ export class Web3Service {
     readonly win = window as any;
     private metaMaskProvider = undefined;
 
-    constructor(private loadingService: LoadingService, private zone: NgZone) { }
+    constructor(private loadingService: LoadingService, private zone: NgZone, private readonly toaster: ToastrService) { }
 
     private getWeb3(networkId: number): Web3 | null {
         // if ((networkId == null && this.win.web3 != null)) {
@@ -55,7 +56,7 @@ export class Web3Service {
             var network = Networks.all.get(networkId);
             this.contractCache.set(networkId,
                 new UtopiaContract(new web3.eth.Contract(UTOPIA_ABI, network.contractAddress),
-                    this.loadingService, this.wallet(), web3));
+                    this.loadingService, this.wallet(), web3, this.toaster));
         }
         return this.contractCache.get(networkId!)!;
     }

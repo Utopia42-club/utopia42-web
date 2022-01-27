@@ -1,3 +1,4 @@
+import { ToastrService } from "ngx-toastr";
 import { from, Observable, of, Subscriber } from "rxjs";
 import { map, switchMap } from "rxjs/operators";
 import Web3 from "web3";
@@ -10,7 +11,8 @@ export class UtopiaContract
     constructor(readonly ethContract: Contract,
                 private loadingService: LoadingService,
                 readonly defaultWallet: string,
-                readonly web3: Web3 | null)
+                readonly web3: Web3 | null,
+                private readonly toaster: ToastrService)
     {
     }
 
@@ -64,7 +66,16 @@ export class UtopiaContract
         if (wallet == null) wallet = this.defaultWallet;
         return this.loadingService.prepare(
             new Observable(s => {
-                this.ethContract.methods.updateLand(ipfsKey, landId).send({ from: wallet }, this.listener(s));
+                this.ethContract.methods.updateLand(ipfsKey, landId).send({ from: wallet })
+                    .on("confirmation", (confirmationNumber: number, receipt: any) => {
+                        if(confirmationNumber == 1)
+                            this.toaster.info(`Land ${landId} saved.`);
+                    })
+                    .on("error", s.error)
+                    .on("transactionHash", (hash: string) => {
+                        s.next(hash);
+                        s.complete();
+                    });
             })
         );
     }
