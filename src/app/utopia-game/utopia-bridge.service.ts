@@ -70,7 +70,7 @@ export class UtopiaBridgeService {
             const x = parseFloat(parameters[0]);
             const y = parseFloat(parameters[1]);
             const z = parseFloat(parameters[2]);
-            if (x && y && z) {
+            if (x != undefined && y != undefined && z != undefined) {
                 this.position = { x: x, y: y, z: z };
                 return;
             }
