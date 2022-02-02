@@ -18,7 +18,7 @@ export class OpenGameAtComponent implements OnInit {
     ngOnInit(): void {}
 
     positionValid(): boolean {
-        return this.position.x && this.position.y && this.position.z;
+        return this.position.x != null && this.position.y != null && this.position.z != null;
     }
 
     start(): void {
