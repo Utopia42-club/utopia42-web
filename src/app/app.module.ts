@@ -48,7 +48,7 @@ import { OpenGameAtComponent } from './open-game-at/open-game-at.component';
         TransferLandComponent,
         EditProfileComponent,
         SetNftComponent,
-        OpenGameAtComponent
+        OpenGameAtComponent,
     ],
     imports: [
         BrowserModule,

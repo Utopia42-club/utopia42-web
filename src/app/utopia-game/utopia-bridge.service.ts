@@ -13,14 +13,15 @@ export class UtopiaBridgeService {
     public unityInstance;
     private position?: Position;
 
-    constructor(
-        private web3service: Web3Service,
-        private app: AppComponent,
-        private clipboard: Clipboard
-    ) {}
+    constructor(private web3service: Web3Service, private app: AppComponent, private clipboard: Clipboard) {
+    }
 
     public buy(payload: BuyLandsRequest): void {
         this.app.buyLands(payload);
+    }
+
+    public runPlugin(payload: PluginRunRequest): void {
+        this.app.runPlugin(payload);
     }
 
     public save(payload: SaveLandsRequest): void {
@@ -39,13 +40,13 @@ export class UtopiaBridgeService {
         this.app.setNft(request);
     }
 
-    public connectMetamask(
-        payload: GameRequest<string>
-    ): Observable<ConnectionDetail> {
+    public connectMetamask(payload: GameRequest<string>): Observable<ConnectionDetail> {
         // return this.web3service.connect()
         return this.web3service.isConnected().pipe(
             map((v) => {
-                if (!v) return null;
+                if (!v) {
+                    return null;
+                }
                 return {
                     network: this.web3service.networkId(),
                     wallet: this.web3service.wallet(),
@@ -58,9 +59,7 @@ export class UtopiaBridgeService {
         this.clipboard.copy(payload.body);
     }
 
-    public getStartingPosition(
-        payload: GameRequest<string>
-    ): Observable<Position> {
+    public getStartingPosition(payload: GameRequest<string>): Observable<Position> {
         return of(this.position);
     }
 
@@ -94,6 +93,10 @@ export type SetNftRequest = GameRequest<SetNftRequestBodyType>;
 export type TransferLandRequest = GameRequest<number>;
 
 export type EditProfileRequest = GameRequest<string>; // FIXME: string --change to--> undefined (wallet id can be retrieved from connection)
+
+export type PluginRunRequestBodyType = { url: string, [key: string]: string };
+
+export type PluginRunRequest = GameRequest<PluginRunRequestBodyType>;
 
 export interface Position {
     x: number;
