@@ -18,7 +18,7 @@
             </mat-step>
             <mat-step completed="false" label="Fill out plugin inputs">
                 <ng-template matStepContent>
-                    <form [formGroup]="inputsForm" class="inputs">
+                    <form [formGroup]="inputsForm" class="inputs" *ngIf="inputsForm != null">
                         <div *ngFor="let input of inputs" [ngSwitch]="input.type">
                             <ng-container *ngSwitchCase="'number'">
                                 <ng-container
@@ -47,49 +47,55 @@
 </div>
 
 <ng-template #numberField let-input="input">
-    <mat-form-field *ngIf="input.options == null">
-        <mat-label>{{input.name}}</mat-label>
-        <input matInput [required]="input.required" [formControlName]="input.key" type="number"/>
-    </mat-form-field>
-    <mat-form-field *ngIf="input.options != null">
-        <mat-label>{{input.name}}</mat-label>
-        <input matInput [required]="input.required" [formControlName]="input.key" type="number"
-               [matAutocomplete]="auto"/>
-        <mat-autocomplete #auto="matAutocomplete">
-            <mat-option *ngFor="let option of input.options | filterInputOptions : inputsForm!.value[input.key]"
-                        [value]="option.value">
-                <span>{{option.key}}</span>
-            </mat-option>
-        </mat-autocomplete>
-    </mat-form-field>
+    <form [formGroup]="inputsForm">
+        <mat-form-field *ngIf="input.options == null">
+            <mat-label>{{input.name}}</mat-label>
+            <input matInput [required]="input.required" [formControlName]="input.key" type="number"/>
+        </mat-form-field>
+        <mat-form-field *ngIf="input.options != null">
+            <mat-label>{{input.name}}</mat-label>
+            <input matInput [required]="input.required" [formControlName]="input.key" type="number"
+                   [matAutocomplete]="auto"/>
+            <mat-autocomplete #auto="matAutocomplete">
+                <mat-option *ngFor="let option of input.options | filterInputOptions : inputsForm!.value[input.key]"
+                            [value]="option.value">
+                    <span>{{option.key}}</span>
+                </mat-option>
+            </mat-autocomplete>
+        </mat-form-field>
+    </form>
 </ng-template>
 
 <ng-template #textField let-input="input">
-    <mat-form-field *ngIf="input.options == null">
-        <mat-label>{{input.name}}</mat-label>
-        <input matInput [required]="input.required" [formControlName]="input.key" type="text"/>
-    </mat-form-field>
-    <mat-form-field *ngIf="input.options != null">
-        <mat-label>{{input.name}}</mat-label>
-        <input matInput [required]="input.required" [formControlName]="input.key" type="text"
-               [matAutocomplete]="auto"/>
-        <mat-autocomplete #auto="matAutocomplete">
-            <mat-option *ngFor="let option of input.options | filterInputOptions : inputsForm!.value[input.key]"
-                        [value]="option.value">
-                <span>{{option.key}}</span>
-            </mat-option>
-        </mat-autocomplete>
-    </mat-form-field>
+    <form [formGroup]="inputsForm">
+        <mat-form-field *ngIf="input.options == null">
+            <mat-label>{{input.name}}</mat-label>
+            <input matInput [required]="input.required" [formControlName]="input.key" type="text"/>
+        </mat-form-field>
+        <mat-form-field *ngIf="input.options != null">
+            <mat-label>{{input.name}}</mat-label>
+            <input matInput [required]="input.required" [formControlName]="input.key" type="text"
+                   [matAutocomplete]="auto"/>
+            <mat-autocomplete #auto="matAutocomplete">
+                <mat-option *ngFor="let option of input.options | filterInputOptions : inputsForm!.value[input.key]"
+                            [value]="option.value">
+                    <span>{{option.key}}</span>
+                </mat-option>
+            </mat-autocomplete>
+        </mat-form-field>
+    </form>
 </ng-template>
 
 <ng-template #selectionField let-input="input">
-    <mat-form-field>
-        <mat-label>{{input.name}}</mat-label>
-        <mat-select [required]="input.required" [formControlName]="input.key">
-            <mat-option *ngFor="let option of input.options" [value]="input.value">
-                {{option.key}}
-            </mat-option>
-        </mat-select>
-    </mat-form-field>
+    <form [formGroup]="inputsForm">
+        <mat-form-field>
+            <mat-label>{{input.name}}</mat-label>
+            <mat-select [required]="input.required" [formControlName]="input.key">
+                <mat-option *ngFor="let option of input.options" [value]="input.value">
+                    {{option.key}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+    </form>
 </ng-template>
 

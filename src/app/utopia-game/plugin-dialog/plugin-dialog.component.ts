@@ -49,7 +49,7 @@ export class PluginDialogComponent implements OnInit {
         } else if (this.stepper.selectedIndex == 0) {
             b = !this.form.valid;
         } else if (this.stepper.selectedIndex == 1) {
-            b = !this.inputsForm.valid;
+            b = this.inputsForm == null || !this.inputsForm.valid;
         }
         return b || this.stepper.selectedIndex == this.stepper.steps.length - 1;
     }
