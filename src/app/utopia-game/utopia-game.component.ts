@@ -1,8 +1,12 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Action, AppComponent } from '../app.component';
 import { UtopiaBridgeService } from './utopia-bridge.service';
 import { ToastrService } from "ngx-toastr";
 import { ActivatedRoute } from "@angular/router";
+import { PluginDialogComponent } from './plugin-dialog/plugin-dialog.component';
+import { UtopiaApiService } from './utopia-api.service';
+import { PluginService } from './plugin.service';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
     selector: 'app-utopia-game',
@@ -18,19 +22,47 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
     };
     progress = 0;
 
-    constructor(private bridge: UtopiaBridgeService,
-                private appComponent: AppComponent,
-                private readonly toaster: ToastrService,
-                private readonly route: ActivatedRoute)
+    pluginAction: Action = {
+        icon: 'extension',
+        perform: () => {
+            let dialog = this.dialog.open(PluginDialogComponent);
+            dialog.afterClosed().subscribe(result => {
+                if (result != null) {
+                    this.pluginService.runCode(result).subscribe(() => {
+                        this.toaster.success('Plugin executed successfully');
+                    }, error => {
+                        this.toaster.error('Plugin execution failed');
+                    });
+                }
+            });
+        }
+    };
+    private sandBoxListener: (e) => void;
+
+    constructor(private bridge: UtopiaBridgeService, private appComponent: AppComponent,
+                private readonly toaster: ToastrService, private readonly route: ActivatedRoute,
+                readonly utopiaApi: UtopiaApiService, readonly zone: NgZone,
+                readonly dialog: MatDialog, readonly pluginService: PluginService)
     {
         window.bridge = bridge;
+        let idx = this.appComponent.actions.indexOf(this.pluginAction);
+        if (idx >= 0) {
+            this.appComponent.actions.splice(idx, 1);
+        }
+        // this.appComponent.actions.push(this.pluginAction);
     }
 
-    ngOnDestroy(): void
-    {
+
+    ngOnDestroy(): void {
         let idx = this.appComponent.actions.indexOf(this.fullScreenAction);
-        if (idx >= 0)
+        if (idx >= 0) {
             this.appComponent.actions.splice(idx, 1);
+        }
+        let ind = this.appComponent.actions.indexOf(this.pluginAction);
+        if (ind >= 0) {
+            this.appComponent.actions.splice(ind, 1);
+        }
+        window.removeEventListener('message', this.sandBoxListener);
     }
 
     ngOnInit(): void
@@ -79,10 +111,12 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
         }).then((unityInstance: any) => {
             // loadingBar.style.display = "none";
             this.bridge.unityInstance = unityInstance;
+            this.utopiaApi.unityInstance = unityInstance;
             this.fullScreenAction.perform = () => unityInstance.SetFullscreen(1);
             const idx = this.appComponent.actions.indexOf(this.fullScreenAction);
-            if (idx >= 0)
+            if (idx >= 0) {
                 this.appComponent.actions.splice(idx, 1);
+            }
             this.appComponent.actions.push(this.fullScreenAction);
         }).catch((message: any) => {
             alert(message);

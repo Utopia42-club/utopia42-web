@@ -20,7 +20,6 @@ import { EditProfileComponent } from './update-profile/update-profile.component'
 import {
     BuyLandsRequest,
     EditProfileRequest,
-    PluginRunRequest,
     SaveLandsRequest,
     SaveLandsRequestBodyType,
     SetNftRequest,
@@ -101,14 +100,6 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     ngAfterViewInit() {
 
-    }
-
-    public runPlugin(request: PluginRunRequest) {
-        this.http.get(request.body.url, { responseType: 'text' }).subscribe(
-            (code: any) => {
-                eval(code);//FIXME
-            }
-        );
     }
 
     public buyLands(request: BuyLandsRequest): void {
