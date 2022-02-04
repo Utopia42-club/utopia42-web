@@ -20,10 +20,6 @@ export class UtopiaBridgeService {
         this.app.buyLands(payload);
     }
 
-    public runPlugin(payload: PluginRunRequest): void {
-        this.app.runPlugin(payload);
-    }
-
     public save(payload: SaveLandsRequest): void {
         this.app.saveLands(payload);
     }
@@ -93,10 +89,6 @@ export type SetNftRequest = GameRequest<SetNftRequestBodyType>;
 export type TransferLandRequest = GameRequest<number>;
 
 export type EditProfileRequest = GameRequest<string>; // FIXME: string --change to--> undefined (wallet id can be retrieved from connection)
-
-export type PluginRunRequestBodyType = { url: string, [key: string]: string };
-
-export type PluginRunRequest = GameRequest<PluginRunRequestBodyType>;
 
 export interface Position {
     x: number;

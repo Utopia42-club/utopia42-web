@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script>
+        UtopiaApi = {
+            mainWindow: undefined,
+            target: undefined,
+            placeBlock: function (type, x, y, z) {
+                this.mainWindow.postMessage({
+                    type: 'request',
+                    body: {
+                        method: 'placeBlock',
+                        params: [type, x, y, z]
+                    }
+                }, this.target);
+            },
+        };
+        Inputs = {}
+
+        window.addEventListener('message', function (e) {
+            let mainWindow = e.source;
+            UtopiaApi.mainWindow = mainWindow;
+            UtopiaApi.target = e.origin;
+            try {
+                eval(e.data);
+            } catch (e) {
+                mainWindow.postMessage(e.message, e.origin);
+            }
+        });
+    </script>
+</head>
+<body>
+</body>
+</html>

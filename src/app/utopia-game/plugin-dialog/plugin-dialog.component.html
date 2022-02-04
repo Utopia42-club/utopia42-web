@@ -1,0 +1,95 @@
+<div class="root" fxLayout="row" fxLayoutAlign="center start" fxLayoutGap="6px">
+    <button [disabled]="isPrevDisabled()" class="prevNavigationButton" mat-raised-button color="primary"
+            (click)="prevClicked()">Previous
+    </button>
+    <div fxFlex="85">
+        <mat-stepper [linear]="true" #stepper>
+            <mat-step completed="false" label="Select plugin">
+                <form [formGroup]="form" class="form">
+                    <mat-form-field class="form__field">
+                        <mat-label>Plugin script url</mat-label>
+                        <input matInput formControlName="scriptUrl" type="text"/>
+                    </mat-form-field>
+                    <mat-form-field class="form__field">
+                        <mat-label>Plugin inputs url</mat-label>
+                        <input matInput formControlName="inputsUrl" type="text"/>
+                    </mat-form-field>
+                </form>
+            </mat-step>
+            <mat-step completed="false" label="Fill out plugin inputs">
+                <ng-template matStepContent>
+                    <form [formGroup]="inputsForm" class="inputs">
+                        <div *ngFor="let input of inputs" [ngSwitch]="input.type">
+                            <ng-container *ngSwitchCase="'number'">
+                                <ng-container
+                                    *ngTemplateOutlet="numberField; context: {input: input}">
+                                </ng-container>
+                            </ng-container>
+                            <ng-container *ngSwitchCase="'text'">
+                                <ng-container
+                                    *ngTemplateOutlet="textField; context: {input: input}">
+                                </ng-container>
+                            </ng-container>
+                            <ng-container *ngSwitchCase="'selection'">
+                                <ng-container
+                                    *ngTemplateOutlet="selectionField; context: {input: input}">
+                                </ng-container>
+                            </ng-container>
+                        </div>
+                    </form>
+                </ng-template>
+            </mat-step>
+        </mat-stepper>
+    </div>
+    <button [disabled]="isNextDisabled()" class="nextNavigationButton" mat-raised-button color="primary"
+            (click)="nextClicked()">Next
+    </button>
+</div>
+
+<ng-template #numberField let-input="input">
+    <mat-form-field *ngIf="input.options == null">
+        <mat-label>{{input.name}}</mat-label>
+        <input matInput [required]="input.required" [formControlName]="input.key" type="number"/>
+    </mat-form-field>
+    <mat-form-field *ngIf="input.options != null">
+        <mat-label>{{input.name}}</mat-label>
+        <input matInput [required]="input.required" [formControlName]="input.key" type="number"
+               [matAutocomplete]="auto"/>
+        <mat-autocomplete #auto="matAutocomplete">
+            <mat-option *ngFor="let option of input.options | filterInputOptions : inputsForm!.value[input.key]"
+                        [value]="option.value">
+                <span>{{option.key}}</span>
+            </mat-option>
+        </mat-autocomplete>
+    </mat-form-field>
+</ng-template>
+
+<ng-template #textField let-input="input">
+    <mat-form-field *ngIf="input.options == null">
+        <mat-label>{{input.name}}</mat-label>
+        <input matInput [required]="input.required" [formControlName]="input.key" type="text"/>
+    </mat-form-field>
+    <mat-form-field *ngIf="input.options != null">
+        <mat-label>{{input.name}}</mat-label>
+        <input matInput [required]="input.required" [formControlName]="input.key" type="text"
+               [matAutocomplete]="auto"/>
+        <mat-autocomplete #auto="matAutocomplete">
+            <mat-option *ngFor="let option of input.options | filterInputOptions : inputsForm!.value[input.key]"
+                        [value]="option.value">
+                <span>{{option.key}}</span>
+            </mat-option>
+        </mat-autocomplete>
+    </mat-form-field>
+</ng-template>
+
+<ng-template #selectionField let-input="input">
+    <mat-form-field>
+        <mat-label>{{input.name}}</mat-label>
+        <mat-select [required]="input.required" [formControlName]="input.key">
+            <mat-option *ngFor="let option of input.options" [value]="input.value">
+                {{option.key}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+</ng-template>
+

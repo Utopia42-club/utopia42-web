@@ -26,13 +26,17 @@ import { PortLandsComponent } from './port-lands/port-lands.component';
 import { SaveLandsComponent } from './save-lands/save-lands.component';
 import { UtopiaGameComponent } from './utopia-game/utopia-game.component';
 import { TransferLandComponent } from './transfer-land/transfer-land.component';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { SetNftComponent } from './set-nft/set-nft.component';
 import { NetsInitializer } from "./ehtereum/networks-loader.guard";
 import { ToastrModule } from "ngx-toastr";
 import { OpenGameAtComponent } from './open-game-at/open-game-at.component';
+import { MatStepperModule } from '@angular/material/stepper';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { PluginDialogComponent } from './utopia-game/plugin-dialog/plugin-dialog.component';
+import { FilterInputOptionsPipe } from './utopia-game/plugin-dialog/filter-input-options.pipe';
 
 @NgModule({
     declarations: [
@@ -49,6 +53,8 @@ import { OpenGameAtComponent } from './open-game-at/open-game-at.component';
         EditProfileComponent,
         SetNftComponent,
         OpenGameAtComponent,
+        PluginDialogComponent,
+        FilterInputOptionsPipe,
     ],
     imports: [
         BrowserModule,
@@ -69,7 +75,14 @@ import { OpenGameAtComponent } from './open-game-at/open-game-at.component';
         FormsModule,
         MatInputModule,
         HttpClientModule,
-        ToastrModule.forRoot()
+        ToastrModule.forRoot({
+            positionClass: 'toast-bottom-right',
+            progressBar: true,
+            timeOut: 5000
+        }),
+        ReactiveFormsModule,
+        MatStepperModule,
+        MatAutocompleteModule
     ],
     providers: [
         {
