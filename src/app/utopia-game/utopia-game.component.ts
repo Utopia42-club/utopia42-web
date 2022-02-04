@@ -78,7 +78,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
 
     private startGame()
     {
-        var buildUrl = "/assets/game/v0.9-rc2/Build";
+        var buildUrl = "/assets/game/v0.9-rc3/Build";
         var config = {
             dataUrl: buildUrl + "/web.data",
             frameworkUrl: buildUrl + "/web.framework.js",
@@ -86,7 +86,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
             streamingAssetsUrl: "StreamingAssets",
             companyName: "Utopia 42",
             productName: "Utopia 42",
-            productVersion: "0.9-rc2",
+            productVersion: "0.9-rc3",
             showBanner: (m, t) => this.showBanner(m, t),
         };
 

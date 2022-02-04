@@ -1,52 +1,52 @@
-@import '~@angular/material/theming';
+@use '@angular/material' as mat;
 // regular style toast
 @import '~ngx-toastr/toastr';
-@include mat-core();
+@include mat.core();
 
-$primary: mat-palette($mat-deep-purple);
-$accent: mat-palette($mat-amber, A200, A100, A400);
-$warn: mat-palette($mat-red);
-$theme: mat-light-theme($primary, $accent, $warn);
-@include angular-material-theme($theme);
+$primary: mat.define-palette(mat.$deep-purple-palette);
+$accent: mat.define-palette(mat.$amber-palette, A200, A100, A400);
+$warn: mat.define-palette(mat.$red-palette);
+$theme: mat.define-light-theme($primary, $accent, $warn);
+@include mat.all-component-themes($theme);
 
 :root {
-    --accent-color: #{mat-color($accent, default)};
-    --primary-color: #{mat-color($primary, default)};
-    --primary-contrast-color: #{mat-color($primary, default-contrast)};
-    --accent-contrast-color: #{mat-color($primary, default-contrast)};
+    --accent-color: #{mat.get-color-from-palette($accent, default)};
+    --primary-color: #{mat.get-color-from-palette($primary, default)};
+    --primary-contrast-color: #{mat.get-color-from-palette($primary, default-contrast)};
+    --accent-contrast-color: #{mat.get-color-from-palette($primary, default-contrast)};
 }
 
-$pink-palette: mat-palette($mat-pink);
-$indigo-palette: mat-palette($mat-indigo);
-$orange-palette: mat-palette($mat-blue);
+$pink-palette: mat.define-palette(mat.$pink-palette);
+$indigo-palette: mat.define-palette(mat.$indigo-palette);
+$orange-palette: mat.define-palette(mat.$blue-palette);
 
 //.dark-background {
 //    background: #424242;
 //}
 
 .pink {
-    background-color: mat-color($pink-palette, default);
-    color: mat-color($pink-palette, default-contrast);
+    background-color: mat.get-color-from-palette($pink-palette, default);
+    color: mat.get-color-from-palette($pink-palette, default-contrast);
 }
 
 .indigo {
-    background-color: mat-color($indigo-palette, default);
-    color: mat-color($indigo-palette, default-contrast);
+    background-color: mat.get-color-from-palette($indigo-palette, default);
+    color: mat.get-color-from-palette($indigo-palette, default-contrast);
 }
 
 .orange {
-    background-color: mat-color($orange-palette, default);
-    color: mat-color($orange-palette, default-contrast);
+    background-color: mat.get-color-from-palette($orange-palette, default);
+    color: mat.get-color-from-palette($orange-palette, default-contrast);
 }
 
 .primary {
-    background-color: mat-color($primary, default);
-    color: mat-color($primary, default-contrast);
+    background-color: mat.get-color-from-palette($primary, default);
+    color: mat.get-color-from-palette($primary, default-contrast);
 }
 
 .accent {
-    background-color: mat-color($accent, default);
-    color: mat-color($accent, default-contrast);
+    background-color: mat.get-color-from-palette($accent, default);
+    color: mat.get-color-from-palette($accent, default-contrast);
 }
 
 html,

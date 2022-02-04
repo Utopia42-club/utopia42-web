@@ -16,9 +16,32 @@
             "es2018",
             "dom"
         ],
-        "allowSyntheticDefaultImports": true
+        "allowSyntheticDefaultImports": true,
+        "paths": {
+            "crypto": [
+                "./node_modules/crypto-browserify"
+            ],
+            "stream": [
+                "./node_modules/stream-browserify"
+            ],
+            "assert": [
+                "./node_modules/assert"
+            ],
+            "http": [
+                "./node_modules/stream-http"
+            ],
+            "https": [
+                "./node_modules/https-browserify"
+            ],
+            "os": [
+                "./node_modules/os-browserify"
+            ],
+            "url": [
+                "./node_modules/url"
+            ]
+        }
     },
     "angularCompilerOptions": {
-        "enableI18nLegacyMessageIdFormat": false,
+        "enableI18nLegacyMessageIdFormat": false
     }
 }
