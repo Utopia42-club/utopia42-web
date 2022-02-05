@@ -28,13 +28,15 @@ export class PluginDialogComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        console.log(this.stepper);
     }
 
     runPlugin() {
         this.pluginService.getFile(this.form.value.scriptUrl)
             .subscribe(code => {
-                this.dialogRef.close(code);
+                this.dialogRef.close({
+                    code: code,
+                    inputs: this.inputsForm?.value
+                });
             });
     }
 
@@ -49,9 +51,9 @@ export class PluginDialogComponent implements OnInit {
         } else if (this.stepper.selectedIndex == 0) {
             b = !this.form.valid;
         } else if (this.stepper.selectedIndex == 1) {
-            b = this.inputsForm == null || !this.inputsForm.valid;
+            b = (this.inputsForm != null && !this.inputsForm.valid);
         }
-        return b || this.stepper.selectedIndex == this.stepper.steps.length - 1;
+        return b;
     }
 
     isPrevDisabled(): boolean {
@@ -81,9 +83,6 @@ export class PluginDialogComponent implements OnInit {
                         this.pluginService.getFile(value.inputsUrl.trim())
                             .subscribe(inputs => {
                                 this.inputs = JSON.parse(inputs);
-                                this.inputs.forEach((input, index) => {
-                                    input.key = `input_${index}`;
-                                });
                                 this.inputsForm = this.toFormGroup(this.inputs);
                                 this.nextStep();
                             });
@@ -93,7 +92,7 @@ export class PluginDialogComponent implements OnInit {
                 });
         }
         if (this.stepper.selectedIndex == 1) {
-
+            this.runPlugin();
         } else {
             this.nextStep();
         }
@@ -107,9 +106,10 @@ export class PluginDialogComponent implements OnInit {
     toFormGroup(params: PluginParameter[]) {
         const group: any = {};
         params.forEach(param => {
-            group[param.key] = param.required ? new FormControl(param.value || null, Validators.required)
-                : new FormControl(param.value || null);
+            group[param.name] = param.required ? new FormControl(param.defaultValue || null, Validators.required)
+                : new FormControl(param.defaultValue || null);
         });
         return new FormGroup(group);
     }
+
 }
