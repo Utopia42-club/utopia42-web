@@ -2,7 +2,7 @@
     <button [disabled]="isPrevDisabled()" class="prevNavigationButton" mat-raised-button color="primary"
             (click)="prevClicked()">Previous
     </button>
-    <div fxFlex="85">
+    <div fxFlex>
         <mat-stepper [linear]="true" #stepper>
             <mat-step completed="false" label="Select plugin">
                 <form [formGroup]="form" class="form">
@@ -18,7 +18,7 @@
             </mat-step>
             <mat-step completed="false" label="Fill out plugin inputs">
                 <ng-template matStepContent>
-                    <form [formGroup]="inputsForm" class="inputs" *ngIf="inputsForm != null">
+                    <form *ngIf="inputsForm != null" [formGroup]="inputsForm" class="inputs">
                         <div *ngFor="let input of inputs" [ngSwitch]="input.type">
                             <ng-container *ngSwitchCase="'number'">
                                 <ng-container
@@ -37,27 +37,33 @@
                             </ng-container>
                         </div>
                     </form>
+                    <div *ngIf="inputsForm == null" class="loading-inputs">
+                        <p>Loading plugin inputs...</p>
+                    </div>
                 </ng-template>
             </mat-step>
         </mat-stepper>
     </div>
     <button [disabled]="isNextDisabled()" class="nextNavigationButton" mat-raised-button color="primary"
-            (click)="nextClicked()">Next
+            (click)="nextClicked()">
+        {{stepper.selectedIndex == 1 ? 'Run' : 'Next'}}
     </button>
 </div>
 
 <ng-template #numberField let-input="input">
     <form [formGroup]="inputsForm">
         <mat-form-field *ngIf="input.options == null">
-            <mat-label>{{input.name}}</mat-label>
-            <input matInput [required]="input.required" [formControlName]="input.key" type="number"/>
+            <mat-label>{{input.label ?? input.name}}</mat-label>
+            <input matInput [required]="input.required" [formControlName]="input.name" type="number"/>
+            <mat-hint *ngIf="input.hint != null">{{input.hint}}</mat-hint>
         </mat-form-field>
         <mat-form-field *ngIf="input.options != null">
-            <mat-label>{{input.name}}</mat-label>
-            <input matInput [required]="input.required" [formControlName]="input.key" type="number"
+            <mat-label>{{input.label ?? input.name}}</mat-label>
+            <input matInput [required]="input.required" [formControlName]="input.name" type="number"
                    [matAutocomplete]="auto"/>
+            <mat-hint *ngIf="input.hint != null">{{input.hint}}</mat-hint>
             <mat-autocomplete #auto="matAutocomplete">
-                <mat-option *ngFor="let option of input.options | filterInputOptions : inputsForm!.value[input.key]"
+                <mat-option *ngFor="let option of input.options | filterInputOptions : inputsForm!.value[input.name]"
                             [value]="option.value">
                     <span>{{option.key}}</span>
                 </mat-option>
@@ -69,15 +75,17 @@
 <ng-template #textField let-input="input">
     <form [formGroup]="inputsForm">
         <mat-form-field *ngIf="input.options == null">
-            <mat-label>{{input.name}}</mat-label>
-            <input matInput [required]="input.required" [formControlName]="input.key" type="text"/>
+            <mat-label>{{input.label ?? input.name}}</mat-label>
+            <input matInput [required]="input.required" [formControlName]="input.name" type="text"/>
+            <mat-hint *ngIf="input.hint != null">{{input.hint}}</mat-hint>
         </mat-form-field>
         <mat-form-field *ngIf="input.options != null">
-            <mat-label>{{input.name}}</mat-label>
-            <input matInput [required]="input.required" [formControlName]="input.key" type="text"
+            <mat-label>{{input.label ?? input.name}}</mat-label>
+            <input matInput [required]="input.required" [formControlName]="input.name" type="text"
                    [matAutocomplete]="auto"/>
+            <mat-hint *ngIf="input.hint != null">{{input.hint}}</mat-hint>
             <mat-autocomplete #auto="matAutocomplete">
-                <mat-option *ngFor="let option of input.options | filterInputOptions : inputsForm!.value[input.key]"
+                <mat-option *ngFor="let option of input.options | filterInputOptions : inputsForm!.value[input.name]"
                             [value]="option.value">
                     <span>{{option.key}}</span>
                 </mat-option>
@@ -89,13 +97,13 @@
 <ng-template #selectionField let-input="input">
     <form [formGroup]="inputsForm">
         <mat-form-field>
-            <mat-label>{{input.name}}</mat-label>
-            <mat-select [required]="input.required" [formControlName]="input.key">
-                <mat-option *ngFor="let option of input.options" [value]="input.value">
+            <mat-label>{{input.label ?? input.name}}</mat-label>
+            <mat-select [required]="input.required" [formControlName]="input.name">
+                <mat-option *ngFor="let option of input.options" [value]="option.value">
                     {{option.key}}
                 </mat-option>
             </mat-select>
+            <mat-hint *ngIf="input.hint != null">{{input.hint}}</mat-hint>
         </mat-form-field>
     </form>
 </ng-template>
-

@@ -1,4 +1,4 @@
-import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Action, AppComponent } from '../app.component';
 import { UtopiaBridgeService } from './utopia-bridge.service';
 import { ToastrService } from 'ngx-toastr';
@@ -7,6 +7,7 @@ import { PluginDialogComponent } from './plugin-dialog/plugin-dialog.component';
 import { UtopiaApiService } from './utopia-api.service';
 import { PluginService } from './plugin.service';
 import { MatDialog } from '@angular/material/dialog';
+import { LoadingService } from '../loading.service';
 
 @Component({
     selector: 'app-utopia-game',
@@ -21,17 +22,24 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
     };
     progress = 0;
 
+    @ViewChild('gameCanvas', { static: true }) gameCanvas;
+
     pluginAction: Action = {
         icon: 'extension',
         perform: () => {
+            this.freezeGame();
             let dialog = this.dialog.open(PluginDialogComponent);
             dialog.afterClosed().subscribe(result => {
+                this.unFreezeGame();
+                this.gameCanvas.nativeElement.focus();
                 if (result != null) {
-                    this.pluginService.runCode(result).subscribe(() => {
-                        this.toaster.success('Plugin executed successfully');
-                    }, error => {
-                        this.toaster.error('Plugin execution failed');
-                    });
+                    this.loadingService.prepare(this.pluginService.runCode(result.code, result.inputs))
+                        .subscribe(() => {
+                        }, error => {
+                            this.toaster.error('Plugin execution failed');
+                        }, () => {
+                            this.toaster.success('Plugin executed successfully');
+                        });
                 }
             });
         }
@@ -41,7 +49,8 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
     constructor(private bridge: UtopiaBridgeService, private appComponent: AppComponent,
                 private readonly toaster: ToastrService, private readonly route: ActivatedRoute,
                 readonly utopiaApi: UtopiaApiService, readonly zone: NgZone,
-                readonly dialog: MatDialog, readonly pluginService: PluginService) {
+                readonly dialog: MatDialog, readonly pluginService: PluginService,
+                readonly loadingService: LoadingService) {
         window.bridge = bridge;
         let idx = this.appComponent.actions.indexOf(this.pluginAction);
         if (idx >= 0) {
@@ -71,6 +80,14 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
                 this.bridge.setStartingPosition(position);
             }
         });
+    }
+
+    public freezeGame() {
+        this.bridge.unityInstance.SendMessage('GameManager', 'FreezeGame', '');
+    }
+
+    public unFreezeGame() {
+        this.bridge.unityInstance.SendMessage('GameManager', 'UnFreezeGame', '');
     }
 
     private startGame() {

@@ -2,27 +2,39 @@
 <html>
 <head>
     <script>
-        UtopiaApi = {
+
+        Global = {
             mainWindow: undefined,
             target: undefined,
+        };
+
+        UtopiaApi = {
             placeBlock: function (type, x, y, z) {
-                this.mainWindow.postMessage({
+                Global.mainWindow.postMessage({
                     type: 'request',
                     body: {
                         method: 'placeBlock',
                         params: [type, x, y, z]
                     }
-                }, this.target);
+                }, Global.target);
             },
         };
         Inputs = {}
 
+        function end() {
+            Global.mainWindow.postMessage({
+                type: 'end'
+            }, Global.target);
+        }
+
         window.addEventListener('message', function (e) {
             let mainWindow = e.source;
-            UtopiaApi.mainWindow = mainWindow;
-            UtopiaApi.target = e.origin;
+            Global.mainWindow = mainWindow;
+            Global.target = e.origin;
+            Inputs = e.data.inputs;
             try {
-                eval(e.data);
+                eval(e.data.code);
+                end();
             } catch (e) {
                 mainWindow.postMessage(e.message, e.origin);
             }

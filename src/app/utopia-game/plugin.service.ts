@@ -17,7 +17,7 @@ export class PluginService {
         return this.http.get(url, { responseType: 'text' });
     }
 
-    runCode(code: string): Observable<PluginRunResult> {
+    runCode(code: string, inputs: any): Observable<PluginRunResult> {
         return new Observable(subs => {
             const secureEvalIframe: HTMLIFrameElement = document.createElement('iframe');
             secureEvalIframe.setAttribute('sandbox', 'allow-scripts');
@@ -26,7 +26,10 @@ export class PluginService {
             secureEvalIframe.setAttribute('src', 'data:text/html;base64,' + btoa(this.iframeSrc));
 
             secureEvalIframe.addEventListener('load', () => {
-                secureEvalIframe.contentWindow.postMessage(code, '*');
+                secureEvalIframe.contentWindow.postMessage({
+                    code: code,
+                    inputs: inputs
+                }, '*');
             });
 
             window.addEventListener('message', windowListener);
@@ -37,20 +40,20 @@ export class PluginService {
 
             function windowListener(event: MessageEvent) {
                 if ((event.origin === 'null' && event.source === secureEvalIframe.contentWindow)) {
-                    window.removeEventListener('message', windowListener);
-                    document.body.removeChild(secureEvalIframe);
                     let message = event.data;
                     switch (message.type) {
                         case 'request': {
-                            let retValue = that.zone.run(() => that.utopiaApi[message.body.method].apply(that.utopiaApi, message.body.params));
-                            subs.next({
-                                type: 'response',
-                                value: retValue
-                            });
+                            that.zone.run(() => that.utopiaApi[message.body.method].apply(that.utopiaApi, message.body.params));
+                            break;
+                        }
+                        case 'end': {
+                            window.removeEventListener('message', windowListener);
+                            document.body.removeChild(secureEvalIframe);
+                            subs.complete();
                             break;
                         }
                         default: {
-                            subs.error(new Error('Unknown message type: ' + message.type));
+                            subs.error(new Error('Unknown message type from plugin: ' + message.type));
                         }
                     }
                 }
@@ -69,11 +72,12 @@ export interface PluginRunResult {
 }
 
 export class PluginParameter {
-    key: string;
-    label: string;
+    name: string;
+    label?: string;
+    hint: string;
     required: boolean;
     type: string;
     options?: { key: string, value: string }[];
-    value?: string | number;
+    defaultValue?: string | number;
 }
 

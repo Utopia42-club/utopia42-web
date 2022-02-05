@@ -1,6 +1,6 @@
 .root {
-    width: 50em;
-    height: 20em;
+    width: 55em;
+    height: 25em;
 
     ::ng-deep .mat-horizontal-stepper-header {
         pointer-events: none !important;
@@ -29,6 +29,15 @@
 
 .inputs {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-auto-rows: min-content;
     grid-gap: 0.5em;
+}
+
+.loading-inputs {
+    width: 100%;
+    height: 100%;
+    font-size: 2em;
+    font-weight: 500;
+    color: #737373;
 }
