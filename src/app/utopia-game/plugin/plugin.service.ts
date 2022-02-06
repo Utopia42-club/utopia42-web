@@ -76,8 +76,7 @@ export class PluginParameter {
     label?: string;
     hint: string;
     required: boolean;
-    type: string;
-    options?: { key: string, value: string }[];
-    defaultValue?: string | number;
+    type: 'text' | 'number' | 'selection';
+    options?: { key: string, value: any }[];
+    defaultValue?: any;
 }
-

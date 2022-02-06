@@ -1,13 +1,14 @@
 import { Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Action, AppComponent } from '../app.component';
-import { UtopiaBridgeService } from './utopia-bridge.service';
+import { State, UtopiaBridgeService } from './utopia-bridge.service';
 import { ToastrService } from 'ngx-toastr';
 import { ActivatedRoute } from '@angular/router';
-import { PluginDialogComponent } from './plugin-dialog/plugin-dialog.component';
-import { UtopiaApiService } from './utopia-api.service';
-import { PluginService } from './plugin.service';
+import { PluginDialogComponent } from './plugin/plugin-dialog/plugin-dialog.component';
+import { UtopiaApiService } from './plugin/utopia-api.service';
+import { PluginService } from './plugin/plugin.service';
 import { MatDialog } from '@angular/material/dialog';
 import { LoadingService } from '../loading.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-utopia-game',
@@ -24,27 +25,10 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
 
     @ViewChild('gameCanvas', { static: true }) gameCanvas;
 
-    pluginAction: Action = {
-        icon: 'extension',
-        perform: () => {
-            this.freezeGame();
-            let dialog = this.dialog.open(PluginDialogComponent);
-            dialog.afterClosed().subscribe(result => {
-                this.unFreezeGame();
-                this.gameCanvas.nativeElement.focus();
-                if (result != null) {
-                    this.loadingService.prepare(this.pluginService.runCode(result.code, result.inputs))
-                        .subscribe(() => {
-                        }, error => {
-                            this.toaster.error('Plugin execution failed');
-                        }, () => {
-                            this.toaster.success('Plugin executed successfully');
-                        });
-                }
-            });
-        }
-    };
+    pluginAction: Action;
     private sandBoxListener: (e) => void;
+
+    private subscription = new Subscription();
 
     constructor(private bridge: UtopiaBridgeService, private appComponent: AppComponent,
                 private readonly toaster: ToastrService, private readonly route: ActivatedRoute,
@@ -52,24 +36,64 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
                 readonly dialog: MatDialog, readonly pluginService: PluginService,
                 readonly loadingService: LoadingService) {
         window.bridge = bridge;
-        let idx = this.appComponent.actions.indexOf(this.pluginAction);
-        if (idx >= 0) {
-            this.appComponent.actions.splice(idx, 1);
-        }
-        this.appComponent.actions.push(this.pluginAction);
+
+        this.pluginAction = {
+            icon: 'extension',
+            perform: () => {
+                this.freezeGame();
+                let dialog = this.dialog.open(PluginDialogComponent);
+                dialog.afterClosed().subscribe(result => {
+                    this.unFreezeGame();
+                    this.gameCanvas.nativeElement.focus();
+                    if (result != null) {
+                        this.loadingService.prepare(this.pluginService.runCode(result.code, result.inputs))
+                            .subscribe(() => {
+                            }, error => {
+                                this.toaster.error('Plugin execution failed');
+                            }, () => {
+                                this.toaster.success('Plugin executed successfully');
+                            });
+                    }
+                });
+            }
+        };
+
+        this.subscription.add(this.bridge.gameState$().subscribe(value => {
+            if (value == State.PLAYING) {
+                this.addPluginAction();
+            } else {
+                this.removePluginAction();
+            }
+        }));
     }
 
 
-    ngOnDestroy(): void {
-        let idx = this.appComponent.actions.indexOf(this.fullScreenAction);
-        if (idx >= 0) {
-            this.appComponent.actions.splice(idx, 1);
+    private addPluginAction() {
+        let idx = this.appComponent.actions.indexOf(this.pluginAction);
+        if (idx < 0) {
+            this.appComponent.actions.push(this.pluginAction);
         }
+    }
+
+    private removePluginAction() {
         let ind = this.appComponent.actions.indexOf(this.pluginAction);
         if (ind >= 0) {
             this.appComponent.actions.splice(ind, 1);
         }
-        window.removeEventListener('message', this.sandBoxListener);
+    }
+
+    private addFullScreenAction() {
+        let idx = this.appComponent.actions.indexOf(this.fullScreenAction);
+        if (idx < 0) {
+            this.appComponent.actions.push(this.fullScreenAction);
+        }
+    }
+
+    private removeFullScreenAction() {
+        let idx = this.appComponent.actions.indexOf(this.fullScreenAction);
+        if (idx >= 0) {
+            this.appComponent.actions.splice(idx, 1);
+        }
     }
 
     ngOnInit(): void {
@@ -80,6 +104,13 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
                 this.bridge.setStartingPosition(position);
             }
         });
+    }
+
+    ngOnDestroy(): void {
+        this.removeFullScreenAction();
+        this.removePluginAction();
+        window.removeEventListener('message', this.sandBoxListener);
+        this.subscription.unsubscribe();
     }
 
     public freezeGame() {
@@ -103,7 +134,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
             showBanner: (m, t) => this.showBanner(m, t),
         };
 
-        var canvas = document.querySelector('#unity-canvas') as any;
+        let canvas = document.querySelector('#unity-canvas') as any;
         // if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
         //     container.className = "unity-mobile";
         //     // Avoid draining fillrate performance on mobile devices,
@@ -126,11 +157,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
             this.bridge.unityInstance = unityInstance;
             this.utopiaApi.unityInstance = unityInstance;
             this.fullScreenAction.perform = () => unityInstance.SetFullscreen(1);
-            const idx = this.appComponent.actions.indexOf(this.fullScreenAction);
-            if (idx >= 0) {
-                this.appComponent.actions.splice(idx, 1);
-            }
-            this.appComponent.actions.push(this.fullScreenAction);
+            this.addFullScreenAction();
         }).catch((message: any) => {
             alert(message);
         });

@@ -35,8 +35,8 @@ import { ToastrModule } from "ngx-toastr";
 import { OpenGameAtComponent } from './open-game-at/open-game-at.component';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { PluginDialogComponent } from './utopia-game/plugin-dialog/plugin-dialog.component';
-import { FilterInputOptionsPipe } from './utopia-game/plugin-dialog/filter-input-options.pipe';
+import { PluginDialogComponent } from './utopia-game/plugin/plugin-dialog/plugin-dialog.component';
+import { FilterInputOptionsPipe } from './utopia-game/plugin/plugin-dialog/filter-input-options.pipe';
 
 @NgModule({
     declarations: [
