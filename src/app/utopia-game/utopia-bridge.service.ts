@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AppComponent } from '../app.component';
 import { ConnectionDetail } from '../ehtereum/connection-detail';
@@ -12,8 +12,13 @@ import { Clipboard } from '@angular/cdk/clipboard';
 export class UtopiaBridgeService {
     public unityInstance;
     private position?: Position;
+    private gameState = new Subject<State>();
 
     constructor(private web3service: Web3Service, private app: AppComponent, private clipboard: Clipboard) {
+    }
+
+    public reportGameState(payload: ReportGameStateRequest): void {
+        this.gameState.next(State[payload.body]);
     }
 
     public buy(payload: BuyLandsRequest): void {
@@ -72,6 +77,10 @@ export class UtopiaBridgeService {
         }
         this.position = null;
     }
+
+    public gameState$(): Observable<State> {
+        return this.gameState.asObservable();
+    }
 }
 
 export type BuyLandsRequest = GameRequest<Land[]>;
@@ -90,8 +99,25 @@ export type TransferLandRequest = GameRequest<number>;
 
 export type EditProfileRequest = GameRequest<string>; // FIXME: string --change to--> undefined (wallet id can be retrieved from connection)
 
+export type ReportGameStateRequest = GameRequest<string>;
+
 export interface Position {
     x: number;
     y: number;
     z: number;
 }
+
+export enum State {
+    LOADING = 'LOADING',
+    SETTINGS = 'SETTINGS',
+    PLAYING = 'PLAYING',
+    MAP = 'MAP',
+    BROWSER_CONNECTION = 'BROWSER_CONNECTION',
+    INVENTORY = 'INVENTORY',
+    HELP = 'HELP',
+    DIALOG = 'DIALOG',
+    PROFILE_DIALOG = 'PROFILE_DIALOG',
+    MOVING_OBJECT = 'MOVING_OBJECT',
+    FREEZE = 'FREEZE'
+}
+
