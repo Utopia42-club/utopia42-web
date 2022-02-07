@@ -1,82 +1,43 @@
-import { Injectable, NgZone } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { UtopiaApiService } from './utopia-api.service';
+import { Configurations } from '../../configurations';
+import { Plugin } from './Plugin';
 
-@Injectable()
+@Injectable({
+    providedIn: 'root',
+})
 export class PluginService {
-    iframeSrc: string;
+    readonly endpoint = Configurations.SERVER_URL + '/plugins';
 
-    constructor(readonly http: HttpClient, readonly utopiaApi: UtopiaApiService,
-                readonly zone: NgZone) {
-        this.http.get('../../assets/sandbox.html', { responseType: 'text' })
-            .subscribe(data => this.iframeSrc = data);
+    constructor(private httpClient: HttpClient) {
+
     }
 
-    public getFile(url: string): Observable<string> {
-        return this.http.get(url, { responseType: 'text' });
+    public create(plugin: Plugin): Observable<Plugin> {
+        return this.httpClient.post<Plugin>(this.endpoint + `/create`, JSON.stringify(plugin),
+            { headers: new HttpHeaders().set('Content-Type', 'application/json') }
+        );
     }
 
-    runCode(code: string, inputs: any): Observable<PluginRunResult> {
-        return new Observable(subs => {
-            const secureEvalIframe: HTMLIFrameElement = document.createElement('iframe');
-            secureEvalIframe.setAttribute('sandbox', 'allow-scripts');
-            secureEvalIframe.setAttribute('style', 'display: none;');
+    public update(plugin: Plugin): Observable<void> {
+        return this.httpClient.post<void>(this.endpoint + `/update`, JSON.stringify(plugin),
+            { headers: new HttpHeaders().set('Content-Type', 'application/json') }
+        );
+    }
 
-            secureEvalIframe.setAttribute('src', 'data:text/html;base64,' + btoa(this.iframeSrc));
+    public get(id: number): Observable<Plugin> {
+        return this.httpClient.get<Plugin>(this.endpoint + `/${id}`);
+    }
 
-            secureEvalIframe.addEventListener('load', () => {
-                secureEvalIframe.contentWindow.postMessage({
-                    code: code,
-                    inputs: inputs
-                }, '*');
-            });
+    public getPluginsForUser(): Observable<Plugin[]> {
+        return this.httpClient.get<Plugin[]>(this.endpoint + `/`);
+    }
 
-            window.addEventListener('message', windowListener);
-
-            document.body.appendChild(secureEvalIframe);
-
-            let that = this;
-
-            function windowListener(event: MessageEvent) {
-                if ((event.origin === 'null' && event.source === secureEvalIframe.contentWindow)) {
-                    let message = event.data;
-                    switch (message.type) {
-                        case 'request': {
-                            that.zone.run(() => that.utopiaApi[message.body.method].apply(that.utopiaApi, message.body.params));
-                            break;
-                        }
-                        case 'end': {
-                            window.removeEventListener('message', windowListener);
-                            document.body.removeChild(secureEvalIframe);
-                            subs.complete();
-                            break;
-                        }
-                        default: {
-                            subs.error(new Error('Unknown message type from plugin: ' + message.type));
-                        }
-                    }
-                }
-            }
-        });
+    public delete(id: number): Observable<void> {
+        return this.httpClient.delete<void>(this.endpoint + `/${id}`);
     }
 
 }
 
-export interface PluginRunResult {
-    type: string;
-    body?: string;
-    error?: string;
 
-    [key: string]: any;
-}
-
-export class PluginParameter {
-    name: string;
-    label?: string;
-    hint: string;
-    required: boolean;
-    type: 'text' | 'number' | 'selection';
-    options?: { key: string, value: any }[];
-    defaultValue?: any;
-}

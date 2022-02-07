@@ -1,0 +1,32 @@
+.search-field {
+    width: 100%;
+}
+
+.header {
+    width: 100%;
+}
+
+.root {
+    background-color: white;
+    padding: 0.5em;
+    box-shadow: rgba(0, 0, 0, 0.16) 0 10px 36px 0, rgba(0, 0, 0, 0.06) 0 0 0 1px;
+    border-radius: 6px;
+}
+
+.plugins {
+    width: 100%;
+    min-height: 30em;
+    max-height: 30em;
+    overflow-y: auto;
+}
+
+.plugin {
+    width: 100%;
+}
+
+.plugin__name {
+    font-size: 1.1em;
+    margin: 0;
+    max-width: 8em;
+    overflow-wrap: anywhere;
+}

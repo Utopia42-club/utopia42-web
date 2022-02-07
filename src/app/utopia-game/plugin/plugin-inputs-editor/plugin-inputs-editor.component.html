@@ -1,53 +1,39 @@
-<div class="root" fxLayout="row" fxLayoutAlign="center start" fxLayoutGap="6px">
-    <button [disabled]="isPrevDisabled()" class="prevNavigationButton" mat-raised-button color="primary"
-            (click)="prevClicked()">Previous
-    </button>
-    <div fxFlex>
-        <mat-stepper [linear]="true" #stepper>
-            <mat-step completed="false" label="Select plugin">
-                <form [formGroup]="form" class="form">
-                    <mat-form-field class="form__field">
-                        <mat-label>Plugin script url</mat-label>
-                        <input matInput formControlName="scriptUrl" type="text"/>
-                    </mat-form-field>
-                    <mat-form-field class="form__field">
-                        <mat-label>Plugin inputs url</mat-label>
-                        <input matInput formControlName="inputsUrl" type="text"/>
-                    </mat-form-field>
-                </form>
-            </mat-step>
-            <mat-step completed="false" label="Fill out plugin inputs">
-                <ng-template matStepContent>
-                    <form *ngIf="inputsForm != null" [formGroup]="inputsForm" class="inputs">
-                        <div *ngFor="let input of inputs" [ngSwitch]="input.type">
-                            <ng-container *ngSwitchCase="'number'">
-                                <ng-container
-                                    *ngTemplateOutlet="numberField; context: {input: input}">
-                                </ng-container>
-                            </ng-container>
-                            <ng-container *ngSwitchCase="'text'">
-                                <ng-container
-                                    *ngTemplateOutlet="textField; context: {input: input}">
-                                </ng-container>
-                            </ng-container>
-                            <ng-container *ngSwitchCase="'selection'">
-                                <ng-container
-                                    *ngTemplateOutlet="selectionField; context: {input: input}">
-                                </ng-container>
-                            </ng-container>
-                        </div>
-                    </form>
-                    <div *ngIf="inputsForm == null" class="loading-inputs">
-                        <p>Loading plugin inputs...</p>
-                    </div>
-                </ng-template>
-            </mat-step>
-        </mat-stepper>
+<div class="root" fxLayout="column" fxLayoutAlign="space-between center">
+    <div *ngIf="inputsForm != null" fxLayout="column" style="width: 100%">
+        <p class="title">Please fill out plugin required inputs</p>
+        <form [formGroup]="inputsForm" class="inputs">
+            <div *ngFor="let input of inputs" [ngSwitch]="input.type">
+                <ng-container *ngSwitchCase="'number'">
+                    <ng-container
+                        *ngTemplateOutlet="numberField; context: {input: input}">
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngSwitchCase="'text'">
+                    <ng-container
+                        *ngTemplateOutlet="textField; context: {input: input}">
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngSwitchCase="'selection'">
+                    <ng-container
+                        *ngTemplateOutlet="selectionField; context: {input: input}">
+                    </ng-container>
+                </ng-container>
+            </div>
+        </form>
     </div>
-    <button [disabled]="isNextDisabled()" class="nextNavigationButton" mat-raised-button color="primary"
-            (click)="nextClicked()">
-        {{stepper.selectedIndex == 1 ? 'Run' : 'Next'}}
-    </button>
+    <div *ngIf="inputsForm == null" fxLayout="row" fxLayoutAlign="center center" class="loading-inputs">
+        <p>Loading plugin inputs...</p>
+    </div>
+    <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="0.5em" class="actions">
+        <button *ngIf="inputsForm != null" mat-raised-button color="primary"
+                (click)="runPlugin()" [disabled]="!this.inputsForm.valid">
+            Run
+        </button>
+        <button mat-raised-button color="accent"
+                (click)="cancel()">
+            Cancel
+        </button>
+    </div>
 </div>
 
 <ng-template #numberField let-input="input">

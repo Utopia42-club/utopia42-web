@@ -1,5 +1,5 @@
 import { EditProfileComponent } from './update-profile/update-profile.component';
-import { APP_INITIALIZER, CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
+import { APP_INITIALIZER, CUSTOM_ELEMENTS_SCHEMA, ErrorHandler, NgModule } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -28,15 +28,22 @@ import { UtopiaGameComponent } from './utopia-game/utopia-game.component';
 import { TransferLandComponent } from './transfer-land/transfer-land.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClient, HttpClientModule } from '@angular/common/http';
 import { SetNftComponent } from './set-nft/set-nft.component';
-import { NetsInitializer } from "./ehtereum/networks-loader.guard";
-import { ToastrModule } from "ngx-toastr";
+import { NetsInitializer } from './ehtereum/networks-loader.guard';
+import { ToastrModule } from 'ngx-toastr';
 import { OpenGameAtComponent } from './open-game-at/open-game-at.component';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { PluginDialogComponent } from './utopia-game/plugin/plugin-dialog/plugin-dialog.component';
-import { FilterInputOptionsPipe } from './utopia-game/plugin/plugin-dialog/filter-input-options.pipe';
+import { PluginInputsEditor } from './utopia-game/plugin/plugin-inputs-editor/plugin-inputs-editor.component';
+import { FilterInputOptionsPipe } from './utopia-game/plugin/plugin-inputs-editor/filter-input-options.pipe';
+import { OverlayModule } from '@angular/cdk/overlay';
+import { PluginEditorComponent } from './utopia-game/plugin/plugin-editor/plugin-editor.component';
+import { PluginSelectionComponent } from './utopia-game/plugin/plugin-selection/plugin-selection.component';
+import { MatListModule } from '@angular/material/list';
+import { FilterPluginsPipe } from './utopia-game/plugin/plugin-selection/filter-plugins.pipe';
+import { AuthInterceptor } from './auth.interceptor';
+import { GlobalErrorHandlerService } from './global-error-handler.service';
 
 @NgModule({
     declarations: [
@@ -53,8 +60,11 @@ import { FilterInputOptionsPipe } from './utopia-game/plugin/plugin-dialog/filte
         EditProfileComponent,
         SetNftComponent,
         OpenGameAtComponent,
-        PluginDialogComponent,
+        PluginInputsEditor,
         FilterInputOptionsPipe,
+        PluginEditorComponent,
+        PluginSelectionComponent,
+        FilterPluginsPipe
     ],
     imports: [
         BrowserModule,
@@ -82,7 +92,9 @@ import { FilterInputOptionsPipe } from './utopia-game/plugin/plugin-dialog/filte
         }),
         ReactiveFormsModule,
         MatStepperModule,
-        MatAutocompleteModule
+        MatAutocompleteModule,
+        OverlayModule,
+        MatListModule
     ],
     providers: [
         {
@@ -91,17 +103,17 @@ import { FilterInputOptionsPipe } from './utopia-game/plugin/plugin-dialog/filte
             deps: [HttpClient, MatDialog],
             multi: true
         },
-        { provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: { duration: 2500 } }
+        { provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: { duration: 2500 } },
+        { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+        { provide: ErrorHandler, useClass: GlobalErrorHandlerService },
     ],
     bootstrap: [AppComponent],
     schemas: [
         CUSTOM_ELEMENTS_SCHEMA
     ],
 })
-export class AppModule
-{
+export class AppModule {
 
-    constructor()
-    {
+    constructor() {
     }
 }

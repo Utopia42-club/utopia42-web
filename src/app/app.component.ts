@@ -187,11 +187,10 @@ export class AppComponent implements OnInit, AfterViewInit {
         });
         return dialogRef.componentInstance.result$;
     }
-
 }
 
 export interface Action {
     icon: string;
 
-    perform();
+    perform: () => void;
 }

@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { PluginDialogComponent } from './plugin-dialog.component';
+import { PluginInputsEditor } from './plugin-inputs-editor.component';
 
 describe('PluginDialogComponent', () => {
-  let component: PluginDialogComponent;
-  let fixture: ComponentFixture<PluginDialogComponent>;
+  let component: PluginInputsEditor;
+  let fixture: ComponentFixture<PluginInputsEditor>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ PluginDialogComponent ]
+      declarations: [ PluginInputsEditor ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(PluginDialogComponent);
+    fixture = TestBed.createComponent(PluginInputsEditor);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

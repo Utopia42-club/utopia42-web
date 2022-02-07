@@ -1,0 +1,26 @@
+<div class="root" fxLayout="column" fxLayoutAlign="start center">
+    <form [formGroup]="form" class="form">
+        <mat-form-field class="form__field">
+            <mat-label>Name</mat-label>
+            <input matInput [required]="true" formControlName="name" type="text"/>
+        </mat-form-field>
+        <mat-form-field class="form__field">
+            <mat-label>Script URL</mat-label>
+            <input matInput [required]="true" formControlName="scriptUrl" type="text"/>
+        </mat-form-field>
+        <mat-form-field class="form__field">
+            <mat-label>Descriptor URL</mat-label>
+            <input matInput formControlName="descriptorUrl" type="text"/>
+        </mat-form-field>
+    </form>
+    <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="0.5em" class="actions">
+        <button mat-raised-button color="primary"
+                (click)="save()" [disabled]="!this.form.valid">
+            Save
+        </button>
+        <button mat-raised-button color="accent"
+                (click)="cancel()">
+            Cancel
+        </button>
+    </div>
+</div>
