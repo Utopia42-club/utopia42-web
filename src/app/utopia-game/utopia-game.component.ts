@@ -1,20 +1,24 @@
-import { Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, InjectionToken, Injector, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Action, AppComponent } from '../app.component';
 import { State, UtopiaBridgeService } from './utopia-bridge.service';
 import { ToastrService } from 'ngx-toastr';
 import { ActivatedRoute } from '@angular/router';
-import { PluginDialogComponent } from './plugin/plugin-dialog/plugin-dialog.component';
 import { UtopiaApiService } from './plugin/utopia-api.service';
-import { PluginService } from './plugin/plugin.service';
+import { PluginExecutionService } from './plugin/plugin-execution.service';
 import { MatDialog } from '@angular/material/dialog';
 import { LoadingService } from '../loading.service';
 import { Subscription } from 'rxjs';
+import { ConnectionPositionPair, Overlay, OverlayRef } from '@angular/cdk/overlay';
+import { ComponentPortal } from '@angular/cdk/portal';
+import { PluginSelectionComponent } from './plugin/plugin-selection/plugin-selection.component';
+
+export const GAME_TOKEN = new InjectionToken<UtopiaGameComponent>('GAME_TOKEN');
 
 @Component({
     selector: 'app-utopia-game',
     templateUrl: './utopia-game.component.html',
     styleUrls: ['./utopia-game.component.scss'],
-    providers: [UtopiaBridgeService, UtopiaApiService, PluginService]
+    providers: [UtopiaBridgeService, UtopiaApiService, PluginExecutionService]
 })
 export class UtopiaGameComponent implements OnInit, OnDestroy {
     fullScreenAction: Action = {
@@ -29,37 +33,42 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
     private sandBoxListener: (e) => void;
 
     private subscription = new Subscription();
+    private pluginOverlayRef?: OverlayRef;
 
     constructor(private bridge: UtopiaBridgeService, private appComponent: AppComponent,
                 private readonly toaster: ToastrService, private readonly route: ActivatedRoute,
                 readonly utopiaApi: UtopiaApiService, readonly zone: NgZone,
-                readonly dialog: MatDialog, readonly pluginService: PluginService,
-                readonly loadingService: LoadingService) {
+                readonly dialog: MatDialog, readonly pluginService: PluginExecutionService,
+                readonly loadingService: LoadingService, readonly overlay: Overlay) {
         window.bridge = bridge;
 
         this.pluginAction = {
             icon: 'extension',
             perform: () => {
                 this.freezeGame();
-                let dialog = this.dialog.open(PluginDialogComponent);
-                dialog.afterClosed().subscribe(result => {
-                    this.unFreezeGame();
-                    this.gameCanvas.nativeElement.focus();
-                    if (result != null) {
-                        this.loadingService.prepare(this.pluginService.runCode(result.code, result.inputs))
-                            .subscribe(() => {
-                            }, error => {
-                                this.toaster.error('Plugin execution failed');
-                            }, () => {
-                                this.toaster.success('Plugin executed successfully');
-                            });
-                    }
+                let positionStrategy = this.overlay.position()
+                    .flexibleConnectedTo(document.getElementById(`action_${this.appComponent.actions.indexOf(this.pluginAction)}`))
+                    .withPositions([
+                        new ConnectionPositionPair({ originX: 'start', originY: 'bottom' }, { overlayX: 'center', overlayY: 'top' }),
+                        new ConnectionPositionPair({ originX: 'start', originY: 'top' }, { overlayX: 'start', overlayY: 'bottom' }),
+                    ]);
+                this.pluginOverlayRef = this.overlay.create({
+                    positionStrategy,
+                    hasBackdrop: true,
+                    backdropClass: 'transparent-backdrop',
                 });
-            }
+                const userProfilePortal = new ComponentPortal(PluginSelectionComponent, null, Injector.create({
+                    providers: [
+                        { provide: GAME_TOKEN, useValue: this }
+                    ]
+                }));
+                this.pluginOverlayRef.attach(userProfilePortal);
+                this.pluginOverlayRef.backdropClick().subscribe(() => this.closePluginSelectionOverlay());
+            },
         };
 
         this.subscription.add(this.bridge.gameState$().subscribe(value => {
-            if (value == State.PLAYING) {
+            if (value == State.PLAYING || value == State.FREEZE) {
                 this.addPluginAction();
             } else {
                 this.removePluginAction();
@@ -67,6 +76,22 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
         }));
     }
 
+    private closePluginSelectionOverlay() {
+        this.pluginOverlayRef.dispose();
+        this.unFreezeGame();
+        this.gameCanvas.nativeElement.focus();
+    }
+
+    public runPlugin(code: string, inputs: any) {
+        this.closePluginSelectionOverlay();
+        this.loadingService.prepare(this.pluginService.runCode(code, inputs))
+            .subscribe(() => {
+            }, error => {
+                this.toaster.error('Plugin execution failed');
+            }, () => {
+                this.toaster.success('Plugin executed successfully');
+            });
+    }
 
     private addPluginAction() {
         let idx = this.appComponent.actions.indexOf(this.pluginAction);

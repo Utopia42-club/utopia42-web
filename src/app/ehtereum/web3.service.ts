@@ -26,16 +26,19 @@ export class Web3Service {
     readonly win = window as any;
     private metaMaskProvider = undefined;
 
-    constructor(private loadingService: LoadingService, private zone: NgZone, private readonly toaster: ToastrService) { }
+    constructor(private loadingService: LoadingService, private zone: NgZone, private readonly toaster: ToastrService) {
+    }
 
     private getWeb3(networkId: number): Web3 | null {
         // if ((networkId == null && this.win.web3 != null)) {
         //     return new Web3(this.win.web3.currentProvider);
         // }
-        if (!Networks.supported.has(networkId))
+        if (!Networks.supported.has(networkId)) {
             return null;
-        if (this.web3ProviderCashe.has(networkId))
+        }
+        if (this.web3ProviderCashe.has(networkId)) {
             return this.web3ProviderCashe.get(networkId)!;
+        }
 
         let network = Networks.all.get(networkId);
         this.web3ProviderCashe.set(networkId, new Web3(new Web3.providers.HttpProvider(network.provider)));
@@ -45,11 +48,14 @@ export class Web3Service {
     public getSmartContract(networkId?: number): UtopiaContract {
         if (networkId == null || this.networkId() == networkId) {
             networkId = this.metaMaskProvider != undefined ? this.networkId() : Networks.MainNet().id;
-            if (!this.web3ProviderCashe.has(networkId))
+            if (!this.web3ProviderCashe.has(networkId)) {
                 this.web3ProviderCashe.set(networkId, new Web3(this.metaMaskProvider));
+            }
         }
 
-        if (!Networks.supported.has(networkId)) return null;
+        if (!Networks.supported.has(networkId)) {
+            return null;
+        }
 
         if (!this.contractCache.has(networkId)) {
             const web3 = this.getWeb3(networkId)!;
@@ -66,7 +72,9 @@ export class Web3Service {
     }
 
     public provider(): Observable<any> {
-        if (this.metaMaskProvider !== undefined) return of(this.metaMaskProvider);
+        if (this.metaMaskProvider !== undefined) {
+            return of(this.metaMaskProvider);
+        }
         return this.loadingService.prepare(
             this.from(detectEthereumProvider())
                 .pipe(map(p => {
@@ -120,7 +128,7 @@ export class Web3Service {
             this.provider()
                 .pipe(switchMap(provider =>
                     this.from(provider.request({
-                        method: "wallet_requestPermissions",
+                        method: 'wallet_requestPermissions',
                         params: [{
                             eth_accounts: {}
                         }]
@@ -130,14 +138,20 @@ export class Web3Service {
     }
 
     public connect(networkId?: number, wallet?: string): Observable<boolean> {
-        if (this.metaMaskProvider === null) return of(false);
-        if (this.isConnectedInstant(networkId, wallet)) return of(true);
+        if (this.metaMaskProvider === null) {
+            return of(false);
+        }
+        if (this.isConnectedInstant(networkId, wallet)) {
+            return of(true);
+        }
         //     return of(true);
         return this.loadingService.prepare(
             this.provider()
                 .pipe(
                     switchMap(provider => {
-                        if (provider == null) return of(false);
+                        if (provider == null) {
+                            return of(false);
+                        }
                         return this.from(provider.request({ method: 'eth_requestAccounts' }))
                             .pipe(
                                 map((d) => {

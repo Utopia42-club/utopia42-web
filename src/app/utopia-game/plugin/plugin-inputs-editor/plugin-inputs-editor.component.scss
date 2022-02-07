@@ -1,0 +1,31 @@
+.root {
+    width: 55em;
+    height: 25em;
+}
+
+.inputs {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-auto-rows: min-content;
+    grid-gap: 0.5em;
+    justify-content: center;
+}
+
+.loading-inputs {
+    width: 100%;
+    height: 100%;
+    font-size: 2em;
+    font-weight: 500;
+    color: #737373;
+}
+
+.actions {
+    width: 100%;
+}
+
+.title {
+    font-size: 1.4em;
+    font-weight: 500;
+    color: #737373;
+}

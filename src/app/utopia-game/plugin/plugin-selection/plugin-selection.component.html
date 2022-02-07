@@ -1,0 +1,30 @@
+<div fxLayout="column" fxLayoutAlign="start center" fxLayoutGap="0.6em" class="root">
+    <div class="header" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="0.3em">
+        <mat-form-field class="search-field">
+            <mat-label>Search</mat-label>
+            <input matInput [(ngModel)]="filter" type="text"/>
+        </mat-form-field>
+        <button mat-icon-button color="primary" (click)="createNewPlugin()">
+            <mat-icon>add</mat-icon>
+        </button>
+    </div>
+    <div class="plugins">
+        <div *ngFor="let plugin of plugins | filterPlugins : filter" style="width: 100%">
+            <div fxLayout="row" fxLayoutAlign="space-between center" class="plugin">
+                <p class="plugin__name">{{ plugin.name }}</p>
+                <div class="actions" fxLayout="row">
+                    <button mat-icon-button color="accent" (click)="editPlugin(plugin)">
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button color="warn" (click)="deletePlugin(plugin)">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                    <button mat-icon-button color="primary" (click)="runPlugin(plugin)">
+                        <mat-icon>play_arrow</mat-icon>
+                    </button>
+                </div>
+            </div>
+            <mat-divider style="width: 100%"></mat-divider>
+        </div>
+    </div>
+</div>
