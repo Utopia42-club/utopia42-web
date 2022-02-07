@@ -23,8 +23,8 @@ export class PluginEditorComponent implements OnInit {
             id: new FormControl(),
             name: new FormControl(null, [Validators.required]),
             walletId: new FormControl(null),
-            scriptUrl: new FormControl('https://raw.githubusercontent.com/Navid-Fkh/utopia42-sample-scripts/main/BigBlockBuilder.js', [Validators.required]),
-            descriptorUrl: new FormControl('https://raw.githubusercontent.com/Navid-Fkh/utopia42-sample-scripts/main/BigBlockBuilderInputs.json')
+            scriptUrl: new FormControl(null, [Validators.required]),
+            descriptorUrl: new FormControl(null)
         });
         if (pluginId != null) {
             this.loadingService.prepare(
