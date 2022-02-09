@@ -38,12 +38,12 @@
 
 <ng-template #numberField let-input="input">
     <form [formGroup]="inputsForm">
-        <mat-form-field *ngIf="input.options == null">
+        <mat-form-field *ngIf="input.options == null" class="input-field">
             <mat-label>{{input.label ?? input.name}}</mat-label>
             <input matInput [required]="input.required" [formControlName]="input.name" type="number"/>
             <mat-hint *ngIf="input.hint != null">{{input.hint}}</mat-hint>
         </mat-form-field>
-        <mat-form-field *ngIf="input.options != null">
+        <mat-form-field *ngIf="input.options != null" class="input-field">
             <mat-label>{{input.label ?? input.name}}</mat-label>
             <input matInput [required]="input.required" [formControlName]="input.name" type="number"
                    [matAutocomplete]="auto"/>
@@ -60,12 +60,12 @@
 
 <ng-template #textField let-input="input">
     <form [formGroup]="inputsForm">
-        <mat-form-field *ngIf="input.options == null">
+        <mat-form-field *ngIf="input.options == null" class="input-field">
             <mat-label>{{input.label ?? input.name}}</mat-label>
             <input matInput [required]="input.required" [formControlName]="input.name" type="text"/>
             <mat-hint *ngIf="input.hint != null">{{input.hint}}</mat-hint>
         </mat-form-field>
-        <mat-form-field *ngIf="input.options != null">
+        <mat-form-field *ngIf="input.options != null" class="input-field">
             <mat-label>{{input.label ?? input.name}}</mat-label>
             <input matInput [required]="input.required" [formControlName]="input.name" type="text"
                    [matAutocomplete]="auto"/>
@@ -82,7 +82,7 @@
 
 <ng-template #selectionField let-input="input">
     <form [formGroup]="inputsForm">
-        <mat-form-field>
+        <mat-form-field class="input-field">
             <mat-label>{{input.label ?? input.name}}</mat-label>
             <mat-select [required]="input.required" [formControlName]="input.name">
                 <mat-option *ngFor="let option of input.options" [value]="option.value">

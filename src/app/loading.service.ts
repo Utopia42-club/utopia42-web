@@ -11,17 +11,25 @@ export class LoadingService {
     private taskCounter: number = 0;
     private dialogRef: MatDialogRef<any, any>;
 
-    constructor(private dialog: MatDialog, private zone: NgZone) { }
+    constructor(private dialog: MatDialog, private zone: NgZone) {
+    }
 
     openDialog(): void {
         if (this.dialogRef != null) {
             let dialogs = this.dialog.openDialogs;
             let idx = dialogs.indexOf(this.dialogRef);
-            if (idx == dialogs.length - 1)
+            if (idx == dialogs.length - 1) {
                 return;
+            }
             this.dialogRef.close();
         }
-        this.dialogRef = this.dialog.open(MatSpinner, { disableClose: true, panelClass: "loading-panel", backdropClass: "loading-back-drop" });
+        this.dialogRef = this.dialog.open(MatSpinner,
+            {
+                disableClose: true,
+                panelClass: 'loading-panel',
+                backdropClass: 'loading-back-drop'
+            }
+        );
     }
 
     private taskStarted(): void {

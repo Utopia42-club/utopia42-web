@@ -2,41 +2,60 @@
 <html>
 <head>
     <script>
-
-        Global = {
-            mainWindow: undefined,
-            target: undefined,
-        };
-
-        UtopiaApi = {
-            placeBlock: function (type, x, y, z) {
-                Global.mainWindow.postMessage({
-                    type: 'request',
-                    body: {
-                        method: 'placeBlock',
-                        params: [type, x, y, z]
-                    }
-                }, Global.target);
-            },
-        };
-        Inputs = {}
-
-        function end() {
-            Global.mainWindow.postMessage({
-                type: 'end'
-            }, Global.target);
-        }
+        worker = undefined;
 
         window.addEventListener('message', function (e) {
             let mainWindow = e.source;
-            Global.mainWindow = mainWindow;
-            Global.target = e.origin;
-            Inputs = e.data.inputs;
-            try {
-                eval(e.data.code);
-                end();
-            } catch (e) {
-                mainWindow.postMessage(e.message, e.origin);
+            let target = e.origin;
+            let message = e.data;
+            if (message.type === 'request') {
+                let code = `
+                    UtopiaApi = {
+                        placeBlock: function (type, x, y, z) {
+                            postMessage({
+                                    type: 'request',
+                                    body: {
+                                        method: 'placeBlock',
+                                        params: [type, x, y, z]
+                                    }
+                                }
+                            )
+                        },
+                    };
+
+                    onmessage = function (e) {
+                        var Inputs = e.data.inputs;
+                        try {
+                            ${message.body.code}
+                            main().then(() => {
+                                postMessage({
+                                    type: 'end'
+                                });
+                            });
+                        } catch (e) {
+                            postMessage({
+                                type: 'error',
+                                body: e.message
+                            });
+                        }
+                    }
+                `;
+                let bb = new Blob([code],
+                    {
+                        type: 'text/javascript'
+                    });
+
+                let bbURL = URL.createObjectURL(bb);
+                this.worker = new Worker(bbURL);
+                this.worker.onmessage = function (e) {
+                    mainWindow.postMessage(e.data, target);
+                }
+                this.worker.postMessage(message.body);
+            } else if (message.type === 'end') {
+                this.worker.terminate();
+                this.worker = undefined;
+            } else {
+                throw new Error('Unknown message type sent to sandbox: ' + message.type);
             }
         });
     </script>

@@ -44,6 +44,8 @@ import { MatListModule } from '@angular/material/list';
 import { FilterPluginsPipe } from './utopia-game/plugin/plugin-selection/filter-plugins.pipe';
 import { AuthInterceptor } from './auth.interceptor';
 import { GlobalErrorHandlerService } from './global-error-handler.service';
+import { PluginRunningOverlayComponent } from './utopia-game/plugin/plugin-running-overlay/plugin-running-overlay.component';
+import { SimpleDialogComponent } from './simple-dialog/simple-dialog.component';
 
 @NgModule({
     declarations: [
@@ -64,7 +66,9 @@ import { GlobalErrorHandlerService } from './global-error-handler.service';
         FilterInputOptionsPipe,
         PluginEditorComponent,
         PluginSelectionComponent,
-        FilterPluginsPipe
+        FilterPluginsPipe,
+        PluginRunningOverlayComponent,
+        SimpleDialogComponent
     ],
     imports: [
         BrowserModule,

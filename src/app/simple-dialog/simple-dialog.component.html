@@ -1,0 +1,17 @@
+<div class="simple-dialog" fxLayout="column" fxLayoutAlign="start center" fxLayoutGap="0.4em">
+    <div class="header" fxLayout="row" fxLayoutAlign="space-between center">
+        <p class="title" fxFlex>{{data.title}}</p>
+        <button *ngIf="data.closable" mat-icon-button (click)="close()">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div class="content">
+        <p>{{data.message}}</p>
+    </div>
+    <div class="actions" fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="0.4em">
+        <button *ngFor="let action of data.actions" class="action" mat-raised-button [color]="action.color"
+                (click)="action.action()">
+            {{action.label}}
+        </button>
+    </div>
+</div>

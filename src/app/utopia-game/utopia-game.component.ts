@@ -57,12 +57,12 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
                     hasBackdrop: true,
                     backdropClass: 'transparent-backdrop',
                 });
-                const userProfilePortal = new ComponentPortal(PluginSelectionComponent, null, Injector.create({
+                const portal = new ComponentPortal(PluginSelectionComponent, null, Injector.create({
                     providers: [
                         { provide: GAME_TOKEN, useValue: this }
                     ]
                 }));
-                this.pluginOverlayRef.attach(userProfilePortal);
+                this.pluginOverlayRef.attach(portal);
                 this.pluginOverlayRef.backdropClick().subscribe(() => this.closePluginSelectionOverlay());
             },
         };
@@ -84,10 +84,11 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
 
     public runPlugin(code: string, inputs: any) {
         this.closePluginSelectionOverlay();
-        this.loadingService.prepare(this.pluginService.runCode(code, inputs))
+        this.pluginService.runCode(code, inputs)
             .subscribe(() => {
             }, error => {
-                this.toaster.error('Plugin execution failed');
+                console.error(error);
+                this.toaster.error('Plugin execution failed: ' + error);
             }, () => {
                 this.toaster.success('Plugin executed successfully');
             });

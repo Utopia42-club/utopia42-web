@@ -12,7 +12,7 @@ import { Plugin } from '../Plugin';
     selector: 'app-plugin-inputs-editor',
     templateUrl: './plugin-inputs-editor.component.html',
     styleUrls: ['./plugin-inputs-editor.component.scss'],
-    providers: [PluginExecutionService, UtopiaApiService, MatStepper]
+    providers: [UtopiaApiService, MatStepper]
 })
 export class PluginInputsEditor implements OnInit {
 

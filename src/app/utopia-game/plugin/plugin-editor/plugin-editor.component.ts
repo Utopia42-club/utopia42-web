@@ -2,7 +2,6 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { LoadingService } from '../../../loading.service';
-import { AuthService } from '../../../auth.service';
 import { PluginService } from '../plugin.service';
 import { ToastrService } from 'ngx-toastr';
 
@@ -14,11 +13,9 @@ import { ToastrService } from 'ngx-toastr';
 export class PluginEditorComponent implements OnInit {
     form: FormGroup;
 
-    constructor(readonly loadingService: LoadingService,
-                readonly dialogRef: MatDialogRef<PluginEditorComponent>,
-                @Inject(MAT_DIALOG_DATA) readonly pluginId: number,
-                readonly pluginService: PluginService,
-                readonly toaster: ToastrService) {
+    constructor(readonly toaster: ToastrService, readonly loadingService: LoadingService,
+                readonly dialogRef: MatDialogRef<PluginEditorComponent>, @Inject(MAT_DIALOG_DATA) readonly pluginId: number,
+                readonly pluginService: PluginService) {
         this.form = new FormGroup({
             id: new FormControl(),
             name: new FormControl(null, [Validators.required]),
