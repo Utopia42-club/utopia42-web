@@ -50,6 +50,8 @@ export class GlobalErrorHandlerService implements ErrorHandler {
                 message = 'An exception occurred.';
             }
 
+            console.error(error);
+
             const dialogRef = this.dialog.open(ExceptionDialogContentComponent,
                 {
                     data: {

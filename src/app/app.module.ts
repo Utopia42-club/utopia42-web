@@ -46,6 +46,7 @@ import { AuthInterceptor } from './auth.interceptor';
 import { GlobalErrorHandlerService } from './global-error-handler.service';
 import { PluginRunningOverlayComponent } from './utopia-game/plugin/plugin-running-overlay/plugin-running-overlay.component';
 import { SimpleDialogComponent } from './simple-dialog/simple-dialog.component';
+import { MatMenuModule } from '@angular/material/menu';
 
 @NgModule({
     declarations: [
@@ -98,7 +99,8 @@ import { SimpleDialogComponent } from './simple-dialog/simple-dialog.component';
         MatStepperModule,
         MatAutocompleteModule,
         OverlayModule,
-        MatListModule
+        MatListModule,
+        MatMenuModule
     ],
     providers: [
         {

@@ -1,4 +1,4 @@
-import { Component, InjectionToken, Injector, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, InjectionToken, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Action, AppComponent } from '../app.component';
 import { State, UtopiaBridgeService } from './utopia-bridge.service';
 import { ToastrService } from 'ngx-toastr';
@@ -8,9 +8,7 @@ import { PluginExecutionService } from './plugin/plugin-execution.service';
 import { MatDialog } from '@angular/material/dialog';
 import { LoadingService } from '../loading.service';
 import { Subscription } from 'rxjs';
-import { ConnectionPositionPair, Overlay, OverlayRef } from '@angular/cdk/overlay';
-import { ComponentPortal } from '@angular/cdk/portal';
-import { PluginSelectionComponent } from './plugin/plugin-selection/plugin-selection.component';
+import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 
 export const GAME_TOKEN = new InjectionToken<UtopiaGameComponent>('GAME_TOKEN');
 
@@ -22,48 +20,34 @@ export const GAME_TOKEN = new InjectionToken<UtopiaGameComponent>('GAME_TOKEN');
 })
 export class UtopiaGameComponent implements OnInit, OnDestroy {
     fullScreenAction: Action = {
+        label: 'Fullscreen',
         icon: 'fullscreen', perform: () => {
         }
     };
     progress = 0;
 
     @ViewChild('gameCanvas', { static: true }) gameCanvas;
+    @ViewChild('pluginMenu', { static: true }) pluginMenu: MatMenu;
 
     pluginAction: Action;
+    pluginActionTrigger?: MatMenuTrigger;
     private sandBoxListener: (e) => void;
 
     private subscription = new Subscription();
-    private pluginOverlayRef?: OverlayRef;
 
     constructor(private bridge: UtopiaBridgeService, private appComponent: AppComponent,
                 private readonly toaster: ToastrService, private readonly route: ActivatedRoute,
                 readonly utopiaApi: UtopiaApiService, readonly zone: NgZone,
                 readonly dialog: MatDialog, readonly pluginService: PluginExecutionService,
-                readonly loadingService: LoadingService, readonly overlay: Overlay) {
+                readonly loadingService: LoadingService) {
         window.bridge = bridge;
 
         this.pluginAction = {
+            label: 'Plugins',
             icon: 'extension',
-            perform: () => {
+            perform: (event) => {
                 this.freezeGame();
-                let positionStrategy = this.overlay.position()
-                    .flexibleConnectedTo(document.getElementById(`action_${this.appComponent.actions.indexOf(this.pluginAction)}`))
-                    .withPositions([
-                        new ConnectionPositionPair({ originX: 'start', originY: 'bottom' }, { overlayX: 'center', overlayY: 'top' }),
-                        new ConnectionPositionPair({ originX: 'start', originY: 'top' }, { overlayX: 'start', overlayY: 'bottom' }),
-                    ]);
-                this.pluginOverlayRef = this.overlay.create({
-                    positionStrategy,
-                    hasBackdrop: true,
-                    backdropClass: 'transparent-backdrop',
-                });
-                const portal = new ComponentPortal(PluginSelectionComponent, null, Injector.create({
-                    providers: [
-                        { provide: GAME_TOKEN, useValue: this }
-                    ]
-                }));
-                this.pluginOverlayRef.attach(portal);
-                this.pluginOverlayRef.backdropClick().subscribe(() => this.closePluginSelectionOverlay());
+                this.pluginActionTrigger = event.menuTrigger;
             },
         };
 
@@ -76,14 +60,34 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
         }));
     }
 
-    private closePluginSelectionOverlay() {
-        this.pluginOverlayRef.dispose();
+    ngOnInit(): void {
+        this.appComponent.getContractSafe(null, null).subscribe(() => this.startGame());
+        this.route.queryParams.subscribe(params => {
+            const position = params.position;
+            if (position != null) {
+                this.bridge.setStartingPosition(position);
+            }
+        });
+        this.pluginAction.menu = this.pluginMenu;
+        this.pluginMenu.hasBackdrop = true;
+    }
+
+    onPluginMenuClosed() {
         this.unFreezeGame();
         this.gameCanvas.nativeElement.focus();
     }
 
+    closePluginMenu() {
+        this.pluginActionTrigger.closeMenu();
+        this.onPluginMenuClosed();
+    }
+
     public runPlugin(code: string, inputs: any) {
-        this.closePluginSelectionOverlay();
+        this.closePluginMenu();
+        this.utopiaApi.getPlayerPosition()
+            .subscribe(position => {
+                inputs.playerPosition = position;
+            });
         this.pluginService.runCode(code, inputs)
             .subscribe(() => {
             }, error => {
@@ -122,22 +126,6 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
         }
     }
 
-    ngOnInit(): void {
-        this.appComponent.getContractSafe(null, null).subscribe(() => this.startGame());
-        this.route.queryParams.subscribe(params => {
-            const position = params.position;
-            if (position != null) {
-                this.bridge.setStartingPosition(position);
-            }
-        });
-    }
-
-    ngOnDestroy(): void {
-        this.removeFullScreenAction();
-        this.removePluginAction();
-        window.removeEventListener('message', this.sandBoxListener);
-        this.subscription.unsubscribe();
-    }
 
     public freezeGame() {
         this.bridge.unityInstance.SendMessage('GameManager', 'FreezeGame', '');
@@ -148,8 +136,8 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
     }
 
     private startGame() {
-        var buildUrl = '/assets/game/v0.9-rc3/Build';
-        var config = {
+        let buildUrl = '/assets/game/v0.9-rc3/Build';
+        let config = {
             dataUrl: buildUrl + '/web.data',
             frameworkUrl: buildUrl + '/web.framework.js',
             codeUrl: buildUrl + '/web.wasm',
@@ -181,7 +169,6 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
         }).then((unityInstance: any) => {
             // loadingBar.style.display = "none";
             this.bridge.unityInstance = unityInstance;
-            this.utopiaApi.unityInstance = unityInstance;
             this.fullScreenAction.perform = () => unityInstance.SetFullscreen(1);
             this.addFullScreenAction();
         }).catch((message: any) => {
@@ -197,5 +184,12 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
         } else {
             this.toaster.info(msg);
         }
+    }
+
+    ngOnDestroy(): void {
+        this.removeFullScreenAction();
+        this.removePluginAction();
+        window.removeEventListener('message', this.sandBoxListener);
+        this.subscription.unsubscribe();
     }
 }

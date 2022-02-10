@@ -1,8 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { PluginExecutionService, PluginParameter } from '../plugin-execution.service';
-import { UtopiaApiService } from '../utopia-api.service';
-import { MatStepper } from '@angular/material/stepper';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { PluginService } from '../plugin.service';
 import { LoadingService } from '../../../loading.service';
@@ -12,7 +10,7 @@ import { Plugin } from '../Plugin';
     selector: 'app-plugin-inputs-editor',
     templateUrl: './plugin-inputs-editor.component.html',
     styleUrls: ['./plugin-inputs-editor.component.scss'],
-    providers: [UtopiaApiService, MatStepper]
+    providers: []
 })
 export class PluginInputsEditor implements OnInit {
 

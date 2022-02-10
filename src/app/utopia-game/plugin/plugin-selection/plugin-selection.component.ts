@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, ComponentFactoryResolver, OnInit, ViewContainerRef } from '@angular/core';
 import { PluginService } from '../plugin.service';
 import { LoadingService } from '../../../loading.service';
 import { Plugin } from '../Plugin';
@@ -7,12 +7,13 @@ import { PluginEditorComponent } from '../plugin-editor/plugin-editor.component'
 import { ToastrService } from 'ngx-toastr';
 import { PluginInputsEditor } from '../plugin-inputs-editor/plugin-inputs-editor.component';
 import { PluginExecutionService } from '../plugin-execution.service';
-import { GAME_TOKEN, UtopiaGameComponent } from '../../utopia-game.component';
+import { UtopiaGameComponent } from '../../utopia-game.component';
 
 @Component({
     selector: 'app-plugin-selection',
     templateUrl: './plugin-selection.component.html',
-    styleUrls: ['./plugin-selection.component.scss']
+    styleUrls: ['./plugin-selection.component.scss'],
+    providers: []
 })
 export class PluginSelectionComponent implements OnInit {
 
@@ -22,7 +23,7 @@ export class PluginSelectionComponent implements OnInit {
     constructor(readonly pluginService: PluginService, readonly loadingService: LoadingService,
                 readonly dialog: MatDialog, readonly toaster: ToastrService,
                 readonly pluginExecutionService: PluginExecutionService,
-                @Inject(GAME_TOKEN) readonly game: UtopiaGameComponent) {
+                readonly game: UtopiaGameComponent, private vcr: ViewContainerRef) {
         loadingService.prepare(
             pluginService.getPluginsForUser()
         ).subscribe((plugins) => this.plugins = plugins);
@@ -43,7 +44,8 @@ export class PluginSelectionComponent implements OnInit {
     runPlugin(plugin: Plugin) {
         if (plugin.descriptorUrl) {
             let dialog = this.dialog.open(PluginInputsEditor, {
-                data: plugin.id
+                data: plugin.id,
+                viewContainerRef: this.vcr
             });
             dialog.afterClosed().subscribe(result => {
                 if (result != null) {
@@ -61,7 +63,8 @@ export class PluginSelectionComponent implements OnInit {
 
     editPlugin(plugin: Plugin) {
         let dialog = this.dialog.open(PluginEditorComponent, {
-            data: plugin.id
+            data: plugin.id,
+            viewContainerRef: this.vcr
         });
         dialog.afterClosed().subscribe(result => {
             if (result != null) {
