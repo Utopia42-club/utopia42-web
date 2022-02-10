@@ -14,7 +14,8 @@ export class PluginEditorComponent implements OnInit {
     form: FormGroup;
 
     constructor(readonly toaster: ToastrService, readonly loadingService: LoadingService,
-                readonly dialogRef: MatDialogRef<PluginEditorComponent>, @Inject(MAT_DIALOG_DATA) readonly pluginId: number,
+                readonly dialogRef: MatDialogRef<PluginEditorComponent>,
+                @Inject(MAT_DIALOG_DATA) readonly pluginId: number,
                 readonly pluginService: PluginService) {
         this.form = new FormGroup({
             id: new FormControl(),

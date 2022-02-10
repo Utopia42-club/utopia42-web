@@ -2,7 +2,7 @@ import { Injectable, NgZone } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { UtopiaApiService } from './utopia-api.service';
-import { switchMap, tap } from 'rxjs/operators';
+import { catchError, switchMap, tap } from 'rxjs/operators';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { SimpleDialogAction, SimpleDialogComponent, SimpleDialogData } from '../../simple-dialog/simple-dialog.component';
@@ -10,9 +10,7 @@ import { PluginRunningOverlayComponent } from './plugin-running-overlay/plugin-r
 import { ToastrService } from 'ngx-toastr';
 import { UtopiaDialogService } from 'src/app/utopia-dialog.service';
 
-@Injectable({
-    providedIn: 'root'
-})
+@Injectable()
 export class PluginExecutionService {
     iframeSrc: string;
     pluginOverlayRef: OverlayRef;
@@ -51,12 +49,12 @@ export class PluginExecutionService {
                                     [
                                         new SimpleDialogAction('Cancel', () => {
                                             // confirmationDialog.close(); // FIXME
-                                        }),
+                                        }, 'accent'),
                                         new SimpleDialogAction('Yes', () => {
                                             // confirmationDialog.close(); // FIXME
                                             this.pluginOverlayRef.dispose();
                                             this.terminateFrame();
-                                        })
+                                        }, 'primary')
                                     ]
                                 )
                             });
@@ -65,6 +63,12 @@ export class PluginExecutionService {
                 switchMap(o =>
                     this.doRunPlugin(code, inputs)
                 ),
+                catchError(err => {
+                    if (this.pluginOverlayRef != null) {
+                        this.pluginOverlayRef.dispose();
+                    }
+                    throw err;
+                }),
                 tap({
                     complete: () => {
                         if (this.pluginOverlayRef != null) {

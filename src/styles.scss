@@ -1,6 +1,7 @@
 @use '@angular/material' as mat;
 // regular style toast
 @import '~ngx-toastr/toastr';
+
 @include mat.core();
 
 $primary: mat.define-palette(mat.$deep-purple-palette);

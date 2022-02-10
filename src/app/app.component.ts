@@ -27,6 +27,7 @@ import {
     TransferLandRequest
 } from './utopia-game/utopia-bridge.service';
 import { HttpClient } from '@angular/common/http';
+import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 
 @Component({
     selector: 'app-root',
@@ -40,6 +41,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     constructor(private service: Web3Service, private dialog: UtopiaDialogService, private route: ActivatedRoute, router: Router,
                 readonly http: HttpClient) {
         this.actions.push({
+            label: 'Home',
             icon: 'home',
             perform() {
                 router.navigate(['home']);
@@ -155,12 +157,9 @@ export class AppComponent implements OnInit, AfterViewInit {
         this.getContractSafe(request.connection.network, request.connection.wallet)
             .subscribe(contract => {
                 if (contract != null) {
-                    console.log('edit pro')
                     this.dialog.open(EditProfileComponent, {
                         data: { request, contract } as EditProfileData,
                         disableClose: true
-                    }).subscribe((r) => {
-                        console.log(r.componentInstance);
                     });
                 }
             });
@@ -194,7 +193,15 @@ export class AppComponent implements OnInit, AfterViewInit {
 }
 
 export interface Action {
+    label: string;
+
     icon: string;
 
-    perform: () => void;
+    perform: (event: ActionEvent) => void;
+
+    menu?: MatMenu;
+}
+
+export interface ActionEvent {
+    menuTrigger?: MatMenuTrigger;
 }

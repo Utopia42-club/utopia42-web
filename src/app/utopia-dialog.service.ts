@@ -37,6 +37,5 @@ class DialogRequest <T, D = any, R = any>{
 
     public execute(): void{
         this.resultSubject.next(this.matDialog.open(this.component, this.config));
-        console.log('exec')
     }
 }

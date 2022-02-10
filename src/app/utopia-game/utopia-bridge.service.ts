@@ -1,12 +1,14 @@
-import { Injectable } from '@angular/core';
-import { Observable, of, Subject } from 'rxjs';
+import { Injectable, NgZone } from '@angular/core';
+import { Observable, of, ReplaySubject, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AppComponent } from '../app.component';
 import { ConnectionDetail } from '../ehtereum/connection-detail';
 import { Land } from '../ehtereum/models';
 import { Web3Service } from '../ehtereum/web3.service';
-import { GameRequest } from './game-request';
+import { BridgeMessage, Response, WebToUnityRequest } from './bridge-message';
 import { Clipboard } from '@angular/cdk/clipboard';
+import * as uuid from 'uuid';
+import { Position } from './position';
 
 @Injectable()
 export class UtopiaBridgeService {
@@ -14,7 +16,10 @@ export class UtopiaBridgeService {
     private position?: Position;
     private gameState = new Subject<State>();
 
-    constructor(private web3service: Web3Service, private app: AppComponent, private clipboard: Clipboard) {
+    private responseObservable = new Map<string, Subject<any>>(); // key: CallId, value: Observable
+
+    constructor(private web3service: Web3Service, private app: AppComponent, private clipboard: Clipboard,
+                readonly zone: NgZone) {
     }
 
     public reportGameState(payload: ReportGameStateRequest): void {
@@ -41,7 +46,7 @@ export class UtopiaBridgeService {
         this.app.setNft(request);
     }
 
-    public connectMetamask(payload: GameRequest<string>): Observable<ConnectionDetail> {
+    public connectMetamask(payload: BridgeMessage<string>): Observable<ConnectionDetail> {
         // return this.web3service.connect()
         return this.web3service.isConnected().pipe(
             map((v) => {
@@ -56,11 +61,11 @@ export class UtopiaBridgeService {
         );
     }
 
-    public copyToClipboard(payload: GameRequest<string>): void {
+    public copyToClipboard(payload: BridgeMessage<string>): void {
         this.clipboard.copy(payload.body);
     }
 
-    public getStartingPosition(payload: GameRequest<string>): Observable<Position> {
+    public getStartingPosition(payload: BridgeMessage<string>): Observable<Position> {
         return of(this.position);
     }
 
@@ -81,31 +86,50 @@ export class UtopiaBridgeService {
     public gameState$(): Observable<State> {
         return this.gameState.asObservable();
     }
+
+    public call(objectName: string, methodName: string, parameter: string): Observable<any> {
+        let id = uuid.v4();
+        let subject = new ReplaySubject(1);
+        this.responseObservable.set(id, subject);
+        let request = JSON.stringify({
+            id: id,
+            objectName: objectName,
+            methodName: methodName,
+            parameter: parameter,
+        } as WebToUnityRequest);
+        window.bridge.unityInstance.SendMessage('WebBridge', 'Request', request);
+        return subject.asObservable();
+    }
+
+    public respond(res: BridgeMessage<string>): void {
+        let response: Response = JSON.parse(res.body);
+        let subject = this.responseObservable.get(response.id);
+        if (subject) {
+            subject.next(response.body);
+            subject.complete();
+            this.responseObservable.delete(response.id);
+        }
+    }
 }
 
-export type BuyLandsRequest = GameRequest<Land[]>;
+
+export type BuyLandsRequest = BridgeMessage<Land[]>;
 
 export type SaveLandsRequestBodyType = { [key: number]: string };
-export type SaveLandsRequest = GameRequest<SaveLandsRequestBodyType>;
+export type SaveLandsRequest = BridgeMessage<SaveLandsRequestBodyType>;
 
 export interface SetNftRequestBodyType {
     landId: number;
     nft: boolean;
 }
 
-export type SetNftRequest = GameRequest<SetNftRequestBodyType>;
+export type SetNftRequest = BridgeMessage<SetNftRequestBodyType>;
 
-export type TransferLandRequest = GameRequest<number>;
+export type TransferLandRequest = BridgeMessage<number>;
 
-export type EditProfileRequest = GameRequest<string>; // FIXME: string --change to--> undefined (wallet id can be retrieved from connection)
+export type EditProfileRequest = BridgeMessage<string>; // FIXME: string --change to--> undefined (wallet id can be retrieved from connection)
 
-export type ReportGameStateRequest = GameRequest<string>;
-
-export interface Position {
-    x: number;
-    y: number;
-    z: number;
-}
+export type ReportGameStateRequest = BridgeMessage<string>;
 
 export enum State {
     LOADING = 'LOADING',

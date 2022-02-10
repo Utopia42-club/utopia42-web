@@ -24,9 +24,11 @@
                     };
 
                     onmessage = function (e) {
-                        var Inputs = e.data.inputs;
+                        var Inputs = e.data;
                         try {
                             ${message.body.code}
+                            if( main == null )
+                                throw new Error('main is not defined');
                             main().then(() => {
                                 postMessage({
                                     type: 'end'
@@ -50,7 +52,7 @@
                 this.worker.onmessage = function (e) {
                     mainWindow.postMessage(e.data, target);
                 }
-                this.worker.postMessage(message.body);
+                this.worker.postMessage(message.body.inputs);
             } else if (message.type === 'end') {
                 this.worker.terminate();
                 this.worker = undefined;
