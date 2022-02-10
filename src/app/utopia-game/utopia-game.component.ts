@@ -5,12 +5,12 @@ import { ToastrService } from 'ngx-toastr';
 import { ActivatedRoute } from '@angular/router';
 import { UtopiaApiService } from './plugin/utopia-api.service';
 import { PluginExecutionService } from './plugin/plugin-execution.service';
-import { MatDialog } from '@angular/material/dialog';
 import { LoadingService } from '../loading.service';
 import { Subscription } from 'rxjs';
 import { ConnectionPositionPair, Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { PluginSelectionComponent } from './plugin/plugin-selection/plugin-selection.component';
+import { UtopiaDialogService } from '../utopia-dialog.service';
 
 export const GAME_TOKEN = new InjectionToken<UtopiaGameComponent>('GAME_TOKEN');
 
@@ -38,7 +38,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
     constructor(private bridge: UtopiaBridgeService, private appComponent: AppComponent,
                 private readonly toaster: ToastrService, private readonly route: ActivatedRoute,
                 readonly utopiaApi: UtopiaApiService, readonly zone: NgZone,
-                readonly dialog: MatDialog, readonly pluginService: PluginExecutionService,
+                readonly dialog: UtopiaDialogService, readonly pluginService: PluginExecutionService,
                 readonly loadingService: LoadingService, readonly overlay: Overlay) {
         window.bridge = bridge;
 

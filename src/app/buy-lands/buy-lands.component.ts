@@ -1,5 +1,5 @@
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { of, Subscription } from 'rxjs';
 import { catchError, concatMap, tap } from 'rxjs/operators';
 import { Land, PricedLand } from '../ehtereum/models';
@@ -9,6 +9,7 @@ import { BuyLandValidation } from './buy-land-validation';
 import { BuyLandsData } from './buy-lands-data';
 import { BuyLandsService } from './buy-lands.service';
 import { ToastrService } from "ngx-toastr";
+import { UtopiaDialogService } from '../utopia-dialog.service';
 
 
 @Component({
@@ -26,7 +27,7 @@ export class BuyLandsComponent implements OnInit, OnDestroy
 
     constructor(@Inject(MAT_DIALOG_DATA) public data: BuyLandsData,
                 private dialogRef: MatDialogRef<any>,
-                private dialog: MatDialog,
+                private dialog: UtopiaDialogService,
                 private readonly loadingService: LoadingService,
                 private readonly toaster: ToastrService,
                 private readonly buyLandsService: BuyLandsService)

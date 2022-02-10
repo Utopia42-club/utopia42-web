@@ -1,5 +1,5 @@
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { of, Subscription } from 'rxjs';
 import { catchError, concatMap, map, takeLast, tap } from 'rxjs/operators';
 import { ExceptionDialogContentComponent } from '../exception-dialog-content/exception-dialog-content.component';
@@ -7,6 +7,7 @@ import { LoadingService } from '../loading.service';
 import { SaveLandsRequestBodyType } from '../utopia-game/utopia-bridge.service';
 import { SaveLandsData } from './save-lands-data';
 import { ToastrService } from "ngx-toastr";
+import { UtopiaDialogService } from '../utopia-dialog.service';
 
 @Component({
     selector: 'app-save-lands',
@@ -21,7 +22,7 @@ export class SaveLandsComponent implements OnInit, OnDestroy
 
     constructor(@Inject(MAT_DIALOG_DATA) public data: SaveLandsData,
                 private dialogRef: MatDialogRef<any>,
-                private dialog: MatDialog,
+                private dialog: UtopiaDialogService,
                 private readonly loadingService: LoadingService,
                 private readonly toaster: ToastrService)
     {

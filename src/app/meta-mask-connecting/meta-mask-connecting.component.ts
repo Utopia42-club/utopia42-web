@@ -42,7 +42,7 @@ export class MetaMaskConnectingComponent implements OnInit, OnDestroy {
     }
 
     networkName(): string {
-        return Networks.all.get(this.data.network).name;
+        return Networks.all.get(this.data.network)?.name ?? 'unknown';
     }
 
     cancel(): void {

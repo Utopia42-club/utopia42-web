@@ -1,14 +1,15 @@
 import { ErrorHandler, Injectable, NgZone } from '@angular/core';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef } from '@angular/material/dialog';
 import { ExceptionDialogContentComponent } from './exception-dialog-content/exception-dialog-content.component';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TimeoutError } from 'rxjs';
+import { UtopiaDialogService } from './utopia-dialog.service';
 
 @Injectable()
 export class GlobalErrorHandlerService implements ErrorHandler {
     private readonly dialogRefs: MatDialogRef<any>[] = [];
 
-    constructor(private readonly dialog: MatDialog, private readonly zone: NgZone) {
+    constructor(private readonly dialog: UtopiaDialogService, private readonly zone: NgZone) {
     }
 
     handleError(error: any): void {
@@ -50,17 +51,18 @@ export class GlobalErrorHandlerService implements ErrorHandler {
                 message = 'An exception occurred.';
             }
 
-            const dialogRef = this.dialog.open(ExceptionDialogContentComponent,
+            this.dialog.open(ExceptionDialogContentComponent,
                 {
                     data: {
                         title: title,
                         content: message,
                     }, closeOnNavigation: false,
+                }).subscribe(ref => {
+                    this.dialogRefs.push(ref);
+                    ref.afterClosed().subscribe(
+                        () => this.dialogRefs.splice(this.dialogRefs.indexOf(ref), 1)
+                    );
                 });
-            this.dialogRefs.push(dialogRef);
-            dialogRef.afterClosed().subscribe(
-                () => this.dialogRefs.splice(this.dialogRefs.indexOf(dialogRef), 1)
-            );
         });
     }
 }
