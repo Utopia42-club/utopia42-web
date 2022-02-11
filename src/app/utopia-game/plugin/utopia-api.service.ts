@@ -14,9 +14,11 @@ export class UtopiaApiService {
     public placeBlock(type: string, x: number, y: number, z: number) {
         this.bridge.call('UtopiaApi', 'PlaceBlock', JSON.stringify({
             type: type,
-            x: x,
-            y: y,
-            z: z
+            position: {
+                x: x,
+                y: y,
+                z: z
+            }
         }));
     }
 
