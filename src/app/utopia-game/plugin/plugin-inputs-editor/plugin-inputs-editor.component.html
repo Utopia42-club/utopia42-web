@@ -18,6 +18,21 @@
                         *ngTemplateOutlet="selectionField; context: {input: input}">
                     </ng-container>
                 </ng-container>
+                <ng-container *ngSwitchCase="'position'">
+                    <ng-container
+                        *ngTemplateOutlet="positionField; context: {input: input}">
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngSwitchCase="'land'">
+                    <ng-container
+                        *ngTemplateOutlet="landField; context: {input: input}">
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngSwitchCase="'blockType'">
+                    <ng-container
+                        *ngTemplateOutlet="blockTypeField; context: {input: input}">
+                    </ng-container>
+                </ng-container>
             </div>
         </form>
     </div>
@@ -87,6 +102,43 @@
             <mat-select [required]="input.required" [formControlName]="input.name">
                 <mat-option *ngFor="let option of input.options" [value]="option.value">
                     {{option.key}}
+                </mat-option>
+            </mat-select>
+            <mat-hint *ngIf="input.hint != null">{{input.hint}}</mat-hint>
+        </mat-form-field>
+    </form>
+</ng-template>
+
+<ng-template #positionField let-input="input">
+    <form [formGroup]="inputsForm" fxLayout="row">
+        <app-position-field [required]="input.required" [formControlName]="input.name"
+                            [label]="input.label ?? input.name" [hint]="input.hint"
+                            [positionOptions]="positionOptions | async">
+        </app-position-field>
+    </form>
+</ng-template>
+
+<ng-template #landField let-input="input">
+    <form [formGroup]="inputsForm">
+        <mat-form-field class="input-field">
+            <mat-label>{{input.label ?? input.name}}</mat-label>
+            <mat-select [required]="input.required" [formControlName]="input.name">
+                <mat-option *ngFor="let option of landOptions | async;let ind=index" [value]="option">
+                    {{ind}}. x1:{{option.x1}}, y1:{{option.y1}}, x2:{{option.x2}}, y2:{{option.y2}}
+                </mat-option>
+            </mat-select>
+            <mat-hint *ngIf="input.hint != null">{{input.hint}}</mat-hint>
+        </mat-form-field>
+    </form>
+</ng-template>
+
+<ng-template #blockTypeField let-input="input">
+    <form [formGroup]="inputsForm">
+        <mat-form-field class="input-field">
+            <mat-label>{{input.label ?? input.name}}</mat-label>
+            <mat-select [required]="input.required" [formControlName]="input.name">
+                <mat-option *ngFor="let type of blockTypes | async" [value]="type">
+                    {{type}}
                 </mat-option>
             </mat-select>
             <mat-hint *ngIf="input.hint != null">{{input.hint}}</mat-hint>

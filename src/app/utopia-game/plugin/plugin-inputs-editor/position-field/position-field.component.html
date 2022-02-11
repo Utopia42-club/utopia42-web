@@ -1,0 +1,26 @@
+<form [formGroup]="form" class="position-field">
+    <div fxLayout="column">
+        <p class="label">{{label}}</p>
+        <div fxLayout="row" class="fields-group" fxLayoutAlign="start center">
+            <mat-form-field fxFlex class="input-field" floatLabel="never">
+                <input matInput [required]="required" formControlName="x" type="number" placeholder="X"/>
+            </mat-form-field>
+            <mat-form-field fxFlex class="input-field" floatLabel="never">
+                <input matInput [required]="required" formControlName="y" type="number" placeholder="Y"/>
+            </mat-form-field>
+            <mat-form-field fxFlex class="input-field" floatLabel="never">
+                <input matInput [required]="required" formControlName="z" type="number" placeholder="Z"/>
+            </mat-form-field>
+            <button mat-icon-button class="options-drop-down" [matMenuTriggerFor]="menu" #trigger="matMenuTrigger">
+                <mat-icon>arrow_drop_down</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+                <button mat-menu-item *ngFor="let option of positionOptions"
+                        (click)="applyPositionOption(option);$event.stopPropagation();trigger.closeMenu()">
+                    {{option.name}}
+                </button>
+            </mat-menu>
+        </div>
+        <p class="hint" *ngIf="hint">{{hint}}</p>
+    </div>
+</form>

@@ -5,14 +5,17 @@
 
 .inputs {
     width: 100%;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    grid-auto-rows: min-content;
-    grid-gap: 0.5em;
-    justify-content: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6em;
+}
+
+.inputs > * {
+    flex-grow: 1;
 }
 
 .input-field {
+    width: 100%;
 }
 
 .loading-inputs {

@@ -3,6 +3,7 @@ import { UtopiaBridgeService } from '../utopia-bridge.service';
 import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { Position } from '../position';
+import { Land } from '../../ehtereum/models';
 
 @Injectable()
 export class UtopiaApiService {
@@ -24,4 +25,24 @@ export class UtopiaApiService {
             .pipe(map(res => JSON.parse(res)));
     }
 
+    public getPlayerLands(walletId: string): Observable<Land[]> {
+        return this.bridge.call('UtopiaApi', 'GetPlayerLands', walletId)
+            .pipe(map(res => JSON.parse(res)));
+    }
+
+    public getMarkers(): Observable<Marker[]> {
+        return this.bridge.call('UtopiaApi', 'GetMarkers', null)
+            .pipe(map(res => JSON.parse(res)));
+    }
+
+    public getBlockTypes(): Observable<string[]> {
+        return this.bridge.call('UtopiaApi', 'GetBlockTypes', null)
+            .pipe(map(res => JSON.parse(res)));
+    }
+
+}
+
+export interface Marker {
+    name: string,
+    position: Position
 }

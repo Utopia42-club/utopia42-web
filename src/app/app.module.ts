@@ -47,6 +47,7 @@ import { GlobalErrorHandlerService } from './global-error-handler.service';
 import { PluginRunningOverlayComponent } from './utopia-game/plugin/plugin-running-overlay/plugin-running-overlay.component';
 import { SimpleDialogComponent } from './simple-dialog/simple-dialog.component';
 import { MatMenuModule } from '@angular/material/menu';
+import { PositionFieldComponent } from './utopia-game/plugin/plugin-inputs-editor/position-field/position-field.component';
 
 @NgModule({
     declarations: [
@@ -69,7 +70,8 @@ import { MatMenuModule } from '@angular/material/menu';
         PluginSelectionComponent,
         FilterPluginsPipe,
         PluginRunningOverlayComponent,
-        SimpleDialogComponent
+        SimpleDialogComponent,
+        PositionFieldComponent
     ],
     imports: [
         BrowserModule,

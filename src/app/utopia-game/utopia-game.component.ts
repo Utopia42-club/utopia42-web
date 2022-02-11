@@ -9,6 +9,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { LoadingService } from '../loading.service';
 import { Subscription } from 'rxjs';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
+import { Web3Service } from '../ehtereum/web3.service';
 
 export const GAME_TOKEN = new InjectionToken<UtopiaGameComponent>('GAME_TOKEN');
 
@@ -39,7 +40,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
                 private readonly toaster: ToastrService, private readonly route: ActivatedRoute,
                 readonly utopiaApi: UtopiaApiService, readonly zone: NgZone,
                 readonly dialog: MatDialog, readonly pluginService: PluginExecutionService,
-                readonly loadingService: LoadingService) {
+                readonly loadingService: LoadingService, readonly web3Service: Web3Service) {
         window.bridge = bridge;
 
         this.pluginAction = {
@@ -87,6 +88,10 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
         this.utopiaApi.getPlayerPosition()
             .subscribe(position => {
                 inputs.playerPosition = position;
+            });
+        this.utopiaApi.getPlayerLands(this.web3Service.wallet())
+            .subscribe(lands => {
+                inputs.playerLands = lands;
             });
         this.pluginService.runCode(code, inputs)
             .subscribe(() => {

@@ -160,7 +160,7 @@ export class PluginParameter {
     label?: string;
     hint: string;
     required: boolean;
-    type: 'text' | 'number' | 'selection';
+    type: 'text' | 'number' | 'selection' | 'position' | 'land' | 'blockType';
     options?: { key: string, value: any }[];
     defaultValue?: any;
 }
