@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { AppComponent } from '../app.component';
 import { PortLandsComponent } from '../port-lands/port-lands.component';
 import { Configurations } from "../configurations";
 import { OpenGameAtComponent } from '../open-game-at/open-game-at.component';
+import { UtopiaDialogService } from '../utopia-dialog.service';
 
 
 @Component({
@@ -18,7 +18,7 @@ export class HomeComponent implements OnInit
 
 
     constructor(private router: Router,
-                private dialog: MatDialog,
+                private dialog: UtopiaDialogService,
                 private app: AppComponent)
     {
     }

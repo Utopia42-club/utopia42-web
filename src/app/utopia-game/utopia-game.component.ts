@@ -5,9 +5,9 @@ import { ToastrService } from 'ngx-toastr';
 import { ActivatedRoute } from '@angular/router';
 import { UtopiaApiService } from './plugin/utopia-api.service';
 import { PluginExecutionService } from './plugin/plugin-execution.service';
-import { MatDialog } from '@angular/material/dialog';
 import { LoadingService } from '../loading.service';
 import { Subscription } from 'rxjs';
+import { UtopiaDialogService } from '../utopia-dialog.service';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { Web3Service } from '../ehtereum/web3.service';
 
@@ -39,7 +39,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
     constructor(private bridge: UtopiaBridgeService, private appComponent: AppComponent,
                 private readonly toaster: ToastrService, private readonly route: ActivatedRoute,
                 readonly utopiaApi: UtopiaApiService, readonly zone: NgZone,
-                readonly dialog: MatDialog, readonly pluginService: PluginExecutionService,
+                readonly dialog: UtopiaDialogService, readonly pluginService: PluginExecutionService,
                 readonly loadingService: LoadingService, readonly web3Service: Web3Service) {
         window.bridge = bridge;
 

@@ -1,3 +1,4 @@
+import { UtopiaDialogService } from './utopia-dialog.service';
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -37,7 +38,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     actions: Action[] = [];
 
-    constructor(private service: Web3Service, private dialog: MatDialog, private route: ActivatedRoute, router: Router,
+    constructor(private service: Web3Service, private dialog: UtopiaDialogService, private route: ActivatedRoute, router: Router,
                 readonly http: HttpClient) {
         this.actions.push({
             label: 'Home',
@@ -183,11 +184,11 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
     private connect(network: number, wallet: string): Observable<boolean> {
-        let dialogRef = this.dialog.open(MetaMaskConnectingComponent, {
+        let dialogRef$ = this.dialog.open(MetaMaskConnectingComponent, {
             disableClose: true,
             data: { wallet, network } as ConnectionDetail
         });
-        return dialogRef.componentInstance.result$;
+        return dialogRef$.pipe(switchMap((ref) => ref.componentInstance.result$));
     }
 }
 

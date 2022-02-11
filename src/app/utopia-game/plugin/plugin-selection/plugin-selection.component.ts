@@ -2,12 +2,12 @@ import { Component, ComponentFactoryResolver, OnInit, ViewContainerRef } from '@
 import { PluginService } from '../plugin.service';
 import { LoadingService } from '../../../loading.service';
 import { Plugin } from '../Plugin';
-import { MatDialog } from '@angular/material/dialog';
 import { PluginEditorComponent } from '../plugin-editor/plugin-editor.component';
 import { ToastrService } from 'ngx-toastr';
 import { PluginInputsEditor } from '../plugin-inputs-editor/plugin-inputs-editor.component';
 import { PluginExecutionService } from '../plugin-execution.service';
 import { UtopiaGameComponent } from '../../utopia-game.component';
+import { UtopiaDialogService } from 'src/app/utopia-dialog.service';
 
 @Component({
     selector: 'app-plugin-selection',
@@ -21,7 +21,7 @@ export class PluginSelectionComponent implements OnInit {
     plugins: Plugin[];
 
     constructor(readonly pluginService: PluginService, readonly loadingService: LoadingService,
-                readonly dialog: MatDialog, readonly toaster: ToastrService,
+                readonly dialog: UtopiaDialogService, readonly toaster: ToastrService,
                 readonly pluginExecutionService: PluginExecutionService,
                 readonly game: UtopiaGameComponent, private vcr: ViewContainerRef) {
         loadingService.prepare(
@@ -33,24 +33,26 @@ export class PluginSelectionComponent implements OnInit {
     }
 
     createNewPlugin() {
-        this.dialog.open(PluginEditorComponent)
-            .afterClosed().subscribe((plugin) => {
-            if (plugin) {
-                this.plugins.push(plugin);
-            }
+        this.dialog.open(PluginEditorComponent).subscribe(ref => {
+            ref.afterClosed().subscribe((plugin) => {
+                if (plugin) {
+                    this.plugins.push(plugin);
+                }
+            });
         });
     }
 
     runPlugin(plugin: Plugin) {
         if (plugin.descriptorUrl) {
-            let dialog = this.dialog.open(PluginInputsEditor, {
+            this.dialog.open(PluginInputsEditor, {
                 data: plugin.id,
                 viewContainerRef: this.vcr
-            });
-            dialog.afterClosed().subscribe(result => {
-                if (result != null) {
-                    this.game.runPlugin(result.code, result.inputs);
-                }
+            }).subscribe((ref) => {
+                ref.afterClosed().subscribe(result => {
+                    if (result != null) {
+                        this.game.runPlugin(result.code, result.inputs);
+                    }
+                });
             });
         } else {
             this.loadingService.prepare(
@@ -62,14 +64,15 @@ export class PluginSelectionComponent implements OnInit {
     }
 
     editPlugin(plugin: Plugin) {
-        let dialog = this.dialog.open(PluginEditorComponent, {
+        this.dialog.open(PluginEditorComponent, {
             data: plugin.id,
             viewContainerRef: this.vcr
-        });
-        dialog.afterClosed().subscribe(result => {
-            if (result != null) {
-                Object.assign(plugin, result);
-            }
+        }).subscribe((ref) => {
+            ref.afterClosed().subscribe(result => {
+                if (result != null) {
+                    Object.assign(plugin, result);
+                }
+            });
         });
     }
 

@@ -2,13 +2,13 @@ import { Injectable, NgZone } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { UtopiaApiService } from './utopia-api.service';
-import { MatDialog } from '@angular/material/dialog';
 import { catchError, switchMap, tap } from 'rxjs/operators';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { SimpleDialogAction, SimpleDialogComponent, SimpleDialogData } from '../../simple-dialog/simple-dialog.component';
 import { PluginRunningOverlayComponent } from './plugin-running-overlay/plugin-running-overlay.component';
 import { ToastrService } from 'ngx-toastr';
+import { UtopiaDialogService } from 'src/app/utopia-dialog.service';
 
 @Injectable()
 export class PluginExecutionService {
@@ -18,7 +18,7 @@ export class PluginExecutionService {
     private windowListener: (event: MessageEvent) => void;
 
     constructor(readonly http: HttpClient, readonly utopiaApi: UtopiaApiService,
-                readonly zone: NgZone, readonly dialog: MatDialog, readonly overlay: Overlay,
+                readonly zone: NgZone, readonly dialog: UtopiaDialogService, readonly overlay: Overlay,
                 readonly toaster: ToastrService) {
         this.http.get('../../assets/sandbox.html', { responseType: 'text' })
             .subscribe(data => this.iframeSrc = data);
@@ -48,10 +48,10 @@ export class PluginExecutionService {
                                     'Are you sure you want to cancel the plugin execution?',
                                     [
                                         new SimpleDialogAction('Cancel', () => {
-                                            confirmationDialog.close();
+                                            // confirmationDialog.close(); // FIXME
                                         }, 'accent'),
                                         new SimpleDialogAction('Yes', () => {
-                                            confirmationDialog.close();
+                                            // confirmationDialog.close(); // FIXME
                                             this.pluginOverlayRef.dispose();
                                             this.terminateFrame();
                                         }, 'primary')

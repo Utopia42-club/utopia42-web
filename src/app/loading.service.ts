@@ -3,6 +3,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSpinner } from '@angular/material/progress-spinner';
 import { Observable, of } from 'rxjs';
 import { finalize, switchMap, tap } from 'rxjs/operators';
+import { UtopiaDialogService } from './utopia-dialog.service';
 
 @Injectable({
     providedIn: 'root'
@@ -11,25 +12,27 @@ export class LoadingService {
     private taskCounter: number = 0;
     private dialogRef: MatDialogRef<any, any>;
 
-    constructor(private dialog: MatDialog, private zone: NgZone) {
+    constructor(private dialog: UtopiaDialogService, private zone: NgZone) {
     }
 
     openDialog(): void {
         if (this.dialogRef != null) {
-            let dialogs = this.dialog.openDialogs;
+            let dialogs = this.dialog.matDialog.openDialogs;
             let idx = dialogs.indexOf(this.dialogRef);
             if (idx == dialogs.length - 1) {
                 return;
             }
             this.dialogRef.close();
         }
-        this.dialogRef = this.dialog.open(MatSpinner,
-            {
-                disableClose: true,
-                panelClass: 'loading-panel',
-                backdropClass: 'loading-back-drop'
-            }
-        );
+        // this.dialog.open(MatSpinner,
+        //     {
+        //         disableClose: true,
+        //         panelClass: 'loading-panel',
+        //         backdropClass: 'loading-back-drop'
+        //     }
+        // ).subscribe((ref) => {
+        //     this.dialogRef = ref;
+        // });
     }
 
     private taskStarted(): void {
