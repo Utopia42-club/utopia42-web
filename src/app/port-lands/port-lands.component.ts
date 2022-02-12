@@ -8,7 +8,7 @@ import { Network, Networks } from '../ehtereum/network';
 import { UtopiaContract } from '../ehtereum/utopia-contract';
 import { Web3Service } from '../ehtereum/web3.service';
 import { ExceptionDialogContentComponent } from '../exception-dialog-content/exception-dialog-content.component';
-import { LoadingService } from '../loading.service';
+import { LoadingService } from '../loading/loading.service';
 import { ToastrService } from "ngx-toastr";
 import { UtopiaDialogService } from '../utopia-dialog.service';
 

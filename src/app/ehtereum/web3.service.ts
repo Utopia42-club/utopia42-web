@@ -4,7 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { BehaviorSubject, from, Observable, of } from 'rxjs';
 import { catchError, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import Web3 from 'web3';
-import { LoadingService } from '../loading.service';
+import { LoadingService } from '../loading/loading.service';
 import { UTOPIA_ABI } from './abi';
 import { Networks } from './network';
 import { UtopiaContract } from './utopia-contract';

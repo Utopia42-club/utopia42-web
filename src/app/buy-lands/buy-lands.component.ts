@@ -4,7 +4,7 @@ import { of, Subscription } from 'rxjs';
 import { catchError, concatMap, tap } from 'rxjs/operators';
 import { Land, PricedLand } from '../ehtereum/models';
 import { ExceptionDialogContentComponent } from '../exception-dialog-content/exception-dialog-content.component';
-import { LoadingService } from '../loading.service';
+import { LoadingService } from '../loading/loading.service';
 import { BuyLandValidation } from './buy-land-validation';
 import { BuyLandsData } from './buy-lands-data';
 import { BuyLandsService } from './buy-lands.service';

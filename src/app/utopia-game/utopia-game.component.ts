@@ -5,7 +5,7 @@ import { ToastrService } from 'ngx-toastr';
 import { ActivatedRoute } from '@angular/router';
 import { UtopiaApiService } from './plugin/utopia-api.service';
 import { PluginExecutionService } from './plugin/plugin-execution.service';
-import { LoadingService } from '../loading.service';
+import { LoadingService } from '../loading/loading.service';
 import { Subscription } from 'rxjs';
 import { UtopiaDialogService } from '../utopia-dialog.service';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';

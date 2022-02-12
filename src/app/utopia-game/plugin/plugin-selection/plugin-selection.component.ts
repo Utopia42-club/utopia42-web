@@ -1,6 +1,6 @@
 import { Component, ComponentFactoryResolver, OnInit, ViewContainerRef } from '@angular/core';
 import { PluginService } from '../plugin.service';
-import { LoadingService } from '../../../loading.service';
+import { LoadingService } from '../../../loading/loading.service';
 import { Plugin } from '../Plugin';
 import { PluginEditorComponent } from '../plugin-editor/plugin-editor.component';
 import { ToastrService } from 'ngx-toastr';

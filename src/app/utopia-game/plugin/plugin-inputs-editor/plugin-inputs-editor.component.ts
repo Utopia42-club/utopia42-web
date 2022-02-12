@@ -3,7 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { PluginExecutionService, PluginParameter } from '../plugin-execution.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { PluginService } from '../plugin.service';
-import { LoadingService } from '../../../loading.service';
+import { LoadingService } from '../../../loading/loading.service';
 import { Plugin } from '../Plugin';
 import { Marker, UtopiaApiService } from '../utopia-api.service';
 import { BehaviorSubject } from 'rxjs';

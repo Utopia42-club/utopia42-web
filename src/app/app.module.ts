@@ -48,6 +48,7 @@ import { PluginRunningOverlayComponent } from './utopia-game/plugin/plugin-runni
 import { SimpleDialogComponent } from './simple-dialog/simple-dialog.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { PositionFieldComponent } from './utopia-game/plugin/plugin-inputs-editor/position-field/position-field.component';
+import { LoadingComponent } from './loading/loading.component';
 
 @NgModule({
     declarations: [
@@ -71,7 +72,8 @@ import { PositionFieldComponent } from './utopia-game/plugin/plugin-inputs-edito
         FilterPluginsPipe,
         PluginRunningOverlayComponent,
         SimpleDialogComponent,
-        PositionFieldComponent
+        PositionFieldComponent,
+        LoadingComponent
     ],
     imports: [
         BrowserModule,

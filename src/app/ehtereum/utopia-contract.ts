@@ -3,7 +3,7 @@ import { from, Observable, of, Subscriber } from "rxjs";
 import { map, switchMap } from "rxjs/operators";
 import Web3 from "web3";
 import { Contract } from "web3-eth-contract";
-import { LoadingService } from "../loading.service";
+import { LoadingService } from "../loading/loading.service";
 import { Land, PricedLand } from "./models";
 
 export class UtopiaContract
@@ -52,7 +52,7 @@ export class UtopiaContract
         );
     }
 
-    public assignLandEstimateGas(wallet: string, land: PricedLand, lastLandCheckedId: number, signature: string, amount: string): Observable<string> 
+    public assignLandEstimateGas(wallet: string, land: PricedLand, lastLandCheckedId: number, signature: string, amount: string): Observable<string>
     {
         return new Observable(s =>
             this.ethContract.methods

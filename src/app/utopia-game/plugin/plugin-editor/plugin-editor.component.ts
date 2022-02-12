@@ -1,7 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { LoadingService } from '../../../loading.service';
+import { LoadingService } from '../../../loading/loading.service';
 import { PluginService } from '../plugin.service';
 import { ToastrService } from 'ngx-toastr';
 

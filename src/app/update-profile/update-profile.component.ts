@@ -7,7 +7,7 @@ import { EditProfileData } from './update-profile-data';
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef, } from '@angular/material/dialog';
 import { of, Subscription } from 'rxjs';
-import { LoadingService } from '../loading.service';
+import { LoadingService } from '../loading/loading.service';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from '../auth.service';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
