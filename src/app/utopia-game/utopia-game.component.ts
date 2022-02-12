@@ -85,14 +85,6 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
 
     public runPlugin(code: string, inputs: any) {
         this.closePluginMenu();
-        this.utopiaApi.getPlayerPosition()
-            .subscribe(position => {
-                inputs.playerPosition = position;
-            });
-        this.utopiaApi.getPlayerLands(this.web3Service.wallet())
-            .subscribe(lands => {
-                inputs.playerLands = lands;
-            });
         this.pluginService.runCode(code, inputs)
             .subscribe(() => {
             }, error => {

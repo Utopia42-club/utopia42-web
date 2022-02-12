@@ -3,41 +3,130 @@
 <head>
     <script>
         worker = undefined;
-
         window.addEventListener('message', function (e) {
             let mainWindow = e.source;
             let target = e.origin;
             let message = e.data;
             if (message.type === 'request') {
                 let code = `
+                    let idCounter = 0;
+                    let map = new Map();
                     UtopiaApi = {
                         placeBlock: function (type, x, y, z) {
-                            postMessage({
+                            return new Promise(function (resolve, reject) {
+                                map.set(idCounter, {resolve: resolve, reject: reject})
+                                let message = {
                                     type: 'request',
                                     body: {
                                         method: 'placeBlock',
                                         params: [type, x, y, z]
-                                    }
-                                }
-                            )
+                                    },
+                                    id: idCounter++
+                                };
+                                postMessage(message);
+                            });
+                        },
+                        getPlayerPosition: function () {
+                            return new Promise(function (resolve, reject) {
+                                map.set(idCounter, {resolve: resolve, reject: reject})
+                                let message = {
+                                    type: 'request',
+                                    body: {
+                                        method: 'getPlayerPosition',
+                                        params: undefined
+                                    },
+                                    id: idCounter++
+                                };
+                                postMessage(message);
+                            });
+                        },
+                        getPlayerLands: function (walletId) {
+                            return new Promise(function (resolve, reject) {
+                                map.set(idCounter, {resolve: resolve, reject: reject})
+                                let message = {
+                                    type: 'request',
+                                    body: {
+                                        method: 'getPlayerLands',
+                                        params: [walletId]
+                                    },
+                                    id: idCounter++
+                                };
+                                postMessage(message);
+                            });
+                        },
+                        getMarkers: function () {
+                            return new Promise(function (resolve, reject) {
+                                map.set(idCounter, {resolve: resolve, reject: reject})
+                                let message = {
+                                    type: 'request',
+                                    body: {
+                                        method: 'getMarkers',
+                                        params: undefined
+                                    },
+                                    id: idCounter++
+                                };
+                                postMessage(message);
+                            });
+                        },
+                        getCurrentWallet: function () {
+                            return new Promise(function (resolve, reject) {
+                                map.set(idCounter, {resolve: resolve, reject: reject})
+                                let message = {
+                                    type: 'request',
+                                    body: {
+                                        method: 'getCurrentWallet',
+                                        params: undefined
+                                    },
+                                    id: idCounter++
+                                };
+                                postMessage(message);
+                            });
                         },
                     };
 
                     onmessage = function (e) {
-                        var Inputs = e.data;
-                        try {
-                            ${message.body.code}
-                            if( main == null )
-                                throw new Error('main is not defined');
-                            main().then(() => {
-                                postMessage({
-                                    type: 'end'
+                        var message = e.data;
+                        if(message.type == 'request'){
+                            var Inputs = e.data.body.inputs;
+                            try {
+                                ${message.body.code}
+                                if( main == null )
+                                    throw new Error('main is not defined');
+                                main().then(() => {
+                                    postMessage({
+                                        type: 'end'
+                                    });
+                                },(e) => {
+                                    postMessage({
+                                        type: 'error',
+                                        body: e.message
+                                    });
                                 });
-                            });
-                        } catch (e) {
+                            } catch (e) {
+                                postMessage({
+                                    type: 'error',
+                                    body: e.message
+                                });
+                            }
+                        } else if(message.type == 'response' || message.type == 'responseError') {
+                            let promiseCallbacks = map.get(message.id);
+                            if(promiseCallbacks != null){
+                                if(message.type == 'response'){
+                                    promiseCallbacks.resolve(message.body);
+                                } else {
+                                    promiseCallbacks.reject(message.body);
+                                }
+                                map.delete(message.id);
+                            } else {
+                                postMessage({
+                                    type: 'error',
+                                    body: 'Invalid Response'
+                                });
+                            }
+                        } else {
                             postMessage({
                                 type: 'error',
-                                body: e.message
+                                body: 'Invalid Response'
                             });
                         }
                     }
@@ -52,7 +141,10 @@
                 this.worker.onmessage = function (e) {
                     mainWindow.postMessage(e.data, target);
                 }
-                this.worker.postMessage(message.body.inputs);
+                this.worker.postMessage(message);
+            } else if (message.type === 'response' || message.type === 'responseError') {
+                if (this.worker != null) //FIXME else? error?
+                    this.worker.postMessage(message);
             } else if (message.type === 'end') {
                 this.worker.terminate();
                 this.worker = undefined;

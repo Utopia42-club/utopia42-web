@@ -1,25 +1,26 @@
 import { Injectable } from '@angular/core';
 import { UtopiaBridgeService } from '../utopia-bridge.service';
 import { map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { Position } from '../position';
 import { Land } from '../../ehtereum/models';
+import { Web3Service } from '../../ehtereum/web3.service';
 
 @Injectable()
 export class UtopiaApiService {
 
-    constructor(readonly bridge: UtopiaBridgeService) {
+    constructor(readonly bridge: UtopiaBridgeService, readonly web3Service: Web3Service) {
     }
 
-    public placeBlock(type: string, x: number, y: number, z: number) {
-        this.bridge.call('UtopiaApi', 'PlaceBlock', JSON.stringify({
+    public placeBlock(type: string, x: number, y: number, z: number): Observable<boolean> {
+        return this.bridge.call('UtopiaApi', 'PlaceBlock', JSON.stringify({
             type: type,
             position: {
                 x: x,
                 y: y,
                 z: z
             }
-        }));
+        })).pipe(map(res => JSON.parse(res)));
     }
 
     public getPlayerPosition(): Observable<Position> {
@@ -40,6 +41,10 @@ export class UtopiaApiService {
     public getBlockTypes(): Observable<string[]> {
         return this.bridge.call('UtopiaApi', 'GetBlockTypes', null)
             .pipe(map(res => JSON.parse(res)));
+    }
+
+    public getCurrentWallet(): Observable<string> {
+        return of(this.web3Service.wallet());
     }
 
 }

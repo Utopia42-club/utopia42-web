@@ -105,7 +105,22 @@ export class PluginExecutionService {
                     let message = event.data;
                     switch (message.type) {
                         case 'request': {
-                            that.zone.run(() => that.utopiaApi[message.body.method].apply(that.utopiaApi, message.body.params));
+                            let res = that.zone.run(() => that.utopiaApi[message.body.method].apply(that.utopiaApi, message.body.params));
+                            if (res instanceof Observable) {
+                                res.subscribe(value => {
+                                    that.secureEvalIframe.contentWindow.postMessage({
+                                        id: message.id,
+                                        type: 'response',
+                                        body: value
+                                    }, '*');
+                                }, error => {
+                                    that.secureEvalIframe.contentWindow.postMessage({
+                                        id: message.id,
+                                        type: 'responseError',
+                                        body: error
+                                    }, '*');
+                                });
+                            }
                             break;
                         }
                         case 'end': {
