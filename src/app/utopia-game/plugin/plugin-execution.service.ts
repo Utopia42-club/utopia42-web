@@ -48,10 +48,14 @@ export class PluginExecutionService {
                                     'Are you sure you want to cancel the plugin execution?',
                                     [
                                         new SimpleDialogAction('Cancel', () => {
-                                            // confirmationDialog.close(); // FIXME
+                                            confirmationDialog.subscribe((dialogRef) => {
+                                                dialogRef.close();
+                                            });
                                         }, 'accent'),
                                         new SimpleDialogAction('Yes', () => {
-                                            // confirmationDialog.close(); // FIXME
+                                            confirmationDialog.subscribe((dialogRef) => {
+                                                dialogRef.close();
+                                            });
                                             this.pluginOverlayRef.dispose();
                                             this.terminateFrame();
                                         }, 'primary')
