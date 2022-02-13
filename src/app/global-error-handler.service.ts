@@ -45,6 +45,9 @@ export class GlobalErrorHandlerService implements ErrorHandler {
             } else if (error instanceof TimeoutError) {
                 title = 'Timeout';
                 message = 'The server did not respond in time.';
+            } else if (error.code != null && error.code == 4001) {
+                title = 'Login error';
+                message = error.message;
             }
             if (title == null) {
                 title = 'Exception';
@@ -60,11 +63,11 @@ export class GlobalErrorHandlerService implements ErrorHandler {
                         content: message,
                     }, closeOnNavigation: false,
                 }).subscribe(ref => {
-                    this.dialogRefs.push(ref);
-                    ref.afterClosed().subscribe(
-                        () => this.dialogRefs.splice(this.dialogRefs.indexOf(ref), 1)
-                    );
-                });
+                this.dialogRefs.push(ref);
+                ref.afterClosed().subscribe(
+                    () => this.dialogRefs.splice(this.dialogRefs.indexOf(ref), 1)
+                );
+            });
         });
     }
 }

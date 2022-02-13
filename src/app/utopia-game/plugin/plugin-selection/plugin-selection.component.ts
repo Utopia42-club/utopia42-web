@@ -1,4 +1,4 @@
-import { Component, ComponentFactoryResolver, OnInit, ViewContainerRef } from '@angular/core';
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
 import { PluginService } from '../plugin.service';
 import { LoadingService } from '../../../loading/loading.service';
 import { Plugin } from '../Plugin';
@@ -8,6 +8,8 @@ import { PluginInputsEditor } from '../plugin-inputs-editor/plugin-inputs-editor
 import { PluginExecutionService } from '../plugin-execution.service';
 import { UtopiaGameComponent } from '../../utopia-game.component';
 import { UtopiaDialogService } from 'src/app/utopia-dialog.service';
+import { catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs';
 
 @Component({
     selector: 'app-plugin-selection',
@@ -26,6 +28,11 @@ export class PluginSelectionComponent implements OnInit {
                 readonly game: UtopiaGameComponent, private vcr: ViewContainerRef) {
         loadingService.prepare(
             pluginService.getPluginsForUser()
+        ).pipe(
+            catchError(err => {
+                this.game.closePluginMenu();
+                return throwError(err);
+            })
         ).subscribe((plugins) => this.plugins = plugins);
     }
 
