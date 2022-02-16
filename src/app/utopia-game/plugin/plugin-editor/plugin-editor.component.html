@@ -12,6 +12,11 @@
             <mat-label>Descriptor URL</mat-label>
             <input matInput formControlName="descriptorUrl" type="text"/>
         </mat-form-field>
+        <mat-form-field class="form__field">
+            <mat-label>Description</mat-label>
+            <textarea matInput [required]="false" formControlName="description">
+            </textarea>
+        </mat-form-field>
     </form>
     <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="0.5em" class="actions">
         <button mat-raised-button color="primary"

@@ -20,6 +20,7 @@ export class PluginEditorComponent implements OnInit {
         this.form = new FormGroup({
             id: new FormControl(),
             name: new FormControl(null, [Validators.required]),
+            description: new FormControl(null),
             walletId: new FormControl(null),
             scriptUrl: new FormControl(null, [Validators.required]),
             descriptorUrl: new FormControl(null)
