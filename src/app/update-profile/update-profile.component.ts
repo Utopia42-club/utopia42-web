@@ -140,7 +140,10 @@ export class EditProfileComponent implements OnInit, OnDestroy {
                             return of(undefined);
                         }),
                     )
-            ).subscribe()
+            ).subscribe(() => {}, error => {
+                if(error.status != 404)
+                    throw error;
+            })
         );
     }
 
