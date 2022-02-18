@@ -124,7 +124,7 @@
             <mat-label>{{input.label ?? input.name}}</mat-label>
             <mat-select [required]="input.required" [formControlName]="input.name">
                 <mat-option *ngFor="let option of landOptions | async;let ind=index" [value]="option">
-                    {{ind}}. x1:{{option.x1}}, y1:{{option.y1}}, x2:{{option.x2}}, y2:{{option.y2}}
+                    Land #{{option.id}}
                 </mat-option>
             </mat-select>
             <mat-hint *ngIf="input.hint != null">{{input.hint}}</mat-hint>

@@ -1,6 +1,5 @@
 import { UtopiaDialogService } from './utopia-dialog.service';
 import { AfterViewInit, Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
@@ -64,7 +63,8 @@ export class AppComponent implements OnInit, AfterViewInit {
                                 .map(l => {
                                     let coords = l.split('_').map(v => Number(v));
                                     return {
-                                        x1: coords[0], y1: coords[1], x2: coords[2], y2: coords[3]
+                                        startCoordinate: { x: coords[0], y: coords[1], z: 0 },
+                                        endCoordinate: { x: coords[2], y: coords[3], z: 0 }
                                     };
                                 })
                         });
