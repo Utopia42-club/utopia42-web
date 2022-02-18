@@ -105,7 +105,11 @@ export class UtopiaBridgeService {
         let response: Response = JSON.parse(res.body);
         let subject = this.responseObservable.get(response.id);
         if (subject) {
-            subject.next(response.body);
+            if (response.body != null) {
+                subject.next(response.body);
+            } else if (response.error != null) {
+                subject.error(response.error);
+            }
             subject.complete();
             this.responseObservable.delete(response.id);
         }

@@ -89,7 +89,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
             .subscribe(() => {
             }, error => {
                 console.error(error);
-                this.toaster.error('Plugin execution failed: ' + error);
+                this.toaster.error('Plugin execution failed: ' + (error ?? "Unknown error"));
             }, () => {
                 this.toaster.success('Plugin executed successfully');
             });

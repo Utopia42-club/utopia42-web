@@ -15,4 +15,5 @@ export interface WebToUnityRequest {
 export interface Response {
     id: string;
     body: string;
+    error: string;
 }
