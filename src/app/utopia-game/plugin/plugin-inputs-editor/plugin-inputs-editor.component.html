@@ -138,7 +138,10 @@
             <mat-label>{{input.label ?? input.name}}</mat-label>
             <mat-select [required]="input.required" [formControlName]="input.name">
                 <mat-option *ngFor="let type of blockTypes | async" [value]="type">
-                    {{type}}
+                    <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="auto">
+                        <div>{{type}}</div>
+                        <img *ngIf="type != 'air'" src="/assets/blockIcons/{{type}}.png" width="30" height="30"/>
+                    </div>
                 </mat-option>
             </mat-select>
             <mat-hint *ngIf="input.hint != null">{{input.hint}}</mat-hint>
