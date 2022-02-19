@@ -128,4 +128,20 @@ export class BuyLandsComponent implements OnInit, OnDestroy
             price = price + land.price;
         return price;
     }
+
+    getLandProperty(land: PricedLand, property: string): Number
+    {
+        if (property == 'x1')
+            return land.startCoordinate.x;
+        if (property == 'x2')
+            return land.endCoordinate.x;
+        if (property == 'y1')
+            return land.startCoordinate.z;
+        if (property == 'y2')
+            return land.endCoordinate.z;
+        if (property == 'price')
+            return land.price;
+        return null;
+    }
+
 }
