@@ -40,6 +40,7 @@ export class PluginInputsEditor implements OnInit {
             this.pluginExecutionService.getFile(value.descriptorUrl.trim())
                 .subscribe(inputs => {
                     this.inputs = JSON.parse(inputs);
+                    this.inputsForm = this.toFormGroup(this.inputs);
                     if (this.inputs.find(input => input.type == 'position') != null) {
                         this.utopiaApiService.getPlayerPosition()
                             .subscribe(position => {
@@ -58,6 +59,18 @@ export class PluginInputsEditor implements OnInit {
                             .subscribe(lands => {
                                 this.landOptions.next(lands);
                             });
+                        this.utopiaApiService.getCurrentLand()
+                            .subscribe(land => {
+                                if (land != null) {
+                                    let l = this.landOptions.value.find(l => l.id == land.id);
+                                    if (l != null) {
+                                        this.inputs.filter(input => input.type == 'land')
+                                            .forEach(input => {
+                                                this.inputsForm.get(input.name).setValue(l);
+                                            });
+                                    }
+                                }
+                            });
                     }
                     if (this.inputs.find(input => input.type == 'blockType') != null) {
                         this.utopiaApiService.getBlockTypes()
@@ -65,7 +78,6 @@ export class PluginInputsEditor implements OnInit {
                                 this.blockTypes.next([...this.blockTypes.getValue(), ...blockTypes]);
                             });
                     }
-                    this.inputsForm = this.toFormGroup(this.inputs);
                 });
         });
     }

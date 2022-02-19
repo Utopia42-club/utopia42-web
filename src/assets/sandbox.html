@@ -54,6 +54,20 @@
                                 postMessage(message);
                             });
                         },
+                        getCurrentLand: function () {
+                            return new Promise(function (resolve, reject) {
+                                map.set(idCounter, {resolve: resolve, reject: reject})
+                                let message = {
+                                    type: 'request',
+                                    body: {
+                                        method: 'getCurrentLand',
+                                        params: undefined
+                                    },
+                                    id: idCounter++
+                                };
+                                postMessage(message);
+                            });
+                        },
                         getMarkers: function () {
                             return new Promise(function (resolve, reject) {
                                 map.set(idCounter, {resolve: resolve, reject: reject})

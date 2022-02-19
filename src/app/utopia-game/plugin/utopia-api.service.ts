@@ -33,6 +33,11 @@ export class UtopiaApiService {
             .pipe(map(res => JSON.parse(res)));
     }
 
+    public getCurrentLand(): Observable<Land> {
+        return this.bridge.call('UtopiaApi', 'GetCurrentLand', null)
+            .pipe(map(res => JSON.parse(res)));
+    }
+
     public getMarkers(): Observable<Marker[]> {
         return this.bridge.call('UtopiaApi', 'GetMarkers', null)
             .pipe(map(res => JSON.parse(res)));
