@@ -17,7 +17,7 @@
             <mat-menu #menu="matMenu">
                 <button mat-menu-item *ngFor="let option of positionOptions"
                         (click)="applyPositionOption(option);$event.stopPropagation();trigger.closeMenu()">
-                    {{option.name}}
+                    {{option.name ?? (option.position.x + ', ' + option.position.y + ', ' + option.position.z)}}
                 </button>
             </mat-menu>
         </div>
