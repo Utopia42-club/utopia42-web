@@ -63,8 +63,8 @@ export class AppComponent implements OnInit, AfterViewInit {
                                 .map(l => {
                                     let coords = l.split('_').map(v => Number(v));
                                     return {
-                                        startCoordinate: { x: coords[0], y: coords[1], z: 0 },
-                                        endCoordinate: { x: coords[2], y: coords[3], z: 0 }
+                                        startCoordinate: { x: coords[0], y: 0, z: coords[1] },
+                                        endCoordinate: { x: coords[2], y: 0, z: coords[3] }
                                     };
                                 })
                         });
