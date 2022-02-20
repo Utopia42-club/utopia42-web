@@ -25,6 +25,9 @@ export class PluginInputsEditor implements OnInit {
     landOptions = new BehaviorSubject<Land[]>([]);
     blockTypes = new BehaviorSubject<string[]>([]);
 
+    isRunDialog = false;
+    acceptedTerms = false;
+
     constructor(readonly pluginExecutionService: PluginExecutionService, readonly loadingService: LoadingService,
                 readonly dialogRef: MatDialogRef<PluginInputsEditor>, @Inject(MAT_DIALOG_DATA) readonly data: any,
                 readonly utopiaApiService: UtopiaApiService, readonly web3Service: Web3Service) {
@@ -34,6 +37,7 @@ export class PluginInputsEditor implements OnInit {
         }
         this.plugin = data.plugin;
         if (data.inputs == null) {
+            this.isRunDialog = true;
             this.pluginExecutionService.getFile(this.plugin.descriptorUrl.trim())
                 .subscribe(inputs => {
                     this.prepareInputs(JSON.parse(inputs));
@@ -108,4 +112,7 @@ export class PluginInputsEditor implements OnInit {
         return new FormGroup(group);
     }
 
+    openInNewTab(scriptUrl: string) {
+        window.open(scriptUrl, '_blank');
+    }
 }

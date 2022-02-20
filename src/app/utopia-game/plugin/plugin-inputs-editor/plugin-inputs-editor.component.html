@@ -40,15 +40,23 @@
     <div *ngIf="inputsForm == null" fxLayout="row" fxLayoutAlign="center center" class="loading-inputs">
         <p>Loading plugin inputs...</p>
     </div>
-    <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="0.5em" class="actions">
-        <button *ngIf="inputsForm != null" mat-raised-button color="primary"
-                (click)="submit()" [disabled]="!this.inputsForm.valid">
-            Submit
-        </button>
-        <button mat-raised-button color="accent"
-                (click)="cancel()">
-            Cancel
-        </button>
+    <div class="footer" fxLayout="column">
+        <div class="terms" fxLayout="row" fxLayoutAlign="start center" *ngIf="isRunDialog">
+            <mat-checkbox [(ngModel)]="acceptedTerms">
+                By checking this box, you are accepting consequences of running this
+                <a [href]="plugin.scriptUrl" target="_blank">plugin script</a>
+            </mat-checkbox>
+        </div>
+        <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="0.5em" class="actions">
+            <button *ngIf="inputsForm != null" mat-raised-button color="primary"
+                    (click)="submit()" [disabled]="!this.inputsForm.valid || (isRunDialog && !acceptedTerms)">
+                Submit
+            </button>
+            <button mat-raised-button color="accent"
+                    (click)="cancel()">
+                Cancel
+            </button>
+        </div>
     </div>
 </div>
 

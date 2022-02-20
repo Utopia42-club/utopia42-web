@@ -49,6 +49,7 @@ import { SimpleDialogComponent } from './simple-dialog/simple-dialog.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { PositionFieldComponent } from './utopia-game/plugin/plugin-inputs-editor/position-field/position-field.component';
 import { LoadingComponent } from './loading/loading.component';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @NgModule({
     declarations: [
@@ -104,7 +105,8 @@ import { LoadingComponent } from './loading/loading.component';
         MatAutocompleteModule,
         OverlayModule,
         MatListModule,
-        MatMenuModule
+        MatMenuModule,
+        MatCheckboxModule
     ],
     providers: [
         {
