@@ -1,6 +1,6 @@
 <form [formGroup]="form" class="position-field">
     <div fxLayout="column">
-        <p class="label">{{label}}</p>
+        <p class="label" [innerHtml]="label | sanitize"></p>
         <div fxLayout="row" class="fields-group" fxLayoutAlign="start center">
             <mat-form-field fxFlex class="input-field" floatLabel="never">
                 <input matInput [required]="required" formControlName="x" type="number" placeholder="X"/>
@@ -10,7 +10,8 @@
             </mat-form-field>
             <mat-form-field fxFlex class="input-field" floatLabel="never">
                 <input matInput [required]="required" formControlName="z" type="number" placeholder="Z"/>
-                <button matSuffix mat-icon-button class="options-drop-down" [matMenuTriggerFor]="menu" #trigger="matMenuTrigger">
+                <button matSuffix mat-icon-button class="options-drop-down" [matMenuTriggerFor]="menu"
+                        #trigger="matMenuTrigger">
                     <mat-icon>arrow_drop_down</mat-icon>
                 </button>
             </mat-form-field>
@@ -21,6 +22,6 @@
                 </button>
             </mat-menu>
         </div>
-        <p class="hint" *ngIf="hint">{{hint}}</p>
+        <p class="hint" *ngIf="hint" [innerHtml]="hint | sanitize"></p>
     </div>
 </form>

@@ -1,7 +1,7 @@
 <div class="root" fxLayout="column" fxLayoutAlign="space-between center">
     <div *ngIf="inputsForm != null" fxLayout="column" style="width: 100%">
         <p class="title">{{plugin.name}} plugin</p>
-        <p class="subtitle" *ngIf="inputs != null && inputs.length > 0">Please fill out required inputs</p>
+        <p class="subtitle" *ngIf="inputs != null && inputs.length > 0">Please fill out input parameters</p>
         <form [formGroup]="inputsForm" class="inputs">
             <div *ngFor="let input of inputs" [ngSwitch]="input.type">
                 <ng-container *ngSwitchCase="'number'">
@@ -43,7 +43,7 @@
     <div class="footer" fxLayout="column">
         <div class="terms" fxLayout="row" fxLayoutAlign="start center" *ngIf="isRunDialog">
             <mat-checkbox [(ngModel)]="acceptedTerms">
-                By checking this box, you are accepting consequences of running this
+                I accept consequences of running this
                 <a [href]="plugin.scriptUrl" target="_blank">plugin script</a>
             </mat-checkbox>
         </div>
@@ -63,15 +63,17 @@
 <ng-template #numberField let-input="input">
     <form [formGroup]="inputsForm">
         <mat-form-field *ngIf="input.options == null" class="input-field">
-            <mat-label>{{input.label ?? input.name}}</mat-label>
+            <mat-label *ngIf="input.label == null">{{input.name}}</mat-label>
+            <mat-label *ngIf="input.label != null" [innerHtml]="input.label | sanitize"></mat-label>
             <input matInput [required]="input.required" [formControlName]="input.name" type="number"/>
-            <mat-hint *ngIf="input.hint != null">{{input.hint}}</mat-hint>
+            <mat-hint *ngIf="input.hint != null" [innerHtml]="input.hint | sanitize"></mat-hint>
         </mat-form-field>
         <mat-form-field *ngIf="input.options != null" class="input-field">
-            <mat-label>{{input.label ?? input.name}}</mat-label>
+            <mat-label *ngIf="input.label == null">{{input.name}}</mat-label>
+            <mat-label *ngIf="input.label != null" [innerHtml]="input.label | sanitize"></mat-label>
             <input matInput [required]="input.required" [formControlName]="input.name" type="number"
                    [matAutocomplete]="auto"/>
-            <mat-hint *ngIf="input.hint != null">{{input.hint}}</mat-hint>
+            <mat-hint *ngIf="input.hint != null" [innerHtml]="input.hint | sanitize"></mat-hint>
             <mat-autocomplete #auto="matAutocomplete">
                 <mat-option *ngFor="let option of input.options | filterInputOptions : inputsForm!.value[input.name]"
                             [value]="option.value">
@@ -85,15 +87,17 @@
 <ng-template #textField let-input="input">
     <form [formGroup]="inputsForm">
         <mat-form-field *ngIf="input.options == null" class="input-field">
-            <mat-label>{{input.label ?? input.name}}</mat-label>
+            <mat-label *ngIf="input.label == null">{{input.name}}</mat-label>
+            <mat-label *ngIf="input.label != null" [innerHtml]="input.label | sanitize"></mat-label>
             <input matInput [required]="input.required" [formControlName]="input.name" type="text"/>
-            <mat-hint *ngIf="input.hint != null">{{input.hint}}</mat-hint>
+            <mat-hint *ngIf="input.hint != null" [innerHtml]="input.hint | sanitize"></mat-hint>
         </mat-form-field>
         <mat-form-field *ngIf="input.options != null" class="input-field">
-            <mat-label>{{input.label ?? input.name}}</mat-label>
+            <mat-label *ngIf="input.label == null">{{input.name}}</mat-label>
+            <mat-label *ngIf="input.label != null" [innerHtml]="input.label | sanitize"></mat-label>
             <input matInput [required]="input.required" [formControlName]="input.name" type="text"
                    [matAutocomplete]="auto"/>
-            <mat-hint *ngIf="input.hint != null">{{input.hint}}</mat-hint>
+            <mat-hint *ngIf="input.hint != null" [innerHtml]="input.hint | sanitize"></mat-hint>
             <mat-autocomplete #auto="matAutocomplete">
                 <mat-option *ngFor="let option of input.options | filterInputOptions : inputsForm!.value[input.name]"
                             [value]="option.value">
@@ -107,13 +111,14 @@
 <ng-template #selectionField let-input="input">
     <form [formGroup]="inputsForm">
         <mat-form-field class="input-field">
-            <mat-label>{{input.label ?? input.name}}</mat-label>
+            <mat-label *ngIf="input.label == null">{{input.name}}</mat-label>
+            <mat-label *ngIf="input.label != null" [innerHtml]="input.label | sanitize"></mat-label>
             <mat-select [required]="input.required" [formControlName]="input.name">
                 <mat-option *ngFor="let option of input.options" [value]="option.value">
                     {{option.key}}
                 </mat-option>
             </mat-select>
-            <mat-hint *ngIf="input.hint != null">{{input.hint}}</mat-hint>
+            <mat-hint *ngIf="input.hint != null" [innerHtml]="input.hint | sanitize"></mat-hint>
         </mat-form-field>
     </form>
 </ng-template>
@@ -130,13 +135,14 @@
 <ng-template #landField let-input="input">
     <form [formGroup]="inputsForm">
         <mat-form-field class="input-field">
-            <mat-label>{{input.label ?? input.name}}</mat-label>
+            <mat-label *ngIf="input.label == null">{{input.name}}</mat-label>
+            <mat-label *ngIf="input.label != null" [innerHtml]="input.label | sanitize"></mat-label>
             <mat-select [required]="input.required" [formControlName]="input.name">
                 <mat-option *ngFor="let option of landOptions | async;let ind=index" [value]="option">
                     Land #{{option.id}}
                 </mat-option>
             </mat-select>
-            <mat-hint *ngIf="input.hint != null">{{input.hint}}</mat-hint>
+            <mat-hint *ngIf="input.hint != null" [innerHtml]="input.hint | sanitize"></mat-hint>
         </mat-form-field>
     </form>
 </ng-template>
@@ -144,7 +150,8 @@
 <ng-template #blockTypeField let-input="input">
     <form [formGroup]="inputsForm">
         <mat-form-field class="input-field">
-            <mat-label>{{input.label ?? input.name}}</mat-label>
+            <mat-label *ngIf="input.label == null">{{input.name}}</mat-label>
+            <mat-label *ngIf="input.label != null" [innerHtml]="input.label | sanitize"></mat-label>
             <mat-select [required]="input.required" [formControlName]="input.name">
                 <mat-option *ngFor="let type of blockTypes | async" [value]="type">
                     <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="auto">
@@ -153,7 +160,7 @@
                     </div>
                 </mat-option>
             </mat-select>
-            <mat-hint *ngIf="input.hint != null">{{input.hint}}</mat-hint>
+            <mat-hint *ngIf="input.hint != null" [innerHtml]="input.hint | sanitize"></mat-hint>
         </mat-form-field>
     </form>
 </ng-template>

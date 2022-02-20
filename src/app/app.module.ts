@@ -50,6 +50,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { PositionFieldComponent } from './utopia-game/plugin/plugin-inputs-editor/position-field/position-field.component';
 import { LoadingComponent } from './loading/loading.component';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { SanitizePipe } from './utopia-game/plugin/plugin-inputs-editor/sanitize.pipe';
 
 @NgModule({
     declarations: [
@@ -74,7 +75,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
         PluginRunningOverlayComponent,
         SimpleDialogComponent,
         PositionFieldComponent,
-        LoadingComponent
+        LoadingComponent,
+        SanitizePipe
     ],
     imports: [
         BrowserModule,
