@@ -12,6 +12,20 @@
                     let idCounter = 0;
                     let map = new Map();
                     UtopiaApi = {
+                        getInputsFromUser: function (inputs) {
+                            return new Promise(function (resolve, reject) {
+                                map.set(idCounter, {resolve: resolve, reject: reject})
+                                let message = {
+                                    type: 'request',
+                                    body: {
+                                        method: 'getInputsFromUser',
+                                        params: [inputs]
+                                    },
+                                    id: idCounter++
+                                };
+                                postMessage(message);
+                            });
+                        },
                         placeBlock: function (type, x, y, z) {
                             return new Promise(function (resolve, reject) {
                                 map.set(idCounter, {resolve: resolve, reject: reject})

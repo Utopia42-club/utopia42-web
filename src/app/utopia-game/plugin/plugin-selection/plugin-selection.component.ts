@@ -52,12 +52,14 @@ export class PluginSelectionComponent implements OnInit {
     runPlugin(plugin: Plugin) {
         if (plugin.descriptorUrl) {
             this.dialog.open(PluginInputsEditor, {
-                data: plugin.id,
+                data: {
+                    plugin: plugin,
+                },
                 viewContainerRef: this.vcr
             }).subscribe((ref) => {
                 ref.afterClosed().subscribe(result => {
                     if (result != null) {
-                        this.game.runPlugin(result.code, result.inputs);
+                        this.game.runPlugin(plugin, result.inputs);
                     }
                 });
             });

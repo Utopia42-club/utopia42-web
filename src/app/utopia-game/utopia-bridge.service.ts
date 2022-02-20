@@ -114,6 +114,14 @@ export class UtopiaBridgeService {
             this.responseObservable.delete(response.id);
         }
     }
+
+    public freezeGame() {
+        this.unityInstance.SendMessage('GameManager', 'FreezeGame', '');
+    }
+
+    public unFreezeGame() {
+        this.unityInstance.SendMessage('GameManager', 'UnFreezeGame', '');
+    }
 }
 
 

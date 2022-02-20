@@ -7,9 +7,9 @@ import { UtopiaApiService } from './plugin/utopia-api.service';
 import { PluginExecutionService } from './plugin/plugin-execution.service';
 import { LoadingService } from '../loading/loading.service';
 import { Subscription } from 'rxjs';
-import { UtopiaDialogService } from '../utopia-dialog.service';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { Web3Service } from '../ehtereum/web3.service';
+import { Plugin } from './plugin/Plugin';
 
 export const GAME_TOKEN = new InjectionToken<UtopiaGameComponent>('GAME_TOKEN');
 
@@ -39,7 +39,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
     constructor(private bridge: UtopiaBridgeService, private appComponent: AppComponent,
                 private readonly toaster: ToastrService, private readonly route: ActivatedRoute,
                 readonly utopiaApi: UtopiaApiService, readonly zone: NgZone,
-                readonly dialog: UtopiaDialogService, readonly pluginService: PluginExecutionService,
+                readonly pluginService: PluginExecutionService,
                 readonly loadingService: LoadingService, readonly web3Service: Web3Service) {
         window.bridge = bridge;
 
@@ -47,7 +47,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
             label: 'Plugins',
             icon: 'extension',
             perform: (event) => {
-                this.freezeGame();
+                this.bridge.freezeGame();
                 this.pluginActionTrigger = event.menuTrigger;
             },
         };
@@ -74,7 +74,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
     }
 
     onPluginMenuClosed() {
-        this.unFreezeGame();
+        this.bridge.unFreezeGame();
         setTimeout(() => this.gameCanvas.nativeElement.focus(), 300);
     }
 
@@ -83,9 +83,9 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
         this.onPluginMenuClosed();
     }
 
-    public runPlugin(code: string, inputs: any) {
+    public runPlugin(plugin: Plugin, inputs: any) {
         this.closePluginMenu();
-        this.pluginService.runCode(code, inputs)
+        this.pluginService.runCode(plugin, inputs)
             .subscribe(() => {
             }, error => {
                 console.error(error);
@@ -123,14 +123,6 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
         }
     }
 
-
-    public freezeGame() {
-        this.bridge.unityInstance.SendMessage('GameManager', 'FreezeGame', '');
-    }
-
-    public unFreezeGame() {
-        this.bridge.unityInstance.SendMessage('GameManager', 'UnFreezeGame', '');
-    }
 
     private startGame() {
         let buildUrl = '/assets/game/v0.10-rc9/Build';

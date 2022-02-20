@@ -1,6 +1,6 @@
 import { Injectable, NgZone } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { UtopiaApiService } from './utopia-api.service';
 import { catchError, switchMap, tap } from 'rxjs/operators';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
@@ -9,6 +9,9 @@ import { SimpleDialogAction, SimpleDialogComponent, SimpleDialogData } from '../
 import { PluginRunningOverlayComponent } from './plugin-running-overlay/plugin-running-overlay.component';
 import { ToastrService } from 'ngx-toastr';
 import { UtopiaDialogService } from 'src/app/utopia-dialog.service';
+import { Plugin } from './Plugin';
+import { LoadingService } from '../../loading/loading.service';
+import { MatDialogRef, MatDialogState } from '@angular/material/dialog';
 
 @Injectable()
 export class PluginExecutionService {
@@ -19,7 +22,7 @@ export class PluginExecutionService {
 
     constructor(readonly http: HttpClient, readonly utopiaApi: UtopiaApiService,
                 readonly zone: NgZone, readonly dialog: UtopiaDialogService, readonly overlay: Overlay,
-                readonly toaster: ToastrService) {
+                readonly toaster: ToastrService, readonly loadingService: LoadingService) {
         this.http.get('../../assets/sandbox.html', { responseType: 'text' })
             .subscribe(data => this.iframeSrc = data);
     }
@@ -28,10 +31,14 @@ export class PluginExecutionService {
         return this.http.get(url, { responseType: 'text' });
     }
 
-    runCode(code: string, inputs: any): Observable<PluginRunResult> {
-        return of(1)
+    runCode(plugin: Plugin, inputs: any): Observable<PluginRunResult> {
+        this.utopiaApi.setRunningPlugin(plugin);
+        let code;
+        let confirmationDialog;
+        return this.getFile(plugin.scriptUrl)
             .pipe(
-                tap(v => {
+                tap(c => {
+                    code = c;
                     let positionStrategy = this.overlay.position()
                         .global();
                     this.pluginOverlayRef = this.overlay.create({
@@ -42,7 +49,7 @@ export class PluginExecutionService {
                     this.pluginOverlayRef.attach(portal);
                     this.pluginOverlayRef.backdropClick()
                         .subscribe(() => {
-                            let confirmationDialog = this.dialog.open(SimpleDialogComponent, {
+                            confirmationDialog = this.dialog.open(SimpleDialogComponent, {
                                 data: new SimpleDialogData(
                                     'Plugin Execution',
                                     'Are you sure you want to cancel the plugin execution?',
@@ -70,6 +77,13 @@ export class PluginExecutionService {
                 catchError(err => {
                     if (this.pluginOverlayRef != null) {
                         this.pluginOverlayRef.dispose();
+                        if (confirmationDialog != null) {
+                            confirmationDialog.subscribe((dialogRef: MatDialogRef<any>) => {
+                                if (dialogRef.getState() == MatDialogState.OPEN) {
+                                    dialogRef.close();
+                                }
+                            });
+                        }
                     }
                     throw err;
                 }),
@@ -77,6 +91,13 @@ export class PluginExecutionService {
                     complete: () => {
                         if (this.pluginOverlayRef != null) {
                             this.pluginOverlayRef.dispose();
+                            if (confirmationDialog != null) {
+                                confirmationDialog.subscribe((dialogRef: MatDialogRef<any>) => {
+                                    if (dialogRef.getState() == MatDialogState.OPEN) {
+                                        dialogRef.close();
+                                    }
+                                });
+                            }
                         }
                     }
                 })

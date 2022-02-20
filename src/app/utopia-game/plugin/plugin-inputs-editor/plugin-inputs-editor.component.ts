@@ -2,7 +2,6 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { PluginExecutionService, PluginParameter } from '../plugin-execution.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { PluginService } from '../plugin.service';
 import { LoadingService } from '../../../loading/loading.service';
 import { Plugin } from '../Plugin';
 import { Marker, UtopiaApiService } from '../utopia-api.service';
@@ -17,10 +16,8 @@ import { Web3Service } from '../../../ehtereum/web3.service';
     providers: []
 })
 export class PluginInputsEditor implements OnInit {
-
-    script?: string;
-    inputs?: PluginParameter[];
     inputsForm?: FormGroup;
+    inputs?: PluginParameter[];
 
     plugin: Plugin;
 
@@ -29,71 +26,73 @@ export class PluginInputsEditor implements OnInit {
     blockTypes = new BehaviorSubject<string[]>([]);
 
     constructor(readonly pluginExecutionService: PluginExecutionService, readonly loadingService: LoadingService,
-                readonly dialogRef: MatDialogRef<PluginInputsEditor>, @Inject(MAT_DIALOG_DATA) readonly pluginId: number,
-                readonly pluginService: PluginService, readonly utopiaApiService: UtopiaApiService,
-                readonly web3Service: Web3Service) {
+                readonly dialogRef: MatDialogRef<PluginInputsEditor>, @Inject(MAT_DIALOG_DATA) readonly data: any,
+                readonly utopiaApiService: UtopiaApiService, readonly web3Service: Web3Service) {
 
-        this.loadingService.prepare(
-            this.pluginService.get(pluginId)
-        ).subscribe(value => {
-            this.plugin = value;
-            this.pluginExecutionService.getFile(value.descriptorUrl.trim())
+        if (data.plugin == null) {
+            throw new Error('Plugin is required');
+        }
+        this.plugin = data.plugin;
+        if (data.inputs == null) {
+            this.pluginExecutionService.getFile(this.plugin.descriptorUrl.trim())
                 .subscribe(inputs => {
-                    this.inputs = JSON.parse(inputs);
-                    this.inputsForm = this.toFormGroup(this.inputs);
-                    if (this.inputs.find(input => input.type == 'position') != null) {
-                        this.utopiaApiService.getPlayerPosition()
-                            .subscribe(position => {
-                                this.positionOptions.next([{
-                                    name: 'Player position',
-                                    position: position
-                                }, ...this.positionOptions.getValue()]);
-                            });
-                        this.utopiaApiService.getMarkers()
-                            .subscribe(markers => {
-                                this.positionOptions.next([...this.positionOptions.getValue(), ...markers]);
-                            });
-                    }
-                    if (this.inputs.find(input => input.type == 'land') != null) {
-                        this.utopiaApiService.getPlayerLands(web3Service.wallet())
-                            .subscribe(lands => {
-                                this.landOptions.next(lands);
-                            });
-                        this.utopiaApiService.getCurrentLand()
-                            .subscribe(land => {
-                                if (land != null) {
-                                    let l = this.landOptions.value.find(l => l.id == land.id);
-                                    if (l != null) {
-                                        this.inputs.filter(input => input.type == 'land')
-                                            .forEach(input => {
-                                                this.inputsForm.get(input.name).setValue(l);
-                                            });
-                                    }
-                                }
-                            });
-                    }
-                    if (this.inputs.find(input => input.type == 'blockType') != null) {
-                        this.utopiaApiService.getBlockTypes()
-                            .subscribe(blockTypes => {
-                                this.blockTypes.next([...this.blockTypes.getValue(), ...blockTypes]);
-                            });
+                    this.prepareInputs(JSON.parse(inputs));
+                });
+        } else {
+            this.prepareInputs(data.inputs);
+        }
+    }
+
+    private prepareInputs(inputs: PluginParameter[]) {
+        this.inputs = inputs;
+        this.inputsForm = this.toFormGroup(inputs);
+        if (inputs.find(input => input.type == 'position') != null) {
+            this.utopiaApiService.getPlayerPosition()
+                .subscribe(position => {
+                    this.positionOptions.next([{
+                        name: 'Player position',
+                        position: position
+                    }, ...this.positionOptions.getValue()]);
+                });
+            this.utopiaApiService.getMarkers()
+                .subscribe(markers => {
+                    this.positionOptions.next([...this.positionOptions.getValue(), ...markers]);
+                });
+        }
+        if (inputs.find(input => input.type == 'land') != null) {
+            this.utopiaApiService.getPlayerLands(this.web3Service.wallet())
+                .subscribe(lands => {
+                    this.landOptions.next(lands);
+                });
+            this.utopiaApiService.getCurrentLand()
+                .subscribe(land => {
+                    if (land != null) {
+                        let l = this.landOptions.value.find(l => l.id == land.id);
+                        if (l != null) {
+                            inputs.filter(input => input.type == 'land')
+                                .forEach(input => {
+                                    this.inputsForm.get(input.name).setValue(l);
+                                });
+                        }
                     }
                 });
-        });
+        }
+        if (inputs.find(input => input.type == 'blockType') != null) {
+            this.utopiaApiService.getBlockTypes()
+                .subscribe(blockTypes => {
+                    this.blockTypes.next([...this.blockTypes.getValue(), ...blockTypes]);
+                });
+        }
     }
 
     ngOnInit(): void {
 
     }
 
-    runPlugin() {
-        this.pluginExecutionService.getFile(this.plugin.scriptUrl)
-            .subscribe(code => {
-                this.dialogRef.close({
-                    code: code,
-                    inputs: this.inputsForm?.value
-                });
-            });
+    submit() {
+        this.dialogRef.close({
+            inputs: this.inputsForm?.value
+        });
     }
 
     cancel() {
