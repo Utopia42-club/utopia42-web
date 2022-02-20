@@ -1,7 +1,7 @@
 <div class="root" fxLayout="column" fxLayoutAlign="space-between center">
     <div *ngIf="inputsForm != null" fxLayout="column" style="width: 100%">
         <p class="title">{{plugin.name}} plugin</p>
-        <p class="subtitle">Please fill out required inputs</p>
+        <p class="subtitle" *ngIf="inputs != null && inputs.length > 0">Please fill out required inputs</p>
         <form [formGroup]="inputsForm" class="inputs">
             <div *ngFor="let input of inputs" [ngSwitch]="input.type">
                 <ng-container *ngSwitchCase="'number'">

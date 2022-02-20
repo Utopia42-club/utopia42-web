@@ -50,26 +50,18 @@ export class PluginSelectionComponent implements OnInit {
     }
 
     runPlugin(plugin: Plugin) {
-        if (plugin.descriptorUrl) {
-            this.dialog.open(PluginInputsEditor, {
-                data: {
-                    plugin: plugin,
-                },
-                viewContainerRef: this.vcr
-            }).subscribe((ref) => {
-                ref.afterClosed().subscribe(result => {
-                    if (result != null) {
-                        this.game.runPlugin(plugin, result.inputs);
-                    }
-                });
+        this.dialog.open(PluginInputsEditor, {
+            data: {
+                plugin: plugin,
+            },
+            viewContainerRef: this.vcr
+        }).subscribe((ref) => {
+            ref.afterClosed().subscribe(result => {
+                if (result != null) {
+                    this.game.runPlugin(plugin, result.inputs);
+                }
             });
-        } else {
-            this.loadingService.prepare(
-                this.pluginExecutionService.getFile(plugin.scriptUrl)
-            ).subscribe(code => {
-                this.game.runPlugin(code, []);
-            });
-        }
+        });
     }
 
     editPlugin(plugin: Plugin) {

@@ -1,6 +1,7 @@
 .root {
     width: 55em;
-    height: 25em;
+    max-height: 25em;
+    height: min-content;
 }
 
 .inputs {
