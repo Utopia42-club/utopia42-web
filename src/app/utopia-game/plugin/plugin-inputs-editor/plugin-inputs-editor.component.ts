@@ -38,10 +38,14 @@ export class PluginInputsEditor implements OnInit {
         this.plugin = data.plugin;
         if (data.inputs == null) {
             this.isRunDialog = true;
-            this.pluginExecutionService.getFile(this.plugin.descriptorUrl.trim())
-                .subscribe(inputs => {
-                    this.prepareInputs(JSON.parse(inputs));
-                });
+            if (data.plugin.descriptorUrl != null) {
+                this.pluginExecutionService.getFile(this.plugin.descriptorUrl.trim())
+                    .subscribe(inputs => {
+                        this.prepareInputs(JSON.parse(inputs));
+                    });
+            } else {
+                this.prepareInputs([]);
+            }
         } else {
             this.prepareInputs(data.inputs);
         }
