@@ -70,7 +70,7 @@ export class UtopiaContract {
                             this.toaster.info(`Land ${landId} saved.`);
                         }
                     })
-                    .on('error', s.error)
+                    .on('error', (e: Error) => s.error(e))
                     .on('transactionHash', (hash: string) => {
                         s.next(hash);
                         s.complete();
