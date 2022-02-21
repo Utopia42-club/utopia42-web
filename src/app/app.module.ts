@@ -51,6 +51,7 @@ import { PositionFieldComponent } from './utopia-game/plugin/plugin-inputs-edito
 import { LoadingComponent } from './loading/loading.component';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { SanitizePipe } from './utopia-game/plugin/plugin-inputs-editor/sanitize.pipe';
+import { PluginConfirmationDialog } from './utopia-game/plugin/plugin-confirmation-dialog/plugin-confirmation-dialog.component';
 
 @NgModule({
     declarations: [
@@ -76,7 +77,8 @@ import { SanitizePipe } from './utopia-game/plugin/plugin-inputs-editor/sanitize
         SimpleDialogComponent,
         PositionFieldComponent,
         LoadingComponent,
-        SanitizePipe
+        SanitizePipe,
+        PluginConfirmationDialog
     ],
     imports: [
         BrowserModule,

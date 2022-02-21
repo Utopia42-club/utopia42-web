@@ -115,7 +115,6 @@
                     onmessage = function (e) {
                         var message = e.data;
                         if(message.type == 'request'){
-                            var Inputs = e.data.body.inputs;
                             try {
                                 ${message.body.code}
                                 if( main == null )

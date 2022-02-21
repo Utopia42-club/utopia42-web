@@ -10,6 +10,7 @@ import { UtopiaGameComponent } from '../../utopia-game.component';
 import { UtopiaDialogService } from 'src/app/utopia-dialog.service';
 import { catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
+import { PluginConfirmationDialog } from '../plugin-confirmation-dialog/plugin-confirmation-dialog.component';
 
 @Component({
     selector: 'app-plugin-selection',
@@ -50,15 +51,15 @@ export class PluginSelectionComponent implements OnInit {
     }
 
     runPlugin(plugin: Plugin) {
-        this.dialog.open(PluginInputsEditor, {
+        this.dialog.open(PluginConfirmationDialog, {
             data: {
                 plugin: plugin,
             },
             viewContainerRef: this.vcr
         }).subscribe((ref) => {
             ref.afterClosed().subscribe(result => {
-                if (result != null) {
-                    this.game.runPlugin(plugin, result.inputs);
+                if (result.acceptedTerms) {
+                    this.game.runPlugin(plugin);
                 }
             });
         });

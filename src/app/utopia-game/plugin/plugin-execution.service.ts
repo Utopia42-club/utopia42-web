@@ -31,7 +31,7 @@ export class PluginExecutionService {
         return this.http.get(url, { responseType: 'text' });
     }
 
-    runCode(plugin: Plugin, inputs: any): Observable<PluginRunResult> {
+    runCode(plugin: Plugin): Observable<PluginRunResult> {
         this.utopiaApi.setRunningPlugin(plugin);
         let code;
         let confirmationDialog;
@@ -72,7 +72,7 @@ export class PluginExecutionService {
                         });
                 }),
                 switchMap(o =>
-                    this.doRunPlugin(code, inputs)
+                    this.doRunPlugin(code)
                 ),
                 catchError(err => {
                     if (this.pluginOverlayRef != null) {
@@ -104,7 +104,7 @@ export class PluginExecutionService {
             );
     }
 
-    private doRunPlugin(code: string, inputs: any): Observable<PluginRunResult> {
+    private doRunPlugin(code: string): Observable<PluginRunResult> {
         return new Observable<PluginRunResult>(subs => {
             this.secureEvalIframe = document.createElement('iframe');
             this.secureEvalIframe.setAttribute('sandbox', 'allow-scripts');
@@ -118,8 +118,7 @@ export class PluginExecutionService {
                 this.secureEvalIframe.contentWindow.postMessage({
                     type: 'request',
                     body: {
-                        code: code,
-                        inputs: inputs
+                        code: code
                     }
                 }, '*');
             });

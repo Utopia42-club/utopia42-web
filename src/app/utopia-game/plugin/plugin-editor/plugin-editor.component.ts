@@ -23,7 +23,6 @@ export class PluginEditorComponent implements OnInit {
             description: new FormControl(null),
             walletId: new FormControl(null),
             scriptUrl: new FormControl(null, [Validators.required]),
-            descriptorUrl: new FormControl(null)
         });
         if (pluginId != null) {
             this.loadingService.prepare(
