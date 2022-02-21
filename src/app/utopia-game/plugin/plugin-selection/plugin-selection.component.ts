@@ -4,7 +4,6 @@ import { LoadingService } from '../../../loading/loading.service';
 import { Plugin } from '../Plugin';
 import { PluginEditorComponent } from '../plugin-editor/plugin-editor.component';
 import { ToastrService } from 'ngx-toastr';
-import { PluginInputsEditor } from '../plugin-inputs-editor/plugin-inputs-editor.component';
 import { PluginExecutionService } from '../plugin-execution.service';
 import { UtopiaGameComponent } from '../../utopia-game.component';
 import { UtopiaDialogService } from 'src/app/utopia-dialog.service';
@@ -55,7 +54,8 @@ export class PluginSelectionComponent implements OnInit {
             data: {
                 plugin: plugin,
             },
-            viewContainerRef: this.vcr
+            viewContainerRef: this.vcr,
+            disableClose: true
         }).subscribe((ref) => {
             ref.afterClosed().subscribe(result => {
                 if (result.acceptedTerms) {

@@ -71,7 +71,8 @@ export class UtopiaApiService {
                     inputs: inputs,
                     plugin: this.runningPlugin
                 },
-                viewContainerRef: this.vcr
+                viewContainerRef: this.vcr,
+                disableClose: true
             }).subscribe((ref) => {
                 ref.afterClosed().subscribe(result => {
                     this.bridge.unFreezeGame();
