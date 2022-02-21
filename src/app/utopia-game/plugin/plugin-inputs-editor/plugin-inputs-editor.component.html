@@ -106,7 +106,7 @@
             <mat-label *ngIf="input.label == null">{{input.name}}</mat-label>
             <mat-label *ngIf="input.label != null" [innerHtml]="input.label | sanitize"></mat-label>
             <mat-select [required]="input.required" [formControlName]="input.name">
-                <mat-option *ngFor="let option of input.options" [value]="option.value">
+                <mat-option *ngFor="let option of input.options ?? []" [value]="option.value">
                     {{option.key}}
                 </mat-option>
             </mat-select>
