@@ -1,12 +1,14 @@
-<div class="root" fxLayout="column" fxLayoutAlign="space-between center">
+<div class="root" fxLayout="column" fxLayoutAlign="space-between center" fxLayoutGap="0.5em">
     <div fxLayout="column" style="width: 100%">
         <p class="title">{{plugin.name}} plugin</p>
+    </div>
+    <div class="code" [innerHTML]="code">
+
     </div>
     <div class="footer" fxLayout="column">
         <div class="terms" fxLayout="row" fxLayoutAlign="start center">
             <mat-checkbox [(ngModel)]="acceptedTerms">
-                I accept consequences of running this
-                <a [href]="plugin.scriptUrl" target="_blank">plugin script</a>
+                I accept consequences of running this plugin script
             </mat-checkbox>
         </div>
         <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="0.5em" class="actions">

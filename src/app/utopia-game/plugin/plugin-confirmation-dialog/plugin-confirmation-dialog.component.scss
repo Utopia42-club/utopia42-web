@@ -50,3 +50,12 @@
 .footer {
     width: 100%;
 }
+
+.code {
+    width: 100%;
+    padding: 0.5em;
+    background-color: whitesmoke;
+    white-space: pre-wrap;
+    max-height: 20em;
+    overflow-y: auto;
+}

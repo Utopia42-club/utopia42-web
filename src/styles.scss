@@ -1,6 +1,7 @@
 @use '@angular/material' as mat;
 // regular style toast
 @import '~ngx-toastr/toastr';
+@import "~prismjs/themes/prism-coy.css";
 
 @include mat.core();
 
