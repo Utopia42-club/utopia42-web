@@ -22,4 +22,5 @@ export interface SerializableVector3Int {
 
 export interface LandProperties {
     color: string;
+    name: string;
 }

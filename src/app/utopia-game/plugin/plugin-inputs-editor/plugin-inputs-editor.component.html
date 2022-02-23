@@ -131,7 +131,10 @@
             <mat-label *ngIf="input.label != null" [innerHtml]="input.label | sanitize"></mat-label>
             <mat-select [required]="input.required" [formControlName]="input.name">
                 <mat-option *ngFor="let option of landOptions | async;let ind=index" [value]="option">
-                    Land #{{option.id}}
+                    <ng-template *ngIf="option.properties != null && option.properties.name != null; else elseLand">
+                        #{{option.properties.name}}
+                    </ng-template>
+                    <ng-template #elseLand>Land #{{option.id}}</ng-template>
                 </mat-option>
             </mat-select>
             <mat-hint *ngIf="input.hint != null" [innerHtml]="input.hint | sanitize"></mat-hint>
