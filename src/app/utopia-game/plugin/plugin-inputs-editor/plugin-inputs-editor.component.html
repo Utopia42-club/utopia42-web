@@ -132,7 +132,7 @@
             <mat-select [required]="input.required" [formControlName]="input.name">
                 <mat-option *ngFor="let option of landOptions | async;let ind=index" [value]="option">
                     <span *ngIf="option.properties != null && option.properties.name != null; else elseLand">
-                        {{option.properties.name}}
+                        {{option.properties.name}} #{{option.id}}
                     </span>
                     <ng-template #elseLand>
                         <span>Land #{{option.id}}</span>
