@@ -34,6 +34,11 @@ export class UtopiaApiService {
         })).pipe(map(res => JSON.parse(res)));
     }
 
+    public placeBlocks(blocks: [{type: string, position: {x: number, y: number, z: number}}]){
+        return this.bridge.call('UtopiaApi', 'PlaceBlocks', JSON.stringify(blocks))
+            .pipe(map(res => JSON.parse(res)));
+    }
+
     public getPlayerPosition(): Observable<Position> {
         return this.bridge.call('UtopiaApi', 'GetPlayerPosition', null)
             .pipe(map(res => JSON.parse(res)));
