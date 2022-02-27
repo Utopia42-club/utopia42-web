@@ -9,6 +9,20 @@
             <input matInput [required]="true" formControlName="scriptUrl" type="text"/>
         </mat-form-field>
         <mat-form-field class="form__field">
+            <mat-label>State</mat-label>
+            <mat-select formControlName="state">
+                <mat-option [value]="stateEnum.PRIVATE">
+                    Private
+                </mat-option>
+                <mat-option [value]="stateEnum.PUBLIC">
+                    Public
+                </mat-option>
+                <mat-option [value]="stateEnum.DEPRECATED">
+                    Deprecated
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-form-field class="form__field">
             <mat-label>Description</mat-label>
             <textarea matInput [required]="false" formControlName="description">
             </textarea>

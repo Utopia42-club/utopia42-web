@@ -79,7 +79,9 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
     }
 
     closePluginMenu() {
-        this.pluginActionTrigger.closeMenu();
+        if (this.pluginActionTrigger) {
+            this.pluginActionTrigger.closeMenu();
+        }
         this.onPluginMenuClosed();
     }
 

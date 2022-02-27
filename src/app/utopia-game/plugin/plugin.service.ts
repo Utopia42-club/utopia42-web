@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Configurations } from '../../configurations';
 import { Plugin } from './Plugin';
+import { SearchCriteria } from './SearchCriteria';
 
 @Injectable({
     providedIn: 'root',
@@ -30,8 +31,30 @@ export class PluginService {
         return this.httpClient.get<Plugin>(this.endpoint + `/${id}`);
     }
 
-    public getPluginsForUser(): Observable<Plugin[]> {
-        return this.httpClient.get<Plugin[]>(this.endpoint + `/`);
+    public getPluginsOfUser(searchCriteria: SearchCriteria): Observable<Plugin[]> {
+        return this.httpClient.post<Plugin[]>(this.endpoint + `/of-user`, searchCriteria);
+    }
+
+    public getPluginsForUser(searchCriteria: SearchCriteria): Observable<Plugin[]> {
+        return this.httpClient.post<Plugin[]>(this.endpoint + `/for-user`, searchCriteria);
+    }
+
+    public getInstalledPlugins(searchCriteria: SearchCriteria, complement: boolean = false): Observable<Plugin[]> {
+        return this.httpClient.post<Plugin[]>(this.endpoint + `/installed`, searchCriteria, {
+            params: { complement: complement.toString() }
+        });
+    }
+
+    public installPlugin(pluginId: number): Observable<void> {
+        return this.httpClient.get<void>(this.endpoint + `/installed/${pluginId}/add`);
+    }
+
+    public uninstallPlugin(pluginId: number): Observable<void> {
+        return this.httpClient.get<void>(this.endpoint + `/installed/${pluginId}/remove`);
+    }
+
+    public getAll(searchCriteria: SearchCriteria): Observable<Plugin[]> {
+        return this.httpClient.post<Plugin[]>(this.endpoint + `/`, searchCriteria);
     }
 
     public delete(id: number): Observable<void> {
@@ -39,5 +62,3 @@ export class PluginService {
     }
 
 }
-
-

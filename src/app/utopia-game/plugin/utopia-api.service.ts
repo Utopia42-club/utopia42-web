@@ -72,7 +72,8 @@ export class UtopiaApiService {
                     plugin: this.runningPlugin
                 },
                 viewContainerRef: this.vcr,
-                disableClose: true
+                disableClose: true,
+                backdropClass: 'transparent-backdrop'
             }).subscribe((ref) => {
                 ref.afterClosed().subscribe(result => {
                     this.bridge.unFreezeGame();
