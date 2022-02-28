@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { Plugin } from '../Plugin';
-import { MatPaginator, MatPaginatorIntl, PageEvent } from '@angular/material/paginator';
+import { MatPaginator, MatPaginatorIntl } from '@angular/material/paginator';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { SearchCriteria } from '../SearchCriteria';
 import { Observable } from 'rxjs';
@@ -48,50 +48,48 @@ export class PluginTableComponent implements OnInit, AfterViewInit {
 
     ngAfterViewInit(): void {
         this.paginator.page
-            .subscribe((pageEvent: PageEvent) => this.load(pageEvent.previousPageIndex < pageEvent.pageIndex));
-        this.load(true);
+            .subscribe(() => this.load());
+        this.load();
     }
 
     reload(): void {
         this.allPlugins = [];
         this.plugins = [];
         this.paginator.pageIndex = 0;
-        this.load(true);
+        this.load();
     }
 
-    load(nextPage: boolean): void {
-        let lastId: number;
-        if (!nextPage) {
-            this.plugins = this.allPlugins.slice(this.paginator.pageIndex * this.paginator.pageSize, (this.paginator.pageIndex + 1) * this.paginator.pageSize);
+    load(): void {
+        let pageIndex = this.paginator.pageIndex;
+        let pageSize = this.paginator.pageSize;
+        let start = pageIndex * pageSize;
+        let end = (pageIndex + 1) * pageSize;
+
+        if (this.allPlugins.length >= end) {
+            this.plugins = this.allPlugins.slice(start, end);
             return;
         } else {
-            if (this.allPlugins.length > 0) {
-                lastId = this.allPlugins[(this.paginator.pageIndex) * this.paginator.pageSize - 1].id;
-            } else {
-                lastId = null;
-            }
-        }
-        this.loadingService
-            .prepare(this.loader.loadData(
-                new SearchCriteria(lastId || null, this.paginator.pageSize + 1, null))
+            let lastId = this.allPlugins.length > 0 ? this.allPlugins[this.allPlugins.length - 1].id : null;
+            let limit = pageIndex == 0 ? pageSize + 1 : pageSize;
+
+            this.loadingService.prepare(
+                this.loader.loadData(new SearchCriteria(lastId, limit, null))
             ).subscribe(data => {
-            if (data.length < (this.paginator.pageSize + 1)) {
-                this.paginator.length = this.paginator.pageIndex * this.paginator.pageSize + data.length;
-            } else {
-                this.paginator.length = (this.paginator.pageIndex + 1) * this.paginator.pageSize + data.length;
-            }
-            this.plugins = data.slice(0, Math.min(data.length, this.paginator.pageSize));
+                this.allPlugins.push(...data);
+                this.plugins = this.allPlugins.slice(start, Math.min(end, this.allPlugins.length));
 
-            this.allPlugins = [
-                ...this.allPlugins.slice(0, this.paginator.pageIndex * this.paginator.pageSize),
-                ...data,
-                ...this.allPlugins.slice((this.paginator.pageIndex + 1) * this.paginator.pageSize + 1, this.allPlugins.length)
-            ];
+                let hasNext = this.allPlugins.length > end;
+                if (!hasNext) {
+                    this.paginator.length = this.allPlugins.length;
+                } else {
+                    this.paginator.length = this.allPlugins.length + pageSize;
+                }
 
-        }, error => {
-            this.loadError.emit(error);
-            throw error;
-        });
+            }, error => {
+                this.loadError.emit(error);
+                throw error;
+            });
+        }
     }
 
     removeFromTable(plugin: Plugin) {
