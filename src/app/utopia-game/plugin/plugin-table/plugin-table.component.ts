@@ -30,11 +30,11 @@ export class CustomMatPaginatorIntl extends MatPaginatorIntl {
 export class PluginTableComponent implements OnInit, AfterViewInit {
 
     plugins: Plugin[] = [];
+    allPlugins: Plugin[] = [];
     displayedColumns: string[] = ['id', 'name', 'description', 'actions'];
     expandedRow: any;
 
     @ViewChild(MatPaginator) paginator: MatPaginator;
-    private firstId = [];
 
     @Input() loader: PluginTableDataLoader;
     @Input() rowActions: PluginTableRowAction[];
@@ -53,48 +53,50 @@ export class PluginTableComponent implements OnInit, AfterViewInit {
     }
 
     reload(): void {
-        this.firstId = [];
+        this.allPlugins = [];
+        this.plugins = [];
         this.paginator.pageIndex = 0;
         this.load(true);
     }
 
     load(nextPage: boolean): void {
-        let nextId: number;
+        let lastId: number;
         if (!nextPage) {
-            nextId = this.firstId.pop() - this.paginator.pageSize - 1;
+            this.plugins = this.allPlugins.slice(this.paginator.pageIndex * this.paginator.pageSize, (this.paginator.pageIndex + 1) * this.paginator.pageSize);
+            return;
         } else {
-            if (this.plugins.length > 0) {
-                nextId = this.firstId[this.firstId.length - 1] + this.paginator.pageSize - 1;
+            if (this.allPlugins.length > 0) {
+                lastId = this.allPlugins[(this.paginator.pageIndex) * this.paginator.pageSize - 1].id;
             } else {
-                nextId = null;
+                lastId = null;
             }
         }
         this.loadingService
             .prepare(this.loader.loadData(
-                new SearchCriteria(nextId || null, this.paginator.pageSize + 1, null)))
-            .subscribe(data => {
-                if (data.length < (this.paginator.pageSize + 1)) {
-                    this.paginator.length = this.paginator.pageIndex * this.paginator.pageSize + data.length;
-                } else {
-                    this.paginator.length = (this.paginator.pageIndex + 1) * this.paginator.pageSize + data.length;
-                }
-                if (data.length > 0) {
-                    this.firstId.push(data[0].id);
-                }
-                this.plugins = data.slice(0, Math.min(data.length, this.paginator.pageSize));
-            }, error => {
-                this.loadError.emit(error);
-                throw error;
-            });
-    }
+                new SearchCriteria(lastId || null, this.paginator.pageSize + 1, null))
+            ).subscribe(data => {
+            if (data.length < (this.paginator.pageSize + 1)) {
+                this.paginator.length = this.paginator.pageIndex * this.paginator.pageSize + data.length;
+            } else {
+                this.paginator.length = (this.paginator.pageIndex + 1) * this.paginator.pageSize + data.length;
+            }
+            this.plugins = data.slice(0, Math.min(data.length, this.paginator.pageSize));
 
-    addToTable(plugin: Plugin) {
-        this.plugins.pop();
-        this.plugins = [plugin, ...this.plugins];
+            this.allPlugins = [
+                ...this.allPlugins.slice(0, this.paginator.pageIndex * this.paginator.pageSize),
+                ...data,
+                ...this.allPlugins.slice((this.paginator.pageIndex + 1) * this.paginator.pageSize + 1, this.allPlugins.length)
+            ];
+
+        }, error => {
+            this.loadError.emit(error);
+            throw error;
+        });
     }
 
     removeFromTable(plugin: Plugin) {
         this.plugins = this.plugins.filter(p => p.id !== plugin.id);
+        this.allPlugins = this.allPlugins.filter(p => p.id !== plugin.id);
     }
 }
 

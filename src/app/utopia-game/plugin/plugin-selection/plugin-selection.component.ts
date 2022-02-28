@@ -124,7 +124,7 @@ export class PluginSelectionComponent implements OnInit, OnDestroy {
                 if (plugin) {
                     let value = this.selectedFilters.value;
                     if (value == null || value.includes('owned') || !value.includes('installed')) {
-                        this.pluginTable.addToTable(plugin);
+                        this.pluginTable.reload();
                     }
                 }
             });
