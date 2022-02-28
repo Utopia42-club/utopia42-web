@@ -5,10 +5,11 @@
         <app-connection-status-indicator style="max-width: 90%;"></app-connection-status-indicator>
         <span style="flex: 1 1 auto;"></span>
         <ng-container *ngFor="let action of actions.slice().reverse()">
-            <button *ngIf="action.menu" mat-icon-button (click)="action.perform({menuTrigger:trigger});"
+            <button *ngIf="action.menu" mat-icon-button
                     cdkOverlayOrigin
                     [id]=" 'action_' + actions.indexOf(action) "
-                    [matTooltip]="action.label" [matMenuTriggerFor]="action.menu" #trigger="matMenuTrigger">
+                    [matTooltip]="action.label" [matMenuTriggerFor]="action.menu" #trigger="matMenuTrigger"
+                    (onMenuOpen)="action.perform({menuTrigger:trigger})">
                 <mat-icon>{{action.icon}}</mat-icon>
             </button>
             <button *ngIf="!action.menu" mat-icon-button (click)="action.perform({})"

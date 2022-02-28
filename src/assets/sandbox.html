@@ -40,6 +40,20 @@
                                 postMessage(message);
                             });
                         },
+                        placeBlocks: function (blocks) {
+                            return new Promise(function (resolve, reject) {
+                                map.set(idCounter, {resolve: resolve, reject: reject})
+                                let message = {
+                                    type: 'request',
+                                    body: {
+                                        method: 'placeBlocks',
+                                        params: [blocks]
+                                    },
+                                    id: idCounter++
+                                };
+                                postMessage(message);
+                            });
+                        },
                         getPlayerPosition: function () {
                             return new Promise(function (resolve, reject) {
                                 map.set(idCounter, {resolve: resolve, reject: reject})
@@ -115,7 +129,6 @@
                     onmessage = function (e) {
                         var message = e.data;
                         if(message.type == 'request'){
-                            var Inputs = e.data.body.inputs;
                             try {
                                 ${message.body.code}
                                 if( main == null )

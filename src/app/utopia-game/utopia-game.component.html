@@ -5,7 +5,7 @@
     </mat-progress-spinner>
 </div>
 
-<mat-menu #pluginMenu (closed)="onPluginMenuClosed()">
+<mat-menu #pluginMenu (closed)="onPluginMenuClosed()" class="plugin-menu">
     <ng-template matMenuContent>
         <app-plugin-selection></app-plugin-selection>
     </ng-template>

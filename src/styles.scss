@@ -1,6 +1,7 @@
 @use '@angular/material' as mat;
 // regular style toast
 @import '~ngx-toastr/toastr';
+@import "~prismjs/themes/prism-coy.css";
 
 @include mat.core();
 
@@ -80,5 +81,9 @@ body {
 
 .loading-back-drop {
     z-index: 1999;
+}
+
+.transparent-backdrop {
+    background-color: transparent;
 }
 

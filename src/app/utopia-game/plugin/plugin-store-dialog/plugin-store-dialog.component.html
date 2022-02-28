@@ -1,0 +1,18 @@
+<div fxLayout="column" fxLayoutAlign="start center" class="root" (click)="$event.stopPropagation()">
+    <div class="title-section" fxLayout="row" fxLayoutAlign="start center">
+        <p class="title">Plugin Store</p>
+    </div>
+    <div class="header">
+        <mat-form-field class="search-field">
+            <mat-label>Search</mat-label>
+            <input matInput [formControl]="filter" type="text"/>
+        </mat-form-field>
+    </div>
+    <div class="plugins">
+        <app-plugin-table [loader]="pluginTableLoader" [rowActions]="pluginTableRowActions">
+        </app-plugin-table>
+    </div>
+    <div class="actions" fxLayout="row" fxLayoutAlign="end center">
+        <button mat-raised-button color="accent" (click)="onClose()">Close</button>
+    </div>
+</div>

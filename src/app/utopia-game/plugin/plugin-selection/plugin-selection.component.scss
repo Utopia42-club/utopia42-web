@@ -7,17 +7,16 @@
 }
 
 .root {
+    width: 50em;
     padding: 0.5em;
 }
 
 .plugins {
-    width: 100%;
-    min-height: 30em;
-    max-height: 30em;
-    overflow-y: auto;
-}
+    ::ng-deep .table-container {
+        min-height: 30em;
+        max-height: 30em;
+    }
 
-.plugin {
     width: 100%;
 }
 
@@ -26,4 +25,22 @@
     margin: 0;
     max-width: 8em;
     overflow-wrap: anywhere;
+}
+
+.chip-filters {
+    height: 1.4em;
+
+    mat-chip {
+        font-size: 0.8em;
+        font-weight: 350;
+        padding-top: 0;
+        padding-bottom: 0;
+        min-height: 2.5em;
+        cursor: pointer;
+
+        &:not(.mat-chip-selected) {
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background-color: white !important;
+        }
+    }
 }

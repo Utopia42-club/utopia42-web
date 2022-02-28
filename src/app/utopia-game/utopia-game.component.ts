@@ -79,13 +79,15 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
     }
 
     closePluginMenu() {
-        this.pluginActionTrigger.closeMenu();
+        if (this.pluginActionTrigger) {
+            this.pluginActionTrigger.closeMenu();
+        }
         this.onPluginMenuClosed();
     }
 
-    public runPlugin(plugin: Plugin, inputs: any) {
+    public runPlugin(plugin: Plugin) {
         this.closePluginMenu();
-        this.pluginService.runCode(plugin, inputs)
+        this.pluginService.runCode(plugin)
             .subscribe(() => {
             }, error => {
                 console.error(error);
@@ -125,7 +127,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
 
 
     private startGame() {
-        let buildUrl = '/assets/game/v0.10/Build';
+        let buildUrl = '/assets/game/v0.12-rc1/Build';
         let config = {
             dataUrl: buildUrl + '/web.data',
             frameworkUrl: buildUrl + '/web.framework.js',
@@ -133,7 +135,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
             streamingAssetsUrl: 'StreamingAssets',
             companyName: 'Utopia 42',
             productName: 'Utopia 42',
-            productVersion: '0.10',
+            productVersion: '0.12-rc1',
             showBanner: (m, t) => this.showBanner(m, t),
         };
 

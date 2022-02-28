@@ -4,6 +4,7 @@ import { ExceptionDialogContentComponent } from './exception-dialog-content/exce
 import { HttpErrorResponse } from '@angular/common/http';
 import { TimeoutError } from 'rxjs';
 import { UtopiaDialogService } from './utopia-dialog.service';
+import { UtopiaError } from './UtopiaError';
 
 @Injectable()
 export class GlobalErrorHandlerService implements ErrorHandler {
@@ -47,6 +48,9 @@ export class GlobalErrorHandlerService implements ErrorHandler {
                 message = 'The server did not respond in time.';
             } else if (error.code != null && error.code == 4001) {
                 title = 'Login error';
+                message = error.message;
+            } else if (error instanceof UtopiaError) {
+                title = 'Exception';
                 message = error.message;
             }
             if (title == null) {

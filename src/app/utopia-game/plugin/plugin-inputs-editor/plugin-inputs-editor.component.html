@@ -40,23 +40,15 @@
     <div *ngIf="inputsForm == null" fxLayout="row" fxLayoutAlign="center center" class="loading-inputs">
         <p>Loading plugin inputs...</p>
     </div>
-    <div class="footer" fxLayout="column">
-        <div class="terms" fxLayout="row" fxLayoutAlign="start center" *ngIf="isRunDialog">
-            <mat-checkbox [(ngModel)]="acceptedTerms">
-                I accept consequences of running this
-                <a [href]="plugin.scriptUrl" target="_blank">plugin script</a>
-            </mat-checkbox>
-        </div>
-        <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="0.5em" class="actions">
-            <button *ngIf="inputsForm != null" mat-raised-button color="primary"
-                    (click)="submit()" [disabled]="!this.inputsForm.valid || (isRunDialog && !acceptedTerms)">
-                Submit
-            </button>
-            <button mat-raised-button color="accent"
-                    (click)="cancel()">
-                Cancel
-            </button>
-        </div>
+    <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="0.5em" class="actions">
+        <button *ngIf="inputsForm != null" mat-raised-button color="primary"
+                (click)="submit()" [disabled]="!this.inputsForm.valid">
+            Submit
+        </button>
+        <button mat-raised-button color="accent"
+                (click)="cancel()">
+            Cancel
+        </button>
     </div>
 </div>
 
@@ -114,7 +106,7 @@
             <mat-label *ngIf="input.label == null">{{input.name}}</mat-label>
             <mat-label *ngIf="input.label != null" [innerHtml]="input.label | sanitize"></mat-label>
             <mat-select [required]="input.required" [formControlName]="input.name">
-                <mat-option *ngFor="let option of input.options" [value]="option.value">
+                <mat-option *ngFor="let option of input.options ?? []" [value]="option.value">
                     {{option.key}}
                 </mat-option>
             </mat-select>
@@ -139,7 +131,12 @@
             <mat-label *ngIf="input.label != null" [innerHtml]="input.label | sanitize"></mat-label>
             <mat-select [required]="input.required" [formControlName]="input.name">
                 <mat-option *ngFor="let option of landOptions | async;let ind=index" [value]="option">
-                    Land #{{option.id}}
+                    <span *ngIf="option.properties != null && option.properties.name != null; else elseLand">
+                        {{option.properties.name}} #{{option.id}}
+                    </span>
+                    <ng-template #elseLand>
+                        <span>Land #{{option.id}}</span>
+                    </ng-template>
                 </mat-option>
             </mat-select>
             <mat-hint *ngIf="input.hint != null" [innerHtml]="input.hint | sanitize"></mat-hint>

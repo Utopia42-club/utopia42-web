@@ -41,7 +41,6 @@ import { OverlayModule } from '@angular/cdk/overlay';
 import { PluginEditorComponent } from './utopia-game/plugin/plugin-editor/plugin-editor.component';
 import { PluginSelectionComponent } from './utopia-game/plugin/plugin-selection/plugin-selection.component';
 import { MatListModule } from '@angular/material/list';
-import { FilterPluginsPipe } from './utopia-game/plugin/plugin-selection/filter-plugins.pipe';
 import { AuthInterceptor } from './auth.interceptor';
 import { GlobalErrorHandlerService } from './global-error-handler.service';
 import { PluginRunningOverlayComponent } from './utopia-game/plugin/plugin-running-overlay/plugin-running-overlay.component';
@@ -51,6 +50,11 @@ import { PositionFieldComponent } from './utopia-game/plugin/plugin-inputs-edito
 import { LoadingComponent } from './loading/loading.component';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { SanitizePipe } from './utopia-game/plugin/plugin-inputs-editor/sanitize.pipe';
+import { PluginConfirmationDialog } from './utopia-game/plugin/plugin-confirmation-dialog/plugin-confirmation-dialog.component';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { PluginTableComponent } from './utopia-game/plugin/plugin-table/plugin-table.component';
+import { PluginStoreDialogComponent } from './utopia-game/plugin/plugin-store-dialog/plugin-store-dialog.component';
 
 @NgModule({
     declarations: [
@@ -71,12 +75,14 @@ import { SanitizePipe } from './utopia-game/plugin/plugin-inputs-editor/sanitize
         FilterInputOptionsPipe,
         PluginEditorComponent,
         PluginSelectionComponent,
-        FilterPluginsPipe,
         PluginRunningOverlayComponent,
         SimpleDialogComponent,
         PositionFieldComponent,
         LoadingComponent,
-        SanitizePipe
+        SanitizePipe,
+        PluginConfirmationDialog,
+        PluginTableComponent,
+        PluginStoreDialogComponent
     ],
     imports: [
         BrowserModule,
@@ -108,7 +114,9 @@ import { SanitizePipe } from './utopia-game/plugin/plugin-inputs-editor/sanitize
         OverlayModule,
         MatListModule,
         MatMenuModule,
-        MatCheckboxModule
+        MatCheckboxModule,
+        MatChipsModule,
+        MatPaginatorModule
     ],
     providers: [
         {

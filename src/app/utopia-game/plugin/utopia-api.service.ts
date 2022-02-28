@@ -1,7 +1,7 @@
 import { Injectable, ViewContainerRef } from '@angular/core';
 import { UtopiaBridgeService } from '../utopia-bridge.service';
-import { map } from 'rxjs/operators';
-import { Observable, of } from 'rxjs';
+import { map, switchMap, concatMap, toArray } from 'rxjs/operators';
+import { Observable, of, timer } from 'rxjs';
 import { Position } from '../position';
 import { Land } from '../../ehtereum/models';
 import { Web3Service } from '../../ehtereum/web3.service';
@@ -32,6 +32,18 @@ export class UtopiaApiService {
                 z: z
             }
         })).pipe(map(res => JSON.parse(res)));
+    }
+
+    public placeBlocks(blocks: [{type: string, position: {x: number, y: number, z: number}}]){
+        const slices = [];
+        while(blocks.length > 0){
+            slices.push(blocks.splice(0, 500));
+        }
+        return of(...slices).pipe(concatMap(slice => {
+            return this.bridge.call('UtopiaApi', 'PlaceBlocks', JSON.stringify(slice))
+                .pipe(switchMap(res => timer(1).pipe(map(() => JSON.parse(res)))))
+            }
+        ), toArray(), map(array => array.reduce((a, b) => {return {...a, ...b}}, {})));
     }
 
     public getPlayerPosition(): Observable<Position> {
@@ -71,7 +83,9 @@ export class UtopiaApiService {
                     inputs: inputs,
                     plugin: this.runningPlugin
                 },
-                viewContainerRef: this.vcr
+                viewContainerRef: this.vcr,
+                disableClose: true,
+                backdropClass: 'transparent-backdrop'
             }).subscribe((ref) => {
                 ref.afterClosed().subscribe(result => {
                     this.bridge.unFreezeGame();

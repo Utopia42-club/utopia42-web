@@ -4,5 +4,10 @@ export class Plugin {
     name?: string;
     description?: string;
     scriptUrl?: string;
-    descriptorUrl?: string;
+}
+
+export enum PluginState {
+    PRIVATE = "PRIVATE",
+    PUBLIC = "PUBLIC",
+    DEPRECATED = "DEPRECATED"
 }
