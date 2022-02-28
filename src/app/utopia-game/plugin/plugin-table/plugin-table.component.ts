@@ -77,14 +77,7 @@ export class PluginTableComponent implements OnInit, AfterViewInit {
             ).subscribe(data => {
                 this.allPlugins.push(...data);
                 this.plugins = this.allPlugins.slice(start, Math.min(end, this.allPlugins.length));
-
-                let hasNext = this.allPlugins.length > end;
-                if (!hasNext) {
-                    this.paginator.length = this.allPlugins.length;
-                } else {
-                    this.paginator.length = this.allPlugins.length + pageSize;
-                }
-
+                this.updatePaginatorLength();
             }, error => {
                 this.loadError.emit(error);
                 throw error;
@@ -92,9 +85,21 @@ export class PluginTableComponent implements OnInit, AfterViewInit {
         }
     }
 
+    private updatePaginatorLength() {
+        let pageSize = this.paginator.pageSize;
+        let end = (this.paginator.pageIndex + 1) * pageSize;
+        let hasNext = this.allPlugins.length > end;
+        if (!hasNext) {
+            this.paginator.length = this.allPlugins.length;
+        } else {
+            this.paginator.length = this.allPlugins.length + pageSize;
+        }
+    }
+
     removeFromTable(plugin: Plugin) {
         this.plugins = this.plugins.filter(p => p.id !== plugin.id);
         this.allPlugins = this.allPlugins.filter(p => p.id !== plugin.id);
+        this.updatePaginatorLength()
     }
 }
 
