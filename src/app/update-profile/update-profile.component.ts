@@ -41,7 +41,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
         this.walletId = data.request.connection.wallet;
 
         this.form = new FormGroup({
-            walletId: new FormControl(null),
+            walletId: new FormControl(this.walletId),
             name: new FormControl(null, [Validators.required]),
             bio: new FormControl(null, [Validators.maxLength(255)]),
             links: new FormArray([
