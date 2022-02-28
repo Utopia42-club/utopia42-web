@@ -1,3 +1,7 @@
+.root {
+    min-width: 40em;
+}
+
 .plugins {
     ::ng-deep .table-container {
         min-height: 30em;

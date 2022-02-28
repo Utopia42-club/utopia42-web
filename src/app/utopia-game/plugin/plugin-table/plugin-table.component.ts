@@ -65,12 +65,12 @@ export class PluginTableComponent implements OnInit, AfterViewInit {
         let start = pageIndex * pageSize;
         let end = (pageIndex + 1) * pageSize;
 
-        if (this.allPlugins.length >= end) {
+        if (this.allPlugins.length > end) {
             this.plugins = this.allPlugins.slice(start, end);
             return;
         } else {
             let lastId = this.allPlugins.length > 0 ? this.allPlugins[this.allPlugins.length - 1].id : null;
-            let limit = pageIndex == 0 ? pageSize + 1 : pageSize;
+            let limit = end + 1 - this.allPlugins.length;
 
             this.loadingService.prepare(
                 this.loader.loadData(new SearchCriteria(lastId, limit, null))
@@ -97,9 +97,8 @@ export class PluginTableComponent implements OnInit, AfterViewInit {
     }
 
     removeFromTable(plugin: Plugin) {
-        this.plugins = this.plugins.filter(p => p.id !== plugin.id);
         this.allPlugins = this.allPlugins.filter(p => p.id !== plugin.id);
-        this.updatePaginatorLength()
+        this.load();
     }
 }
 
