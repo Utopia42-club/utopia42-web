@@ -116,10 +116,10 @@
 </ng-template>
 
 <ng-template #positionField let-input="input">
-    <form [formGroup]="inputsForm" fxLayout="row">
+    <form [formGroup]="inputsForm" fxLayout="row" style="width: 100%">
         <app-position-field [required]="input.required" [formControlName]="input.name"
                             [label]="input.label ?? input.name" [hint]="input.hint"
-                            [positionOptions]="positionOptions | async">
+                            [positionOptions]="positionOptions | async" style="width: 100%">
         </app-position-field>
     </form>
 </ng-template>
@@ -144,20 +144,12 @@
     </form>
 </ng-template>
 
+
 <ng-template #blockTypeField let-input="input">
-    <form [formGroup]="inputsForm">
-        <mat-form-field class="input-field">
-            <mat-label *ngIf="input.label == null">{{input.name}}</mat-label>
-            <mat-label *ngIf="input.label != null" [innerHtml]="input.label | sanitize"></mat-label>
-            <mat-select [required]="input.required" [formControlName]="input.name">
-                <mat-option *ngFor="let type of blockTypes | async" [value]="type">
-                    <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="auto">
-                        <div>{{type}}</div>
-                        <img *ngIf="type != 'air'" src="/assets/blockIcons/{{type}}.png" width="30" height="30"/>
-                    </div>
-                </mat-option>
-            </mat-select>
-            <mat-hint *ngIf="input.hint != null" [innerHtml]="input.hint | sanitize"></mat-hint>
-        </mat-form-field>
+    <form [formGroup]="inputsForm" fxLayout="row" style="width: 100%">
+        <app-block-type-field [required]="input.required" [formControlName]="input.name"
+                              [label]="input.label ?? input.name" [hint]="input.hint"
+                              [blockTypes]="blockTypes | async" style="width: 100%">
+        </app-block-type-field>
     </form>
 </ng-template>

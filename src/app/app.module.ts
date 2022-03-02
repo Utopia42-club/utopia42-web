@@ -55,6 +55,8 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { PluginTableComponent } from './utopia-game/plugin/plugin-table/plugin-table.component';
 import { PluginStoreDialogComponent } from './utopia-game/plugin/plugin-store-dialog/plugin-store-dialog.component';
+import { ColorPickerModule } from 'ngx-color-picker';
+import { BlockTypeFieldComponent } from './utopia-game/plugin/plugin-inputs-editor/block-type-field/block-type-field.component';
 
 @NgModule({
     declarations: [
@@ -82,7 +84,8 @@ import { PluginStoreDialogComponent } from './utopia-game/plugin/plugin-store-di
         SanitizePipe,
         PluginConfirmationDialog,
         PluginTableComponent,
-        PluginStoreDialogComponent
+        PluginStoreDialogComponent,
+        BlockTypeFieldComponent
     ],
     imports: [
         BrowserModule,
@@ -116,7 +119,8 @@ import { PluginStoreDialogComponent } from './utopia-game/plugin/plugin-store-di
         MatMenuModule,
         MatCheckboxModule,
         MatChipsModule,
-        MatPaginatorModule
+        MatPaginatorModule,
+        ColorPickerModule
     ],
     providers: [
         {
