@@ -1,19 +1,15 @@
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { Observable, of, Subscription, throwError } from 'rxjs';
-import {
-    catchError,
-    concatMap,
-    map, takeLast,
-    tap
-} from 'rxjs/operators';
-import { PricedLand } from '../ehtereum/models';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { of, Subscription } from 'rxjs';
+import { catchError, concatMap, tap } from 'rxjs/operators';
+import { Land, PricedLand } from '../ehtereum/models';
 import { ExceptionDialogContentComponent } from '../exception-dialog-content/exception-dialog-content.component';
-import { LoadingService } from '../loading.service';
+import { LoadingService } from '../loading/loading.service';
+import { BuyLandValidation } from './buy-land-validation';
 import { BuyLandsData } from './buy-lands-data';
-
-
+import { BuyLandsService } from './buy-lands.service';
+import { ToastrService } from "ngx-toastr";
+import { UtopiaDialogService } from '../utopia-dialog.service';
 
 
 @Component({
@@ -21,116 +17,131 @@ import { BuyLandsData } from './buy-lands-data';
     templateUrl: './buy-lands.component.html',
     styleUrls: ['./buy-lands.component.scss'],
 })
-export class BuyLandsComponent implements OnInit, OnDestroy {
+export class BuyLandsComponent implements OnInit, OnDestroy
+{
     private subscription = new Subscription();
     readonly lands: PricedLand[];
+    private signature: string;
+    private lastLandCheckedId: number;
     columns = ['x1', 'y1', 'x2', 'y2', 'Price'];
 
     constructor(@Inject(MAT_DIALOG_DATA) public data: BuyLandsData,
-        private dialogRef: MatDialogRef<any>,
-        private dialog: MatDialog,
-        private readonly loadingService: LoadingService,
-        private snackBar: MatSnackBar) {
+                private dialogRef: MatDialogRef<any>,
+                private dialog: UtopiaDialogService,
+                private readonly loadingService: LoadingService,
+                private readonly toaster: ToastrService,
+                private readonly buyLandsService: BuyLandsService)
+    {
         this.lands = data.request.body;
     }
 
-    ngOnInit(): void {
+    ngOnInit(): void
+    {
         this.subscription.add(
-            this.getPrices()
-                .pipe(
+            this.loadingService.prepare(
+                of(this.lands).pipe(
+                    concatMap((lands: Land[]) => {
+                        if (lands.length == 1) return of(lands[0]);
+                        throw new Error('Exactly one land should be selected for buying');
+                    }),
+                    concatMap((land: Land) => {
+                        return this.buyLandsService.validate(land);
+                    }),
+                    concatMap((validation: BuyLandValidation) => {
+                        if (!validation.valid) {
+                            throw new Error('Invalid land coordinates. Buying cancelled');
+                        }
+                        if (validation.conflictingLand == undefined) {
+                            if (validation.signature) {
+                                this.signature = validation.signature;
+                                this.lastLandCheckedId = validation.lastCheckedLandId;
+                                return this.data.contract.getLandPrice(this.lands[0]);
+                            }
+                            throw new Error('No signature retrieved');
+                        }
+                        throw new Error('Conflict detected. Buying cancelled');
+                    }),
+                    concatMap((price: string) => {
+                        this.lands[0].price = Number(price);
+                        return of(true);
+                    }),
                     catchError((e: Error) => {
                         this.dialog.open(ExceptionDialogContentComponent, {
                             data: {
-                                title:
-                                    e.message != ''
-                                        ? e.message
-                                        : 'Failed to calculate price!',
+                                title: "Error",
+                                content: e.message
                             },
                         });
-                        return throwError(e);
+                        this.dialogRef.close();
+                        return of(false);
                     })
-                ).subscribe()
-        );
-    }
-
-    getPrices(): Observable<any> {
-        return this.loadingService.prepare(
-            this.loadingService
-                .prepare(
-                    of(...this.lands).pipe(
-                        concatMap((land, index) => {
-                            if (land.price != null) return of(true);
-                            return this.data.contract
-                                .getLandPrice(land)
-                                .pipe(
-                                    map((price) => {
-                                        land.price = Number(price);
-                                        return true;
-                                    })
-                                );
-                        }),
-                        takeLast(1),
-                        tap((v) => {
-                            if (v)
-                                this.snackBar.open('All land prices calculated.');
-                        })
-                    )
                 )
-        );
+            ).subscribe()
+        )
     }
 
-    ngOnDestroy(): void {
+    ngOnDestroy(): void
+    {
         this.subscription.unsubscribe();
     }
 
-    buy(): void {
+    buy(): void
+    {
         this.subscription.add(
-            this.loadingService
-                .prepare(
-                    of(...this.lands).pipe(
-                        concatMap((land, index) => {
-                            return this.data.contract.
-                                assignPricedLand(
-                                    this.data.request.connection.wallet,
-                                    land
-                                ).pipe(
-                                    map((v) => {
-                                        this.snackBar.open(
-                                            `Land number ${index + 1} bought.`
-                                        );
-                                        return true;
-                                    })
-                                );
-                        }),
-                        catchError((e) => {
-                            this.dialog.open(ExceptionDialogContentComponent, {
-                                data: {
-                                    title: 'Failed to buy all the lands!',
-                                },
-                            });
-                            return throwError(e);
-                        }),
-                        takeLast(1),
-                        tap((v) => {
-                            if (v) {
-                                this.snackBar.open('All lands were bought.');
-                                this.dialogRef.close();
-                            }
-                        })
-                    )
+            this.loadingService.prepare(
+                of(this.lands[0]).pipe(
+                    concatMap((land: Land) => {
+                        return this.data.contract.assignPricedLand(
+                            this.data.request.connection.wallet, land, this.lastLandCheckedId, this.signature
+                        )
+                    }),
+                    catchError((e) => {
+                        this.dialog.open(ExceptionDialogContentComponent, {
+                            data: {
+                                title: "Error",
+                                content: e.message ? e.message : "Failed to buy the land"
+                            },
+                        });
+                        this.dialogRef.close();
+                        return of(false);
+                    }),
+                    tap((v) => {
+                        if (v) {
+                            this.toaster.info('Land bought successfully');
+                        }
+                        this.dialogRef.close();
+                    })
                 )
-                .subscribe()
+            ).subscribe()
         );
     }
 
-    cancel(): void {
+    cancel(): void
+    {
         this.dialogRef.close();
     }
 
-    totalPrice(): number {
+    totalPrice(): number
+    {
         let price = 0;
         for (let land of this.lands)
             price = price + land.price;
         return price;
     }
+
+    getLandProperty(land: PricedLand, property: string): Number
+    {
+        if (property == 'x1')
+            return land.startCoordinate.x;
+        if (property == 'x2')
+            return land.endCoordinate.x;
+        if (property == 'y1')
+            return land.startCoordinate.z;
+        if (property == 'y2')
+            return land.endCoordinate.z;
+        if (property == 'price')
+            return land.price;
+        return null;
+    }
+
 }

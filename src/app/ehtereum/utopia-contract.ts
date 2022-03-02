@@ -1,129 +1,145 @@
-import { Observable, of, Subscriber } from "rxjs";
-import { map, mergeMap, reduce, switchMap } from "rxjs/operators";
-import Web3 from "web3";
-import { Contract } from "web3-eth-contract";
-import { LoadingService } from "../loading.service";
-import { Land, PricedLand } from "./models";
+import { ToastrService } from 'ngx-toastr';
+import { from, Observable, Subscriber } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
+import Web3 from 'web3';
+import { Contract } from 'web3-eth-contract';
+import { LoadingService } from '../loading/loading.service';
+import { Land, PricedLand } from './models';
 
 export class UtopiaContract {
     constructor(readonly ethContract: Contract,
-        private loadingService: LoadingService,
-        readonly defaultWallet: string) { }
+                private loadingService: LoadingService,
+                readonly defaultWallet: string,
+                readonly web3: Web3 | null,
+                private readonly toaster: ToastrService) {
+    }
 
     public getLandPrice(land: Land): Observable<string> {
         return this.loadingService.prepare(
             new Observable((s) =>
-                this.ethContract.methods.landPrice(land.x1, land.y1, land.x2, land.y2,).call(this.listener(s))
+                this.ethContract.methods.landPrice(land.startCoordinate.x, land.endCoordinate.x, land.startCoordinate.z, land.endCoordinate.z)
+                    .call(this.listener(s))
             ).pipe(map((price: any) => Web3.utils.fromWei(price).toString()))
         );
     }
 
-    public updateKey(ipfsId): Observable<string> {
+    public assignPricedLand(wallet: string, land: PricedLand, lastLandCheckedId: number, signature: string): Observable<any> {
+        let amount: string;
+        let balance: string;
         return this.loadingService.prepare(
-            new Observable(s => this.ethContract.methods().updateKey(ipfsId, this.listener(s)))
+            from(this.web3.eth.getBalance(wallet))
+        ).pipe(
+            switchMap(b => {
+                balance = b as string;
+                return new Observable(s =>
+                    this.ethContract.methods.landPrice(land.startCoordinate.x, land.endCoordinate.x, land.startCoordinate.z, land.endCoordinate.z).call(this.listener(s)));
+            }),
+            switchMap(a => {
+                amount = a as string;
+                if (Number(Web3.utils.fromWei(amount)) > Number(Web3.utils.fromWei(balance))) {
+                    throw new Error('Insufficient balance (account balance < land price)');
+                }
+                return this.assignLandEstimateGas(wallet, land, lastLandCheckedId, signature, amount as string);
+            }),
+            switchMap(gasAmount => {
+                return new Observable(s =>
+                    this.ethContract.methods.assignLandConflictFree(land.startCoordinate.x, land.endCoordinate.x, land.startCoordinate.z, land.endCoordinate.z, land.ipfsKey || '', lastLandCheckedId, signature)
+                        .send({ from: wallet, value: amount, gasLimit: (3 * Number(gasAmount)).toString() }, this.listener(s))
+                );
+            })
         );
     }
 
-    public assignPricedLand(wallet: string, land: PricedLand): Observable<any> {
-        return this.assignLand(wallet, land);
+    public assignLandEstimateGas(wallet: string, land: PricedLand, lastLandCheckedId: number, signature: string, amount: string): Observable<string> {
+        return new Observable(s =>
+            this.ethContract.methods
+                .assignLandConflictFree(land.startCoordinate.x, land.endCoordinate.x, land.startCoordinate.z, land.endCoordinate.z, land.ipfsKey || '', lastLandCheckedId, signature)
+                .estimateGas({ from: wallet, value: amount }, this.listener(s))
+        );
     }
 
-    public assignLand(wallet: string, land: Land): Observable<any> {
+    public updateLand(ipfsKey, landId, wallet): Observable<any> {
+        if (wallet == null) {
+            wallet = this.defaultWallet;
+        }
         return this.loadingService.prepare(
-            new Observable(s =>
-                this.ethContract.methods.landPrice(land.x1, land.y1, land.x2, land.y2).call(this.listener(s))
-            ).pipe(switchMap(amount => {
-                return new Observable(s =>
-                    this.ethContract.methods.assignLand(land.x1, land.y1, land.x2, land.y2, land.ipfsKey || "")
-                        .send({ from: wallet, value: amount }, this.listener(s))
-                );
-            }))
+            new Observable(s => {
+                this.ethContract.methods.updateLand(ipfsKey, landId).send({ from: wallet })
+                    .on('confirmation', (confirmationNumber: number, receipt: any) => {
+                        if (confirmationNumber == 1) {
+                            this.toaster.info(`Land ${landId} saved.`);
+                        }
+                    })
+                    .on('error', (e: Error) => s.error(e))
+                    .on('transactionHash', (hash: string) => {
+                        s.next(hash);
+                        s.complete();
+                    });
+            })
+        );
+    }
+
+    public transferLand(landId: number, to: string, wallet: string): Observable<any> {
+        if (wallet == null) {
+            wallet = this.defaultWallet;
+        }
+        return this.loadingService.prepare(
+            new Observable(s => {
+                this.ethContract.methods.transferLand(landId, to).send({ from: wallet }, this.listener(s));
+            })
+        );
+    }
+
+    public setNft(landId: number, wallet: string, nft: boolean): Observable<any> {
+        if (wallet == null) {
+            wallet = this.defaultWallet;
+        }
+        return this.loadingService.prepare(
+            new Observable(s => {
+                if (nft) {
+                    this.ethContract.methods.landToNFT(landId).send({ from: wallet }, this.listener(s));
+                } else {
+                    this.ethContract.methods.NFTToLand(landId).send({ from: wallet }, this.listener(s));
+                }
+            })
         );
     }
 
     public getOwnerLands(wallet?: string): Observable<Land[]> {
-        if (wallet == null) wallet = this.defaultWallet;
-        return this.getLands(wallet, []);
-    }
+        if (wallet == null) {
+            wallet = this.defaultWallet;
+        }
 
-    private getLands(wallet: string, current: Land[]): Observable<Land[]> {
-        return this.loadingService.prepare(
-            this.getOwnerLand(wallet, current.length)
-                .pipe(switchMap((land: Land) => {
-                    if (land && land.time > 0) {
-                        current.push(land);
-                        return this.getLands(wallet, current);
-                    }
-                    return of(current);
-                }))
-        );
-    }
-
-    public updateLand(ipfsKey, index, wallet): Observable<any> {
-        if (wallet == null) wallet = this.defaultWallet;
-        return this.loadingService.prepare(
-            new Observable(s => {
-                this.ethContract.methods.updateLand(ipfsKey, index).send({ from: wallet }, this.listener(s));
-            })
-        );
-    }
-
-    public transferLand(index, to, wallet): Observable<any> {
-        if (wallet == null) wallet = this.defaultWallet;
-        return this.loadingService.prepare(
-            new Observable(s => {
-                this.ethContract.methods.transferLand(index, to).send({ from: wallet }, this.listener(s));
-            })
-        );
-    }
-
-    public getOwnerLand(wallet: string, landIndex: number): Observable<Land> {
         return this.loadingService.prepare(
             new Observable(s =>
-                this.ethContract.methods.getLand(wallet, landIndex).call(this.listener(s))
-            ).pipe(map((r: any) => {
-                return {
-                    x1: parseInt(r.x1),
-                    y1: parseInt(r.y1),
-                    x2: parseInt(r.x2),
-                    y2: parseInt(r.y2),
-                    time: parseInt(r.time),
-                    ipfsKey: r.hash,
-                }
-            }))
-        );
-    }
-    public getOwnerList(): Observable<string[]> {
-        return this.loadingService.prepare(
-            new Observable(s => this.ethContract.methods.getOwners().call(this.listener(s)))
-        );
-    }
-
-
-    public getUsersAssignee(): Observable<any> {
-        return this.loadingService.prepare(
-            this.getOwnerList().pipe(
-                switchMap(owners => of(...owners)),
-                mergeMap(owner => this.getOwnerLands(owner)
-                    .pipe(map(lands => {
-                        const res: any = {};
-                        res[owner] = lands;
-                        return res;
-                    }))
-                ), reduce<any>((acc, v) => {
-                    return { ...acc, ...v };
-                }, {})
+                this.ethContract.methods.getLands(wallet).call(this.listener(s))
+            ).pipe(map((rs: any[]) =>
+                rs.map(r => {
+                        return {
+                            x1: parseInt(r.x1),
+                            y1: parseInt(r.y1),
+                            x2: parseInt(r.x2),
+                            y2: parseInt(r.y2),
+                            time: parseInt(r.time),
+                            ipfsKey: r.hash,
+                            isNft: r.isNFT == 'true',
+                            owner: r.owner,
+                            ownerIndex: parseInt(r.ownerIndex)
+                        };
+                    }
+                ))
             )
         );
     }
 
     private listener(subscriber: Subscriber<any>) {
         return (error: any, value: any) => {
-            if (error)
+            if (error) {
                 return subscriber.error(error);
+            }
             // it returns tx hash because sending tx
             subscriber.next(value);
             subscriber.complete();
-        }
+        };
     }
 }

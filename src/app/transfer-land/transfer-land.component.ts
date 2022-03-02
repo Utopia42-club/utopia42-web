@@ -1,30 +1,31 @@
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { of, Subscription } from 'rxjs';
 import { catchError, concatMap, map, takeLast, tap } from 'rxjs/operators';
 import { ExceptionDialogContentComponent } from '../exception-dialog-content/exception-dialog-content.component';
-import { LoadingService } from '../loading.service';
+import { LoadingService } from '../loading/loading.service';
 import { TransferLandData } from './transfer-land-data';
+import { ToastrService } from "ngx-toastr";
+import { UtopiaDialogService } from '../utopia-dialog.service';
 
 @Component({
-  selector: 'app-transfer-land',
-  templateUrl: './transfer-land.component.html',
-  styleUrls: ['./transfer-land.component.scss']
+    selector: 'app-transfer-land',
+    templateUrl: './transfer-land.component.html',
+    styleUrls: ['./transfer-land.component.scss']
 })
 export class TransferLandComponent implements OnInit, OnDestroy
 {
     private subscription = new Subscription();
-    readonly landIndex: number;
     destinationAddress: string;
+    landId: number;
 
     constructor(@Inject(MAT_DIALOG_DATA) public data: TransferLandData,
-        private dialogRef: MatDialogRef<any>,
-        private dialog: MatDialog,
-        private readonly loadingService: LoadingService,
-        private snackBar: MatSnackBar)
+                private dialogRef: MatDialogRef<any>,
+                private dialog: UtopiaDialogService,
+                private readonly loadingService: LoadingService,
+                private readonly toaster: ToastrService)
     {
-        this.landIndex = data.request.body;
+        this.landId = data.request.body;
     }
 
     ngOnInit(): void
@@ -49,24 +50,20 @@ export class TransferLandComponent implements OnInit, OnDestroy
             this.loadingService.prepare(
                 of(this.destinationAddress.trim())
                     .pipe(
-                        concatMap((to) =>
-                        {
+                        concatMap((target) => {
                             return this.data.contract
-                                .transferLand(this.landIndex, to, this.data.request.connection.wallet)
-                                .pipe(map(v =>
-                                {
+                                .transferLand(this.landId, target, this.data.request.connection.wallet)
+                                .pipe(map(v => {
                                     status[0] = true;
                                     return true;
                                 }));
-                        }), catchError(e =>
-                        {
+                        }), catchError(e => {
                             console.log(e);
                             this.dialog.open(ExceptionDialogContentComponent, { data: { title: "Failed to transfer land!" } });
                             return of(false);
-                        }), takeLast(1), tap(v =>
-                        {
+                        }), takeLast(1), tap(v => {
                             if (v) {
-                                this.snackBar.open(`Land transferred successfully.`);
+                                this.toaster.info('Request successfully sent.');
                                 this.dialogRef.close();
                             }
                         })

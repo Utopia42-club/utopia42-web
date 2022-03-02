@@ -1,0 +1,32 @@
+<div fxLayout="column" fxLayoutAlign="start center" class="root" (click)="$event.stopPropagation()">
+    <div class="header" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="0.3em">
+        <mat-form-field class="search-field">
+            <mat-label>Search</mat-label>
+            <input matInput [formControl]="filter" type="text"/>
+        </mat-form-field>
+        <button mat-icon-button color="primary" (click)="createNewPlugin()">
+            <mat-icon>add</mat-icon>
+        </button>
+        <button mat-icon-button color="primary" (click)="openPluginStore()">
+            <mat-icon>store</mat-icon>
+        </button>
+    </div>
+    <div class="filter">
+        <mat-chip-list class="chip-filters" #chipList [formControl]="selectedFilters" selectable multiple>
+            <mat-chip #OWNED="matChip" [value]="'owned'"
+                      (click)="toggleSelection($event, OWNED)">
+                Owned
+            </mat-chip>
+            <mat-chip #SAVED="matChip" [value]="'installed'"
+                      (click)="toggleSelection($event, SAVED)">
+                Installed
+            </mat-chip>
+        </mat-chip-list>
+    </div>
+
+    <div class="plugins">
+        <app-plugin-table [loader]="pluginTableLoader" (loadError)="game.closePluginMenu()"
+            [rowActions]="pluginTableRowActions">
+        </app-plugin-table>
+    </div>
+</div>

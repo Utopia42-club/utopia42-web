@@ -12,3 +12,7 @@ mat-toolbar {
         white-space: nowrap;
     }
 }
+
+::ng-deep .mat-menu-panel {
+    max-width: none !important;
+}

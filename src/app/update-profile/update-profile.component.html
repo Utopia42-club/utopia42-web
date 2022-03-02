@@ -1,0 +1,64 @@
+<h2 mat-dialog-title>Edit Profile</h2>
+
+<mat-dialog-content>
+    <form [formGroup]="form" style="width: 100%; height: 100%">
+        <div fxLayout="row" fxLayoutGap="0.5em" fxLayoutAlign="center start">
+            <div fxFlex="40" fxLayout="column" fxLayoutAlign="start center">
+                <mat-form-field class="field">
+                    <mat-label>Name</mat-label>
+                    <input matInput formControlName="name" [required]="true"/>
+                </mat-form-field>
+
+                <mat-form-field class="field">
+                    <mat-label>Bio</mat-label>
+                    <textarea matInput rows="2" formControlName="bio"></textarea>
+                </mat-form-field>
+            </div>
+
+            <div fxFlex fxLayout="column" fxLayoutGap="0.6em" fxLayoutAlign="center center">
+                <img class="profile-image" [src]="imageSrc"/>
+                <label for="file-upload" class="file-input-label">
+                    Choose an image
+                </label>
+                <input id="file-upload" class="file-input" type="file" accept="image/*" #fileInput
+                       (change)="onImageChange(fileInput.files[0])"/>
+            </div>
+        </div>
+        <div fxLayout="column" fxLayoutAlign="center center" style="width: 100%">
+            <div *ngFor="let linkControl of asFormArray(form.get('links')).controls; let i = index"
+                 [formGroup]="asFormGroup(linkControl)"
+                 fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="0.4em" class="link-form">
+                <mat-form-field fxFlex="30">
+                    <mat-select required="true" formControlName="media">
+                        <mat-option *ngFor="let media of linkMedias" [value]="media">
+                            {{ media }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <mat-form-field fxFlex>
+                    <input placeholder="Url" matInput formControlName="link"/>
+                    <mat-error *ngIf="!asFormGroup(linkControl).controls.link.valid">Not a valid url</mat-error>
+                </mat-form-field>
+
+                <button mat-icon-button color="warn" class="delete-link-button" (click)="removeLink(i)">
+                    <mat-icon>delete</mat-icon>
+                </button>
+            </div>
+        </div>
+        <div style="width: 100%" fxLayout="row" fxLayoutAlign="end center">
+            <button mat-stroked-button class="add-link-button" (click)="addLink()">
+                <mat-icon>add</mat-icon>
+            </button>
+        </div>
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button tabindex="-1" mat-raised-button color="accent" (click)="cancel()">
+        Cancel
+    </button>
+    <button [disabled]="!form.valid" mat-raised-button color="primary" (click)="update()">
+        Update
+    </button>
+</mat-dialog-actions>

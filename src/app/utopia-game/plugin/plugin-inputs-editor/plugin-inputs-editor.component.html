@@ -1,0 +1,155 @@
+<div class="root" fxLayout="column" fxLayoutAlign="space-between center">
+    <div *ngIf="inputsForm != null" fxLayout="column" style="width: 100%">
+        <p class="title">{{plugin.name}} plugin</p>
+        <p class="subtitle" *ngIf="inputs != null && inputs.length > 0">Please fill out input parameters</p>
+        <form [formGroup]="inputsForm" class="inputs">
+            <div *ngFor="let input of inputs" [ngSwitch]="input.type">
+                <ng-container *ngSwitchCase="'number'">
+                    <ng-container
+                        *ngTemplateOutlet="numberField; context: {input: input}">
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngSwitchCase="'text'">
+                    <ng-container
+                        *ngTemplateOutlet="textField; context: {input: input}">
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngSwitchCase="'selection'">
+                    <ng-container
+                        *ngTemplateOutlet="selectionField; context: {input: input}">
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngSwitchCase="'position'">
+                    <ng-container
+                        *ngTemplateOutlet="positionField; context: {input: input}">
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngSwitchCase="'land'">
+                    <ng-container
+                        *ngTemplateOutlet="landField; context: {input: input}">
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngSwitchCase="'blockType'">
+                    <ng-container
+                        *ngTemplateOutlet="blockTypeField; context: {input: input}">
+                    </ng-container>
+                </ng-container>
+            </div>
+        </form>
+    </div>
+    <div *ngIf="inputsForm == null" fxLayout="row" fxLayoutAlign="center center" class="loading-inputs">
+        <p>Loading plugin inputs...</p>
+    </div>
+    <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="0.5em" class="actions">
+        <button *ngIf="inputsForm != null" mat-raised-button color="primary"
+                (click)="submit()" [disabled]="!this.inputsForm.valid">
+            Submit
+        </button>
+        <button mat-raised-button color="accent"
+                (click)="cancel()">
+            Cancel
+        </button>
+    </div>
+</div>
+
+<ng-template #numberField let-input="input">
+    <form [formGroup]="inputsForm">
+        <mat-form-field *ngIf="input.options == null" class="input-field">
+            <mat-label *ngIf="input.label == null">{{input.name}}</mat-label>
+            <mat-label *ngIf="input.label != null" [innerHtml]="input.label | sanitize"></mat-label>
+            <input matInput [required]="input.required" [formControlName]="input.name" type="number"/>
+            <mat-hint *ngIf="input.hint != null" [innerHtml]="input.hint | sanitize"></mat-hint>
+        </mat-form-field>
+        <mat-form-field *ngIf="input.options != null" class="input-field">
+            <mat-label *ngIf="input.label == null">{{input.name}}</mat-label>
+            <mat-label *ngIf="input.label != null" [innerHtml]="input.label | sanitize"></mat-label>
+            <input matInput [required]="input.required" [formControlName]="input.name" type="number"
+                   [matAutocomplete]="auto"/>
+            <mat-hint *ngIf="input.hint != null" [innerHtml]="input.hint | sanitize"></mat-hint>
+            <mat-autocomplete #auto="matAutocomplete">
+                <mat-option *ngFor="let option of input.options | filterInputOptions : inputsForm!.value[input.name]"
+                            [value]="option.value">
+                    <span>{{option.key}}</span>
+                </mat-option>
+            </mat-autocomplete>
+        </mat-form-field>
+    </form>
+</ng-template>
+
+<ng-template #textField let-input="input">
+    <form [formGroup]="inputsForm">
+        <mat-form-field *ngIf="input.options == null" class="input-field">
+            <mat-label *ngIf="input.label == null">{{input.name}}</mat-label>
+            <mat-label *ngIf="input.label != null" [innerHtml]="input.label | sanitize"></mat-label>
+            <input matInput [required]="input.required" [formControlName]="input.name" type="text"/>
+            <mat-hint *ngIf="input.hint != null" [innerHtml]="input.hint | sanitize"></mat-hint>
+        </mat-form-field>
+        <mat-form-field *ngIf="input.options != null" class="input-field">
+            <mat-label *ngIf="input.label == null">{{input.name}}</mat-label>
+            <mat-label *ngIf="input.label != null" [innerHtml]="input.label | sanitize"></mat-label>
+            <input matInput [required]="input.required" [formControlName]="input.name" type="text"
+                   [matAutocomplete]="auto"/>
+            <mat-hint *ngIf="input.hint != null" [innerHtml]="input.hint | sanitize"></mat-hint>
+            <mat-autocomplete #auto="matAutocomplete">
+                <mat-option *ngFor="let option of input.options | filterInputOptions : inputsForm!.value[input.name]"
+                            [value]="option.value">
+                    <span>{{option.key}}</span>
+                </mat-option>
+            </mat-autocomplete>
+        </mat-form-field>
+    </form>
+</ng-template>
+
+<ng-template #selectionField let-input="input">
+    <form [formGroup]="inputsForm">
+        <mat-form-field class="input-field">
+            <mat-label *ngIf="input.label == null">{{input.name}}</mat-label>
+            <mat-label *ngIf="input.label != null" [innerHtml]="input.label | sanitize"></mat-label>
+            <mat-select [required]="input.required" [formControlName]="input.name">
+                <mat-option *ngFor="let option of input.options ?? []" [value]="option.value">
+                    {{option.key}}
+                </mat-option>
+            </mat-select>
+            <mat-hint *ngIf="input.hint != null" [innerHtml]="input.hint | sanitize"></mat-hint>
+        </mat-form-field>
+    </form>
+</ng-template>
+
+<ng-template #positionField let-input="input">
+    <form [formGroup]="inputsForm" fxLayout="row" style="width: 100%">
+        <app-position-field [required]="input.required" [formControlName]="input.name"
+                            [label]="input.label ?? input.name" [hint]="input.hint"
+                            [positionOptions]="positionOptions | async" style="width: 100%">
+        </app-position-field>
+    </form>
+</ng-template>
+
+<ng-template #landField let-input="input">
+    <form [formGroup]="inputsForm">
+        <mat-form-field class="input-field">
+            <mat-label *ngIf="input.label == null">{{input.name}}</mat-label>
+            <mat-label *ngIf="input.label != null" [innerHtml]="input.label | sanitize"></mat-label>
+            <mat-select [required]="input.required" [formControlName]="input.name">
+                <mat-option *ngFor="let option of landOptions | async;let ind=index" [value]="option">
+                    <span *ngIf="option.properties != null && option.properties.name != null; else elseLand">
+                        {{option.properties.name}} #{{option.id}}
+                    </span>
+                    <ng-template #elseLand>
+                        <span>Land #{{option.id}}</span>
+                    </ng-template>
+                </mat-option>
+            </mat-select>
+            <mat-hint *ngIf="input.hint != null" [innerHtml]="input.hint | sanitize"></mat-hint>
+        </mat-form-field>
+    </form>
+</ng-template>
+
+
+<ng-template #blockTypeField let-input="input">
+    <form [formGroup]="inputsForm" fxLayout="row" style="width: 100%">
+        <app-block-type-field [required]="input.required" [formControlName]="input.name"
+                              [label]="input.label ?? input.name" [hint]="input.hint"
+                              [blockTypes]="blockTypes | async" style="width: 100%">
+        </app-block-type-field>
+    </form>
+</ng-template>

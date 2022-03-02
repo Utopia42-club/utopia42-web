@@ -7,7 +7,15 @@
             <h2> Play On Browser</h2>
         </mat-card-actions>
     </mat-card>
-    <a href="http://app.utopia42.club/windows.zip" style="text-decoration: none;">
+    <mat-card class="orange" matRipple fxLayout="column" (click)="startGameAt()">
+        <mat-card-content fxLayout="row" fxLayoutAlign="center center">
+            <mat-icon>edit_location</mat-icon>
+        </mat-card-content>
+        <mat-card-actions>
+            <h2>Open Game At</h2>
+        </mat-card-actions>
+    </mat-card>
+    <a [href]="windowsUrl" style="text-decoration: none;">
         <mat-card class="indigo" matRipple fxLayout="column">
             <mat-card-content fxLayout="row" fxLayoutAlign="center center">
                 <mat-icon>desktop_windows</mat-icon>

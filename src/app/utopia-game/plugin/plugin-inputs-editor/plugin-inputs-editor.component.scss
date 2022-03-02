@@ -1,0 +1,52 @@
+.root {
+    width: 55em;
+    max-height: 25em;
+    height: min-content;
+}
+
+.inputs {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6em;
+}
+
+.inputs > * {
+    flex-grow: 1;
+}
+
+.input-field {
+    width: 100%;
+}
+
+.loading-inputs {
+    width: 100%;
+    height: 100%;
+    font-size: 2em;
+    font-weight: 500;
+    color: #737373;
+}
+
+.actions {
+    width: 100%;
+}
+
+.title {
+    font-size: 1.4em;
+    font-weight: 500;
+    color: #737373;
+}
+
+.subtitle {
+    font-size: 1.1em;
+    font-weight: 400;
+    color: #575757;
+}
+
+.terms {
+    width: 100%;
+}
+
+.footer {
+    width: 100%;
+}

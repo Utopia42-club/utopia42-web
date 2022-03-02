@@ -1,0 +1,12 @@
+.loading-layer {
+    position: absolute;
+    inset: 0;
+    background-color: transparent;
+    z-index: 10000;
+
+    mat-spinner {
+        position: absolute;
+        top: calc(50% - 50px);
+        left: calc(50% - 50px);
+    }
+}
