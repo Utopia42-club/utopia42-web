@@ -21,7 +21,7 @@ import { BuyLandsComponent } from './buy-lands/buy-lands.component';
 import { ConnectionStatusIndicatorComponent } from './connection-status-indicator/connection-status-indicator.component';
 import { ExceptionDialogContentComponent } from './exception-dialog-content/exception-dialog-content.component';
 import { HomeComponent } from './home/home.component';
-import { MetaMaskConnectingComponent } from './meta-mask-connecting/meta-mask-connecting.component';
+import { WalletConnectingComponent } from './wallet-mask-connecting/wallet-connecting.component';
 import { PortLandsComponent } from './port-lands/port-lands.component';
 import { SaveLandsComponent } from './save-lands/save-lands.component';
 import { UtopiaGameComponent } from './utopia-game/utopia-game.component';
@@ -62,7 +62,7 @@ import { BlockTypeFieldComponent } from './utopia-game/plugin/plugin-inputs-edit
     declarations: [
         AppComponent,
         HomeComponent,
-        MetaMaskConnectingComponent,
+        WalletConnectingComponent,
         SaveLandsComponent,
         ExceptionDialogContentComponent,
         PortLandsComponent,

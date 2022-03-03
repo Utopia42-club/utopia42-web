@@ -1,5 +1,5 @@
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Subject, Subscription, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ConnectionDetail } from '../ehtereum/connection-detail';
@@ -7,11 +7,11 @@ import { Networks } from '../ehtereum/network';
 import { Web3Service } from '../ehtereum/web3.service';
 
 @Component({
-    selector: 'app-meta-mask-connecting',
-    templateUrl: './meta-mask-connecting.component.html',
-    styleUrls: ['./meta-mask-connecting.component.scss']
+    selector: 'app-wallet-mask-connecting',
+    templateUrl: './wallet-connecting.component.html',
+    styleUrls: ['./wallet-connecting.component.scss']
 })
-export class MetaMaskConnectingComponent implements OnInit, OnDestroy {
+export class WalletConnectingComponent implements OnInit, OnDestroy {
     private connectionSubscription: Subscription;
     private stateSubscription = new Subscription();
     private resultSubject = new Subject<boolean>();
@@ -19,12 +19,11 @@ export class MetaMaskConnectingComponent implements OnInit, OnDestroy {
     private readonly targetWallet: string;
     private readonly targetNetwork: number;
     retry = null;
-    title: string = "Connecting to Meta Mask";
+    title: string = 'Connecting to wallet';
     message: string;
 
     constructor(@Inject(MAT_DIALOG_DATA) public data: ConnectionDetail,
-        private service: Web3Service,
-        private dialog: MatDialogRef<any>) {
+                private service: Web3Service, private dialog: MatDialogRef<any>) {
         this.targetNetwork = data.network;
         this.targetWallet = data.wallet;
         this.stateSubscription.add(service.connected$.subscribe(() => this.tryConnect()));
@@ -63,27 +62,29 @@ export class MetaMaskConnectingComponent implements OnInit, OnDestroy {
                     return throwError(e);
                 }))
                 .subscribe(v => {
-                    if (v)
+                    if (v) {
                         this.finish(true);
-                    else {
+                    } else {
                         this.retry = null;
-                        if (this.targetNetwork != null && this.service.networkId() != this.targetNetwork)
+                        if (this.targetNetwork != null && this.service.networkId() != this.targetNetwork) {
                             this.wrongNetwork();
-                        else if (this.targetWallet != null && this.service.wallet() != this.targetWallet)
+                        } else if (this.targetWallet != null && this.service.wallet() != this.targetWallet) {
                             this.wrongWallet();
-                        else this.connectionError();
+                        } else {
+                            this.connectionError();
+                        }
                     }
                 });
     }
 
     private connectionError(): void {
-        this.title = "Failed to connect Meta Mask";
-        this.message = "";
+        this.title = 'Connection to wallet failed';
+        this.message = '';
         this.retry = () => this.tryConnect();
     }
 
     private wrongWallet(): void {
-        this.title = "You are connected to the wrong wallet";
+        this.title = 'You are connected to the wrong wallet';
         this.message = `Please select ${this.targetWallet}`;
         this.retry = () => this.service.reconnect().subscribe(() => this.tryConnect());
     }
@@ -91,10 +92,10 @@ export class MetaMaskConnectingComponent implements OnInit, OnDestroy {
     private wrongNetwork(): void {
         this.retry = () => this.tryConnect();
         if (this.networkName() == null) {
-            this.title = "Unknown network id in url";
-            this.message = "";
+            this.title = 'Unknown network id in url';
+            this.message = '';
         } else {
-            this.title = "You are connected to the wrong network";
+            this.title = 'You are connected to the wrong network';
             this.message = `Please connect to the ${this.networkName()}`;
         }
     }

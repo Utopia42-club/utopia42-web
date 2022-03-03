@@ -50,7 +50,7 @@ export class AuthService {
                 if (!value) {
                     return throwError(new UtopiaError('Connection to MetaMask failed'));
                 } else {
-                    return this.web3Service.provider()
+                    return this.web3Service.getProvider()
                         .pipe(
                             concatMap((p) => {
                                 provider = p;

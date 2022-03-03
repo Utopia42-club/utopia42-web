@@ -2,13 +2,13 @@ import { UtopiaDialogService } from './utopia-dialog.service';
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 import { BuyLandsData } from './buy-lands/buy-lands-data';
 import { BuyLandsComponent } from './buy-lands/buy-lands.component';
 import { ConnectionDetail } from './ehtereum/connection-detail';
 import { UtopiaContract } from './ehtereum/utopia-contract';
 import { Web3Service } from './ehtereum/web3.service';
-import { MetaMaskConnectingComponent } from './meta-mask-connecting/meta-mask-connecting.component';
+import { WalletConnectingComponent } from './wallet-mask-connecting/wallet-connecting.component';
 import { SaveLandsData } from './save-lands/save-lands-data';
 import { SaveLandsComponent } from './save-lands/save-lands.component';
 import { TransferLandData } from './transfer-land/transfer-land-data';
@@ -174,17 +174,17 @@ export class AppComponent implements OnInit, AfterViewInit {
                     }
                     return of(true);
                 }),
-                map((connected) => {
+                switchMap((connected) => {
                     if (connected) {
                         return this.service.getSmartContract();
                     }
-                    return null;
+                    return of(null);
                 })
             );
     }
 
     private connect(network: number, wallet: string): Observable<boolean> {
-        let dialogRef$ = this.dialog.open(MetaMaskConnectingComponent, {
+        let dialogRef$ = this.dialog.open(WalletConnectingComponent, {
             disableClose: true,
             data: { wallet, network } as ConnectionDetail
         });

@@ -1,6 +1,6 @@
-<ng-container *ngIf="supported | async; else notSupported">
-    <button class="stroked-button" mat-stroked-button *ngIf="(service.connected$ | async); else notConnected" mat-button
-        (click)="service.reconnect().subscribe()">
+<ng-container *ngIf="service.provider$ | async; else noProvider">
+    <button class="stroked-button" mat-stroked-button *ngIf="(service.connected$ | async); else notConnected"
+            mat-button (click)="service.reconnect().subscribe()">
         <mat-icon>public</mat-icon>
         {{networkName()}}
         <mat-icon>account_balance_wallet</mat-icon>
@@ -8,13 +8,14 @@
     </button>
 </ng-container>
 
-<ng-template #notSupported>
-    <button mat-raised-button color="warn" style="pointer-events: none;">
-        MetaMask Not Found
+<ng-template #noProvider>
+    <button mat-raised-button color="warn" (click)="tryToGetProvider(true,false)">
+        Connection to wallet failed. Tap to try again.
     </button>
 </ng-template>
+
 <ng-template #notConnected>
     <button mat-raised-button color="accent" (click)="service.connect().subscribe()">
-        Connect To MetaMask
+        Connect to wallet
     </button>
 </ng-template>

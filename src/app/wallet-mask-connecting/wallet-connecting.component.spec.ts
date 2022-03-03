@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { MetaMaskConnectingComponent } from './meta-mask-connecting.component';
+import { WalletConnectingComponent } from './wallet-connecting.component';
 
 describe('MetaMaskConnectingComponent', () => {
-  let component: MetaMaskConnectingComponent;
-  let fixture: ComponentFixture<MetaMaskConnectingComponent>;
+  let component: WalletConnectingComponent;
+  let fixture: ComponentFixture<WalletConnectingComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ MetaMaskConnectingComponent ]
+      declarations: [ WalletConnectingComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(MetaMaskConnectingComponent);
+    fixture = TestBed.createComponent(WalletConnectingComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

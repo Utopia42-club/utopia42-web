@@ -14,7 +14,7 @@ export class NotSupportGuard implements CanActivate {
     }
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree | Observable<boolean | UrlTree> | Promise<boolean | UrlTree> {
-        return this.service.provider().pipe(map(p => {
+        return this.service.getProvider().pipe(map(p => {
             if (p == null) return true;
             return this.router.createUrlTree(["/home"]);
         }));
