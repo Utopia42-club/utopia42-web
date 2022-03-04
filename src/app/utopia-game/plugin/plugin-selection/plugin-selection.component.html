@@ -1,9 +1,7 @@
 <div fxLayout="column" fxLayoutAlign="start center" class="root" (click)="$event.stopPropagation()">
     <div class="header" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="0.3em">
-        <mat-form-field class="search-field">
-            <mat-label>Search</mat-label>
-            <input matInput [formControl]="filter" type="text"/>
-        </mat-form-field>
+        <app-plugin-search-bar [formControl]="filter" style="width: 100%">
+        </app-plugin-search-bar>
         <button mat-icon-button color="primary" (click)="createNewPlugin()">
             <mat-icon>add</mat-icon>
         </button>
@@ -26,7 +24,7 @@
 
     <div class="plugins">
         <app-plugin-table [loader]="pluginTableLoader" (loadError)="game.closePluginMenu()"
-            [rowActions]="pluginTableRowActions">
+                          [rowActions]="pluginTableRowActions">
         </app-plugin-table>
     </div>
 </div>

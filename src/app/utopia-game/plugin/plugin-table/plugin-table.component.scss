@@ -9,6 +9,14 @@ table {
 
 }
 
+.mat-column-id {
+    padding-right: 0.5em;
+}
+
+.mat-column-name {
+    padding-right: 0.5em;
+}
+
 .mat-column-actions {
     border-left: 1px solid #e0e0e0;
     text-align: center;
@@ -59,4 +67,9 @@ tr.detail-row {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
+    word-break: break-all;
+}
+
+.row__detail__description {
+    word-wrap: anywhere;
 }

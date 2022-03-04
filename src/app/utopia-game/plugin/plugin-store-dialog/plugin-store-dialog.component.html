@@ -3,10 +3,8 @@
         <p class="title">Plugin Store</p>
     </div>
     <div class="header">
-        <mat-form-field class="search-field">
-            <mat-label>Search</mat-label>
-            <input matInput [formControl]="filter" type="text"/>
-        </mat-form-field>
+        <app-plugin-search-bar [formControl]="filter" style="width: 100%">
+        </app-plugin-search-bar>
     </div>
     <div class="plugins">
         <app-plugin-table [loader]="pluginTableLoader" [rowActions]="pluginTableRowActions">

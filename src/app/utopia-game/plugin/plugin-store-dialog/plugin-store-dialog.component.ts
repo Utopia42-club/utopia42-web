@@ -52,9 +52,7 @@ export class PluginStoreDialogComponent implements OnInit, OnDestroy {
 
         this.pluginTableLoader = {
             loadData(searchCriteria: SearchCriteria): Observable<Plugin[]> {
-                let searchTerm = that.filter.value;
-                searchTerm = (searchTerm && searchTerm.trim().length > 0) ? searchTerm.trim() : null;
-                let newCriteria = new SearchCriteria(searchCriteria.lastId, searchCriteria.limit, searchTerm);
+                let newCriteria = new SearchCriteria(searchCriteria.lastId, searchCriteria.limit, that.filter.value);
                 return pluginService.getInstalledPlugins(newCriteria, true);
             }
         };

@@ -93,9 +93,7 @@ export class PluginSelectionComponent implements OnInit, OnDestroy {
 
         this.pluginTableLoader = {
             loadData(searchCriteria: SearchCriteria): Observable<Plugin[]> {
-                let searchTerm = that.filter.value;
-                searchTerm = (searchTerm && searchTerm.trim().length > 0) ? searchTerm.trim() : null;
-                let newCriteria = new SearchCriteria(searchCriteria.lastId, searchCriteria.limit, searchTerm);
+                let newCriteria = new SearchCriteria(searchCriteria.lastId, searchCriteria.limit, that.filter.value);
                 let value = that.selectedFilters.value;
                 if (value.length == 2 || value.length == 0) {
                     return pluginService.getPluginsForUser(newCriteria);

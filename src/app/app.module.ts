@@ -57,6 +57,7 @@ import { PluginTableComponent } from './utopia-game/plugin/plugin-table/plugin-t
 import { PluginStoreDialogComponent } from './utopia-game/plugin/plugin-store-dialog/plugin-store-dialog.component';
 import { ColorPickerModule } from 'ngx-color-picker';
 import { BlockTypeFieldComponent } from './utopia-game/plugin/plugin-inputs-editor/block-type-field/block-type-field.component';
+import { PluginSearchBarComponent } from './utopia-game/plugin/plugin-search-bar/plugin-search-bar.component';
 
 @NgModule({
     declarations: [
@@ -85,7 +86,8 @@ import { BlockTypeFieldComponent } from './utopia-game/plugin/plugin-inputs-edit
         PluginConfirmationDialog,
         PluginTableComponent,
         PluginStoreDialogComponent,
-        BlockTypeFieldComponent
+        BlockTypeFieldComponent,
+        PluginSearchBarComponent
     ],
     imports: [
         BrowserModule,

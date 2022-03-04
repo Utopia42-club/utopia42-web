@@ -82,6 +82,4 @@ export class BlockTypeFieldComponent implements OnInit, OnDestroy, ControlValueA
     ngOnDestroy() {
         this.subscription.unsubscribe();
     }
-
-
 }
