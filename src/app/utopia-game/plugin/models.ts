@@ -1,8 +1,13 @@
 import { SerializableVector3Int } from "src/app/ehtereum/models";
 
-export interface MetaBlockType {
-    blockType?: string; // default to grass
-    metaBlock?: ImageBlockType | VideoBlockType | LinkBlockType | TdObjectBlockType | MarkerBlockType
+export interface MetaBlock {
+    type: MetaBlockType;
+    position: SerializableVector3Int;
+}
+
+interface MetaBlockType {
+    blockType?: string;
+    metaBlock?: ImageBlockType | VideoBlockType | LinkBlockType | TdObjectBlockType | MarkerBlockType;
 }
 
 interface ImageBlockType {
@@ -32,39 +37,40 @@ interface VideoBlockType {
 interface LinkBlockType {
     type: "link";
     properties: {
-        url: string;
-        pos: [number]
+        url?: string;
+        pos?: [number]
     }
 }
 
 interface TdObjectBlockType {
     type: "3d_object";
     properties: {
-        scale: SerializableVector3Int;
-        offset: SerializableVector3Int;
-        rotation: SerializableVector3Int;
-        detectCollision: boolean;
+        url: string;
+        scale?: SerializableVector3Int;
+        offset?: SerializableVector3Int;
+        rotation?: SerializableVector3Int;
+        detectCollision?: boolean;
     }
 }
 
 interface MarkerBlockType {
     type: "marker";
     properties: {
-        name: string
+        name?: string
     }
 }
 
 interface ImageFaceProps {
     url: string;
-    width: number;
-    height: number;
-    detectCollision: boolean;
+    width?: number;
+    height?: number;
+    detectCollision?: boolean;
 }
 
 interface VideoFaceProps {
     url: string;
-    width: number;
-    height: number;
-    detectCollision: boolean;
-    previewTime: number;
+    width?: number;
+    height?: number;
+    detectCollision?: boolean;
+    previewTime?: number;
 }

@@ -9,7 +9,7 @@ import { PluginParameter } from './plugin-execution.service';
 import { UtopiaDialogService } from '../../utopia-dialog.service';
 import { PluginInputsEditor } from './plugin-inputs-editor/plugin-inputs-editor.component';
 import { Plugin } from './Plugin';
-import { MetaBlockType } from './models';
+import { MetaBlock } from './models';
 
 @Injectable()
 export class UtopiaApiService {
@@ -35,14 +35,23 @@ export class UtopiaApiService {
         }));
     }
 
-    public placeMetaBlocks(blocks: [{ type: MetaBlockType, position: { x: number, y: number, z: number } }]) {
+    public placeMetaBlocks(blocks: MetaBlock[]) {
         const slices = [];
         while (blocks.length > 0) {
             slices.push(blocks.splice(0, 500));
         }
         return of(...slices).pipe(
             concatMap(slice => {
-                    return this.bridge.call('UtopiaApi', 'PlaceMetaBlocks', JSON.stringify(slice))
+                    const modifiedSlice: any[] = slice.map((block: any) => {
+                        const modifiedBlock: any = {...block};
+                        if(block.type.metaBlock?.properties){
+                            modifiedBlock.type.metaBlock.properties = JSON.stringify(block.type.metaBlock.properties);
+                        } else if (block.type.metaBlock) {
+                            modifiedBlock.type.metaBlock.properties = "";
+                        }
+                        return modifiedBlock;
+                    })
+                    return this.bridge.call('UtopiaApi', 'PlaceMetaBlocks', JSON.stringify(modifiedSlice))
                         .pipe(
                             switchMap(res => timer(1).pipe(map(() => res)))
                         );
