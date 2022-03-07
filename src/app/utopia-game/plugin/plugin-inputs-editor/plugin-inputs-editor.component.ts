@@ -1,5 +1,5 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
+import { AbstractControl, FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { PluginExecutionService, PluginParameter } from '../plugin-execution.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { LoadingService } from '../../../loading/loading.service';
@@ -27,7 +27,8 @@ export class PluginInputsEditor implements OnInit {
 
     constructor(readonly pluginExecutionService: PluginExecutionService, readonly loadingService: LoadingService,
                 readonly dialogRef: MatDialogRef<PluginInputsEditor>, @Inject(MAT_DIALOG_DATA) readonly data: any,
-                readonly utopiaApiService: UtopiaApiService, readonly web3Service: Web3Service) {
+                readonly utopiaApiService: UtopiaApiService, readonly web3Service: Web3Service,
+                readonly cdr: ChangeDetectorRef) {
 
         if (data.plugin == null || data.inputs == null) {
             throw new Error('Plugin/Inputs is required');
@@ -95,13 +96,30 @@ export class PluginInputsEditor implements OnInit {
     toFormGroup(params: PluginParameter[]) {
         const group: any = {};
         params.forEach(param => {
-            group[param.name] = param.required ? new FormControl(param.defaultValue || null, Validators.required)
+            let formControl = param.isList ?
+                new FormArray(param.defaultValue || [new FormControl(null)])
                 : new FormControl(param.defaultValue || null);
+            if (param.required) {
+                formControl.setValidators([Validators.required]);
+            }
+            group[param.name] = formControl;
         });
         return new FormGroup(group);
     }
 
-    openInNewTab(scriptUrl: string) {
-        window.open(scriptUrl, '_blank');
+    asFormArray(form: any): FormArray {
+        return form as FormArray;
+    }
+
+    removeListItem(input: PluginParameter, formControl: AbstractControl) {
+        let control = this.inputsForm.get(input.name) as FormArray;
+        control.removeAt(control.controls.indexOf(formControl));
+        this.cdr.detectChanges();
+    }
+
+    addListItem(input: PluginParameter) {
+        let control = this.inputsForm.get(input.name) as FormArray;
+        control.push(new FormControl(null));
+        this.cdr.detectChanges();
     }
 }

@@ -30,6 +30,7 @@ export class PositionFieldComponent implements OnInit, OnDestroy, ControlValueAc
     @Input() required: boolean = false;
     @Input() label: string = 'Position';
     @Input() hint?: string;
+    @Input() isList: boolean = false;
     @Input() positionOptions: Marker[] = [];
 
     constructor(readonly cdr: ChangeDetectorRef) {

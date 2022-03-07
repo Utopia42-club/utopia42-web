@@ -153,8 +153,8 @@ export class PluginExecutionService {
                             }
                             break;
                         }
-                        case 'cancel':{
-                            if(resultMap.has(message.id)){
+                        case 'cancel': {
+                            if (resultMap.has(message.id)) {
                                 resultMap.get(message.id).unsubscribe();
                                 resultMap.delete(message.id);
                             } else {
@@ -214,6 +214,7 @@ export class PluginParameter {
     label?: string;
     hint: string;
     required: boolean;
+    isList: boolean = false;
     type: 'text' | 'number' | 'selection' | 'position' | 'land' | 'blockType';
     options?: { key: string, value: any }[];
     defaultValue?: any;

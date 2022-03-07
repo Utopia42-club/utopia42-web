@@ -29,6 +29,7 @@ export class BlockTypeFieldComponent implements OnInit, OnDestroy, ControlValueA
     @Input() label: string = 'Position';
     @Input() hint?: string;
     @Input() blockTypes: string[] = [];
+    @Input() isList: boolean = false;
 
     formControl = new FormControl(null);
     selectedColor = '#000000';

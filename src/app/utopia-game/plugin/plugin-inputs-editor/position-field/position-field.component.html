@@ -1,6 +1,6 @@
 <form [formGroup]="form" class="position-field">
     <div fxLayout="column">
-        <p class="label" [innerHtml]="label | sanitize"></p>
+        <p class="label" *ngIf="!isList" [innerHtml]="label | sanitize"></p>
         <div fxLayout="row" class="fields-group" fxLayoutAlign="start center">
             <mat-form-field fxFlex class="input-field" floatLabel="never">
                 <input matInput [required]="required" formControlName="x" type="number" placeholder="X"/>
