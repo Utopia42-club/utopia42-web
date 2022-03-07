@@ -1,4 +1,3 @@
-import { SerializableVector3Int } from './../../ehtereum/models';
 import { Injectable, ViewContainerRef } from '@angular/core';
 import { UtopiaBridgeService } from '../utopia-bridge.service';
 import { concatMap, map, switchMap, toArray } from 'rxjs/operators';
@@ -10,6 +9,7 @@ import { PluginParameter } from './plugin-execution.service';
 import { UtopiaDialogService } from '../../utopia-dialog.service';
 import { PluginInputsEditor } from './plugin-inputs-editor/plugin-inputs-editor.component';
 import { Plugin } from './Plugin';
+import { MetaBlockType } from './models';
 
 @Injectable()
 export class UtopiaApiService {
@@ -111,66 +111,7 @@ export class UtopiaApiService {
     }
 }
 
-
 export interface Marker {
     name: string;
     position: Position;
-}
-
-export interface MetaBlockType {
-    blockType?: string; // default to grass
-    metaBlock?: {
-        type: string; // image, video, link, 3d_object, marker
-        properties: ImageBlockProperties | VideoBlockProperties | LinkBlockProperties | 
-                    TdObjectBlockProperties | MarkerBlockProperties;
-    }
-}
-
-export interface ImageBlockProperties {
-    front?: ImageFaceProps;
-    back?: ImageFaceProps;
-    right?: ImageFaceProps;
-    left?: ImageFaceProps;
-    top?: ImageFaceProps;
-    bottom?: ImageFaceProps;
-}
-
-export interface VideoBlockProperties {
-    front?: VideoFaceProps;
-    back?: VideoFaceProps;
-    right?: VideoFaceProps;
-    left?: VideoFaceProps;
-    top?: VideoFaceProps;
-    bottom?: VideoFaceProps;
-}
-
-export interface LinkBlockProperties {
-    url: string;
-    pos: [number]
-}
-
-export interface TdObjectBlockProperties {
-    scale: SerializableVector3Int;
-    offset: SerializableVector3Int;
-    rotation: SerializableVector3Int;
-    detectCollision: boolean;
-}
-
-export interface MarkerBlockProperties {
-    name: string
-}
-
-export interface ImageFaceProps {
-    url: string;
-    width: number;
-    height: number;
-    detectCollision: boolean;
-}
-
-export interface VideoFaceProps {
-    url: string;
-    width: number;
-    height: number;
-    detectCollision: boolean;
-    previewTime: number;
 }
