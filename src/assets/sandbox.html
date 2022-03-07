@@ -9,125 +9,73 @@
             let message = e.data;
             if (message.type === 'request') {
                 let code = `
+                    importScripts('https://cdnjs.cloudflare.com/ajax/libs/rxjs/7.5.4/rxjs.umd.js');
+
                     let idCounter = 0;
                     let map = new Map();
+
+                    function callMethod(method, params){
+                        return new rxjs.Observable(function (subscriber) {
+                            let callId = idCounter;
+                            idCounter++;
+                            map.set(callId, subscriber);
+                            let message = {
+                                type: 'request',
+                                body: {
+                                    method: method,
+                                    params: params
+                                },
+                                id: callId
+                            };
+                            postMessage(message);
+                            return {
+                                unsubscribe: () => {
+                                    if(map.has(callId)){
+                                        map.delete(callId);
+                                        let message = {
+                                            type: 'cancel',
+                                            id: callId
+                                        };
+                                        postMessage(message);
+                                    }
+                                },
+                            }
+                        });
+                    }
+
                     UtopiaApi = {
                         getInputsFromUser: function (inputs) {
-                            return new Promise(function (resolve, reject) {
-                                map.set(idCounter, {resolve: resolve, reject: reject})
-                                let message = {
-                                    type: 'request',
-                                    body: {
-                                        method: 'getInputsFromUser',
-                                        params: [inputs]
-                                    },
-                                    id: idCounter++
-                                };
-                                postMessage(message);
-                            });
+                            return callMethod('getInputsFromUser', [inputs]);
                         },
                         placeBlock: function (type, x, y, z) {
-                            return new Promise(function (resolve, reject) {
-                                map.set(idCounter, {resolve: resolve, reject: reject})
-                                let message = {
-                                    type: 'request',
-                                    body: {
-                                        method: 'placeBlock',
-                                        params: [type, x, y, z]
-                                    },
-                                    id: idCounter++
-                                };
-                                postMessage(message);
-                            });
+                            return callMethod('placeBlock', [type, x, y, z]);
                         },
                         placeBlocks: function (blocks) {
-                            return new Promise(function (resolve, reject) {
-                                map.set(idCounter, {resolve: resolve, reject: reject})
-                                let message = {
-                                    type: 'request',
-                                    body: {
-                                        method: 'placeBlocks',
-                                        params: [blocks]
-                                    },
-                                    id: idCounter++
-                                };
-                                postMessage(message);
-                            });
+                            return callMethod('placeBlocks', [blocks]);
                         },
                         getPlayerPosition: function () {
-                            return new Promise(function (resolve, reject) {
-                                map.set(idCounter, {resolve: resolve, reject: reject})
-                                let message = {
-                                    type: 'request',
-                                    body: {
-                                        method: 'getPlayerPosition',
-                                        params: undefined
-                                    },
-                                    id: idCounter++
-                                };
-                                postMessage(message);
-                            });
+                            return callMethod('getPlayerPosition', undefined);
+                        },
+                        currentLand: function () {
+                            return callMethod('currentLand', undefined);
                         },
                         getPlayerLands: function (walletId) {
-                            return new Promise(function (resolve, reject) {
-                                map.set(idCounter, {resolve: resolve, reject: reject})
-                                let message = {
-                                    type: 'request',
-                                    body: {
-                                        method: 'getPlayerLands',
-                                        params: [walletId]
-                                    },
-                                    id: idCounter++
-                                };
-                                postMessage(message);
-                            });
+                            return callMethod('getPlayerLands', [walletId]);
                         },
                         getCurrentLand: function () {
-                            return new Promise(function (resolve, reject) {
-                                map.set(idCounter, {resolve: resolve, reject: reject})
-                                let message = {
-                                    type: 'request',
-                                    body: {
-                                        method: 'getCurrentLand',
-                                        params: undefined
-                                    },
-                                    id: idCounter++
-                                };
-                                postMessage(message);
-                            });
+                            return callMethod('getCurrentLand', undefined);
                         },
                         getMarkers: function () {
-                            return new Promise(function (resolve, reject) {
-                                map.set(idCounter, {resolve: resolve, reject: reject})
-                                let message = {
-                                    type: 'request',
-                                    body: {
-                                        method: 'getMarkers',
-                                        params: undefined
-                                    },
-                                    id: idCounter++
-                                };
-                                postMessage(message);
-                            });
+                            return callMethod('getCurrentLand', undefined);
                         },
                         getCurrentWallet: function () {
-                            return new Promise(function (resolve, reject) {
-                                map.set(idCounter, {resolve: resolve, reject: reject})
-                                let message = {
-                                    type: 'request',
-                                    body: {
-                                        method: 'getCurrentWallet',
-                                        params: undefined
-                                    },
-                                    id: idCounter++
-                                };
-                                postMessage(message);
-                            });
+                            return callMethod('getCurrentWallet', undefined);
                         },
                     };
 
                     onmessage = function (e) {
                         var message = e.data;
+                        console.log('Message received in worker', message);
                         if(message.type == 'request'){
                             try {
                                 ${message.body.code}
@@ -150,19 +98,24 @@
                                 });
                             }
                         } else if(message.type == 'response' || message.type == 'responseError') {
-                            let promiseCallbacks = map.get(message.id);
-                            if(promiseCallbacks != null){
+                            let subscriber = map.get(message.id);
+                            if(subscriber != null){
                                 if(message.type == 'response'){
-                                    promiseCallbacks.resolve(message.body);
+                                    subscriber.next(message.body);
                                 } else {
-                                    promiseCallbacks.reject(message.body);
+                                    subscriber.error(message.body);
                                 }
-                                map.delete(message.id);
                             } else {
                                 postMessage({
                                     type: 'error',
                                     body: 'Invalid Response'
                                 });
+                            }
+                        } else if(message.type == 'complete') {
+                            let subscriber = map.get(message.id);
+                            if(subscriber != null){
+                                subscriber.complete();
+                                map.delete(message.id);
                             }
                         } else {
                             postMessage({
@@ -183,7 +136,7 @@
                     mainWindow.postMessage(e.data, target);
                 }
                 this.worker.postMessage(message);
-            } else if (message.type === 'response' || message.type === 'responseError') {
+            } else if (message.type === 'response' || message.type === 'responseError' || message.type === 'complete') {
                 if (this.worker != null) //FIXME else? error?
                     this.worker.postMessage(message);
             } else if (message.type === 'end') {

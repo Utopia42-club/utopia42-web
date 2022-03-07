@@ -1,6 +1,6 @@
 import { Injectable, NgZone } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { UtopiaApiService } from './utopia-api.service';
 import { catchError, switchMap, tap } from 'rxjs/operators';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
@@ -124,6 +124,7 @@ export class PluginExecutionService {
             });
 
             let that = this;
+            let resultMap = new Map<string, Subscription>();
             this.windowListener = function windowListener(event: MessageEvent) {
                 if ((event.origin === 'null' && event.source === that.secureEvalIframe.contentWindow)) {
                     let message = event.data;
@@ -131,7 +132,7 @@ export class PluginExecutionService {
                         case 'request': {
                             let res = that.zone.run(() => that.utopiaApi[message.body.method].apply(that.utopiaApi, message.body.params));
                             if (res instanceof Observable) {
-                                res.subscribe(value => {
+                                resultMap.set(message.id, res.subscribe(value => {
                                     that.secureEvalIframe.contentWindow.postMessage({
                                         id: message.id,
                                         type: 'response',
@@ -143,7 +144,21 @@ export class PluginExecutionService {
                                         type: 'responseError',
                                         body: error
                                     }, '*');
-                                });
+                                }, () => {
+                                    that.secureEvalIframe.contentWindow.postMessage({
+                                        id: message.id,
+                                        type: 'complete'
+                                    }, '*');
+                                }));
+                            }
+                            break;
+                        }
+                        case 'cancel':{
+                            if(resultMap.has(message.id)){
+                                resultMap.get(message.id).unsubscribe();
+                                resultMap.delete(message.id);
+                            } else {
+                                subs.error(new Error('Invalid message from plugin: ' + message.id));
                             }
                             break;
                         }

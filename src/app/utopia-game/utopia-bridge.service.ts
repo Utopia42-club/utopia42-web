@@ -98,20 +98,36 @@ export class UtopiaBridgeService {
             parameter: parameter,
         } as WebToUnityRequest);
         window.bridge.unityInstance.SendMessage('WebBridge', 'Request', request);
-        return subject.asObservable();
+        return new Observable<any>(observer => {
+            const subscription = subject.subscribe(observer);
+            return () => {
+                this.responseObservable.delete(id);
+                subscription.unsubscribe();
+                let cancelRequest = JSON.stringify({
+                    id: id,
+                    command: 'cancel',
+                } as WebToUnityRequest);
+                window.bridge.unityInstance.SendMessage('WebBridge', 'Request', cancelRequest);
+            };
+        }).pipe(map(res => JSON.parse(res)));
     }
 
     public respond(res: BridgeMessage<string>): void {
         let response: Response = JSON.parse(res.body);
         let subject = this.responseObservable.get(response.id);
         if (subject) {
-            if (response.body != null) {
+            if (response.command == 'complete') {
+                subject.complete();
+                this.responseObservable.delete(response.id);
+            } else if (response.body != null) {
                 subject.next(response.body);
             } else if (response.error != null) {
                 subject.error(response.error);
+                subject.complete();
+                this.responseObservable.delete(response.id);
             }
-            subject.complete();
-            this.responseObservable.delete(response.id);
+        } else {
+            console.log('Invalid response from unity. ID: ' + response.id);
         }
     }
 
