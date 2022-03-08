@@ -95,10 +95,17 @@ export class PluginInputsEditor implements OnInit {
 
     toFormGroup(params: PluginParameter[]) {
         const group: any = {};
+        let formControl;
         params.forEach(param => {
-            let formControl = param.isList ?
-                new FormArray(param.defaultValue || [new FormControl(null)])
-                : new FormControl(param.defaultValue || null);
+            if (param.isList) {
+                if (param.defaultValue != null) {
+                    formControl = new FormArray(param.defaultValue.map(value => new FormControl(value)));
+                } else {
+                    formControl = new FormArray([new FormControl(null)]);
+                }
+            } else {
+                formControl = new FormControl(param.defaultValue || null);
+            }
             if (param.required) {
                 formControl.setValidators([Validators.required]);
             }
