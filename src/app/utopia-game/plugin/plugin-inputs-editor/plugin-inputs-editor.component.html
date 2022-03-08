@@ -2,32 +2,40 @@
     <div *ngIf="inputsForm != null" fxLayout="column" style="width: 100%">
         <p class="title">{{plugin.name}} plugin</p>
         <p class="subtitle" *ngIf="inputs != null && inputs.length > 0">Please fill out input parameters</p>
-        <form [formGroup]="inputsForm" class="inputs">
-            <div *ngFor="let input of inputs" [ngClass]="{'list-field' : input.isList}">
+        <form [formGroup]="inputsForm" class="inputs"
+              [gdAreas]="gridAreas" [gdColumns]="templateColumns" [gdRows]="templateRows"
+              gdGap="0.5em">
+            <div *ngFor="let input of inputs" [ngClass]="{'list-field' : input.isList}"
+                 [gdArea]="input.name">
                 <ng-container *ngIf="!input.isList">
                     <ng-container
                         *ngTemplateOutlet="inputField; context: {input: input, formControl:inputsForm.get(input.name)}">
                     </ng-container>
                 </ng-container>
                 <ng-container *ngIf="input.isList">
-                    <p [innerHtml]="((input.label ?? input.name) + (input.required ? '*' :'')) | sanitize"
-                       class="list-field__label">
-                    </p>
-                    <div *ngFor="let formControl of asFormArray(inputsForm.get(input.name)).controls; let i = index">
-                        <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="0.4em">
-                            <ng-container fxFlex
-                                          *ngTemplateOutlet="inputField; context: {input: input, formControl:formControl}">
-                            </ng-container>
-                            <button mat-icon-button color="warn" class="delete-link-button"
-                                    (click)="removeListItem(input, formControl)">
-                                <mat-icon>delete</mat-icon>
+                    <div fxLayout="column" fxLayoutAlign="space-between center" style="width: 100%;height: 100%">
+                        <div fxLayout="column" style="width: 100%;height: 100%; overflow-y: auto">
+                            <p [innerHtml]="((input.label ?? input.name) + (input.required ? '*' :'')) | sanitize"
+                               class="list-field__label">
+                            </p>
+                            <div
+                                *ngFor="let formControl of asFormArray(inputsForm.get(input.name)).controls; let i = index">
+                                <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="0.4em">
+                                    <ng-container fxFlex
+                                                  *ngTemplateOutlet="inputField; context: {input: input, formControl:formControl}">
+                                    </ng-container>
+                                    <button mat-icon-button color="warn" class="delete-link-button"
+                                            (click)="removeListItem(input, formControl)">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="width: 100%" fxLayout="row" fxLayoutAlign="end center">
+                            <button mat-stroked-button style="width: 100%" (click)="addListItem(input)">
+                                <mat-icon>add</mat-icon>
                             </button>
                         </div>
-                    </div>
-                    <div style="width: 100%" fxLayout="row" fxLayoutAlign="end center">
-                        <button mat-stroked-button style="width: 100%" (click)="addListItem(input)">
-                            <mat-icon>add</mat-icon>
-                        </button>
                     </div>
                 </ng-container>
             </div>

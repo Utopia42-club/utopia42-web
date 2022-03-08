@@ -75,7 +75,6 @@
 
                     onmessage = function (e) {
                         var message = e.data;
-                        console.log('Message received in worker', message);
                         if(message.type == 'request'){
                             try {
                                 ${message.body.code}

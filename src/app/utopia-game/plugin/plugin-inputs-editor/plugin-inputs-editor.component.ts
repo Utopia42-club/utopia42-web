@@ -7,7 +7,7 @@ import { Marker, UtopiaApiService } from '../utopia-api.service';
 import { BehaviorSubject } from 'rxjs';
 import { Land } from '../../../ehtereum/models';
 import { Web3Service } from '../../../ehtereum/web3.service';
-import { PluginParameter } from '../plugin.parameter';
+import { PluginInputFormDescriptor, PluginInput } from '../pluginInput';
 
 @Component({
     selector: 'app-plugin-inputs-editor',
@@ -17,7 +17,8 @@ import { PluginParameter } from '../plugin.parameter';
 })
 export class PluginInputsEditor implements OnInit {
     inputsForm?: FormGroup;
-    inputs?: PluginParameter[];
+    descriptor?: PluginInputFormDescriptor;
+    inputs?: PluginInput[];
 
     plugin: Plugin;
 
@@ -25,22 +26,58 @@ export class PluginInputsEditor implements OnInit {
     landOptions = new BehaviorSubject<Land[]>([]);
     blockTypes = new BehaviorSubject<string[]>([]);
 
+    gridAreas: string;
+    templateColumns: string;
+    templateRows: string;
+
     constructor(readonly loadingService: LoadingService,
                 readonly dialogRef: MatDialogRef<PluginInputsEditor>, @Inject(MAT_DIALOG_DATA) readonly data: any,
                 readonly utopiaApiService: UtopiaApiService, readonly web3Service: Web3Service,
                 readonly cdr: ChangeDetectorRef) {
 
-        if (data.plugin == null || data.inputs == null) {
-            throw new Error('Plugin/Inputs is required');
+        if (data.plugin == null || data.descriptor == null) {
+            throw new Error('Plugin/Descriptor is required');
         }
         this.plugin = data.plugin;
-        this.prepareInputs(data.inputs);
+        this.prepareInputs(data.descriptor);
     }
 
-    private prepareInputs(inputs: PluginParameter[]) {
-        this.inputs = inputs;
-        this.inputsForm = this.toFormGroup(inputs);
-        if (inputs.find(input => input.type == 'position') != null) {
+    private prepareInputs(descriptor: PluginInputFormDescriptor) {
+        this.descriptor = descriptor;
+        this.inputs = this.descriptor.inputs;
+
+        if (descriptor.gridDescriptor != null) {
+            let colCount = 0;
+            descriptor.gridDescriptor.rows.forEach(row => colCount = Math.max(colCount, row.length));
+            this.gridAreas = descriptor.gridDescriptor.rows
+                .map(row => {
+                    while (row.length < colCount) {
+                        row.push('.');
+                    }
+                    return row;
+                })
+                .map(row => row.join(' ')).join(' | ');
+            this.templateColumns = descriptor.gridDescriptor.templateColumns ?? `repeat(${colCount}, 1fr)`;
+            this.templateRows = descriptor.gridDescriptor.templateRows ?? 'auto';
+        } else {
+            let names = this.inputs.map(param => param.name);
+            let groups = [];
+            while (names.length > 0) {
+                groups.push(names.splice(0, 3));
+            }
+            if (groups.length > 0 && groups[groups.length - 1].length < 3) {
+                let lastGroup = groups[groups.length - 1];
+                while (lastGroup.length < 3) {
+                    lastGroup.push('.');
+                }
+            }
+            this.gridAreas = groups.map(group => group.join(' ')).join(' | ');
+            this.templateColumns = '1fr 1fr 1fr';
+            this.templateRows = 'auto';
+        }
+
+        this.inputsForm = this.toFormGroup(this.inputs);
+        if (this.inputs.find(input => input.type == 'position') != null) {
             this.utopiaApiService.getPlayerPosition()
                 .subscribe(position => {
                     this.positionOptions.next([{
@@ -53,7 +90,7 @@ export class PluginInputsEditor implements OnInit {
                     this.positionOptions.next([...this.positionOptions.getValue(), ...markers]);
                 });
         }
-        if (inputs.find(input => input.type == 'land') != null) {
+        if (this.inputs.find(input => input.type == 'land') != null) {
             this.utopiaApiService.getPlayerLands(this.web3Service.wallet())
                 .subscribe(lands => {
                     this.landOptions.next(lands);
@@ -63,7 +100,7 @@ export class PluginInputsEditor implements OnInit {
                     if (land != null) {
                         let l = this.landOptions.value.find(l => l.id == land.id);
                         if (l != null) {
-                            inputs.filter(input => input.type == 'land')
+                            this.inputs.filter(input => input.type == 'land')
                                 .forEach(input => {
                                     this.inputsForm.get(input.name).setValue(l);
                                 });
@@ -71,7 +108,7 @@ export class PluginInputsEditor implements OnInit {
                     }
                 });
         }
-        if (inputs.find(input => input.type == 'blockType') != null) {
+        if (this.inputs.find(input => input.type == 'blockType') != null) {
             this.utopiaApiService.getBlockTypes()
                 .subscribe(blockTypes => {
                     this.blockTypes.next([...this.blockTypes.getValue(), ...blockTypes]);
@@ -93,7 +130,7 @@ export class PluginInputsEditor implements OnInit {
         this.dialogRef.close();
     }
 
-    toFormGroup(params: PluginParameter[]) {
+    toFormGroup(params: PluginInput[]) {
         const group: any = {};
         let formControl;
         params.forEach(param => {
@@ -118,13 +155,13 @@ export class PluginInputsEditor implements OnInit {
         return form as FormArray;
     }
 
-    removeListItem(input: PluginParameter, formControl: AbstractControl) {
+    removeListItem(input: PluginInput, formControl: AbstractControl) {
         let control = this.inputsForm.get(input.name) as FormArray;
         control.removeAt(control.controls.indexOf(formControl));
         this.cdr.detectChanges();
     }
 
-    addListItem(input: PluginParameter) {
+    addListItem(input: PluginInput) {
         let control = this.inputsForm.get(input.name) as FormArray;
         control.push(new FormControl(null));
         this.cdr.detectChanges();

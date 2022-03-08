@@ -8,7 +8,7 @@ import { Web3Service } from '../../ehtereum/web3.service';
 import { UtopiaDialogService } from '../../utopia-dialog.service';
 import { PluginInputsEditor } from './plugin-inputs-editor/plugin-inputs-editor.component';
 import { MetaBlock } from './models';
-import { PluginParameter } from './plugin.parameter';
+import { PluginInputFormDescriptor, PluginInput } from './pluginInput';
 import { Plugin } from './Plugin';
 
 @Injectable()
@@ -85,17 +85,19 @@ export class UtopiaApiService {
         return of(this.web3Service.wallet());
     }
 
-    public getInputsFromUser(inputs: PluginParameter[], runningPlugin: Plugin): Observable<any> {
+    public getInputsFromUser(descriptor: PluginInputFormDescriptor, runningPlugin: Plugin): Observable<any> {
         return new Observable<any>(subscriber => {
             this.bridge.freezeGame();
             this.dialogService.open(PluginInputsEditor, {
                 data: {
-                    inputs: inputs,
+                    descriptor: descriptor,
                     plugin: runningPlugin
                 },
                 viewContainerRef: this.vcr,
                 disableClose: true,
-                backdropClass: 'transparent-backdrop'
+                backdropClass: 'transparent-backdrop',
+                maxWidth: '80vw',
+                maxHeight: '80vh',
             }).subscribe((ref) => {
                 ref.afterClosed().subscribe(result => {
                     this.bridge.unFreezeGame();
