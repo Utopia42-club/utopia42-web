@@ -4,7 +4,6 @@ import { LoadingService } from '../../../loading/loading.service';
 import { Plugin } from '../Plugin';
 import { PluginEditorComponent } from '../plugin-editor/plugin-editor.component';
 import { ToastrService } from 'ngx-toastr';
-import { PluginExecutionService } from '../plugin-execution.service';
 import { UtopiaGameComponent } from '../../utopia-game.component';
 import { UtopiaDialogService } from 'src/app/utopia-dialog.service';
 import { merge, Observable, Subscription } from 'rxjs';
@@ -85,7 +84,6 @@ export class PluginSelectionComponent implements OnInit, OnDestroy {
 
     constructor(readonly pluginService: PluginService, readonly loadingService: LoadingService,
                 readonly dialog: UtopiaDialogService, readonly toaster: ToastrService,
-                readonly pluginExecutionService: PluginExecutionService,
                 readonly web3Service: Web3Service,
                 readonly game: UtopiaGameComponent, private vcr: ViewContainerRef) {
 

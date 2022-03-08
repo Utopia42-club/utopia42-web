@@ -1,5 +1,4 @@
-import { Injectable, NgZone } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { NgZone } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 import { UtopiaApiService } from './utopia-api.service';
 import { catchError, switchMap, tap } from 'rxjs/operators';
@@ -10,32 +9,34 @@ import { PluginRunningOverlayComponent } from './plugin-running-overlay/plugin-r
 import { ToastrService } from 'ngx-toastr';
 import { UtopiaDialogService } from 'src/app/utopia-dialog.service';
 import { Plugin } from './Plugin';
-import { LoadingService } from '../../loading/loading.service';
 import { MatDialogRef, MatDialogState } from '@angular/material/dialog';
+import { PluginService } from './plugin.service';
 
-@Injectable()
 export class PluginExecutionService {
     iframeSrc: string;
     pluginOverlayRef: OverlayRef;
     private secureEvalIframe: HTMLIFrameElement;
     private windowListener: (event: MessageEvent) => void;
 
-    constructor(readonly http: HttpClient, readonly utopiaApi: UtopiaApiService,
+    private runningPlugin: Plugin;
+    private runId: string;
+
+    resultMap = new Map<string, Subscription>();
+
+    constructor(readonly pluginService: PluginService, readonly utopiaApi: UtopiaApiService,
                 readonly zone: NgZone, readonly dialog: UtopiaDialogService, readonly overlay: Overlay,
-                readonly toaster: ToastrService, readonly loadingService: LoadingService) {
-        this.http.get('../../assets/sandbox.html', { responseType: 'text' })
+                readonly toaster: ToastrService) {
+
+        this.pluginService.getFile('../../assets/sandbox.html')
             .subscribe(data => this.iframeSrc = data);
     }
 
-    public getFile(url: string): Observable<string> {
-        return this.http.get(url, { responseType: 'text' });
-    }
-
-    runCode(plugin: Plugin): Observable<PluginRunResult> {
-        this.utopiaApi.setRunningPlugin(plugin);
+    runPlugin(plugin: Plugin, runId: string): Observable<PluginRunResult> {
+        this.runId = runId;
+        this.runningPlugin = plugin;
         let code;
         let confirmationDialog;
-        return this.getFile(plugin.scriptUrl)
+        return this.pluginService.getFile(plugin.scriptUrl)
             .pipe(
                 tap(c => {
                     code = c;
@@ -124,15 +125,17 @@ export class PluginExecutionService {
             });
 
             let that = this;
-            let resultMap = new Map<string, Subscription>();
             this.windowListener = function windowListener(event: MessageEvent) {
                 if ((event.origin === 'null' && event.source === that.secureEvalIframe.contentWindow)) {
                     let message = event.data;
                     switch (message.type) {
                         case 'request': {
+                            if (message.body.method == 'getInputsFromUser') {
+                                message.body.params.push(that.runningPlugin);
+                            }
                             let res = that.zone.run(() => that.utopiaApi[message.body.method].apply(that.utopiaApi, message.body.params));
                             if (res instanceof Observable) {
-                                resultMap.set(message.id, res.subscribe(value => {
+                                that.resultMap.set(message.id, res.subscribe(value => {
                                     that.secureEvalIframe.contentWindow.postMessage({
                                         id: message.id,
                                         type: 'response',
@@ -154,9 +157,9 @@ export class PluginExecutionService {
                             break;
                         }
                         case 'cancel': {
-                            if (resultMap.has(message.id)) {
-                                resultMap.get(message.id).unsubscribe();
-                                resultMap.delete(message.id);
+                            if (that.resultMap.has(message.id)) {
+                                that.resultMap.get(message.id).unsubscribe();
+                                that.resultMap.delete(message.id);
                             } else {
                                 subs.error(new Error('Invalid message from plugin: ' + message.id));
                             }
@@ -190,6 +193,7 @@ export class PluginExecutionService {
             document.body.removeChild(this.secureEvalIframe);
             this.secureEvalIframe = null;
             this.windowListener = null;
+            this.resultMap.forEach(sub => sub.unsubscribe());
         }
     }
 
@@ -198,6 +202,10 @@ export class PluginExecutionService {
             type: 'end',
         }, '*');
         this.clearPluginFrame(); // Do we need to wait a little to do this?
+    }
+
+    getRunningPlugin() {
+        return this.runningPlugin;
     }
 }
 
@@ -209,13 +217,3 @@ export interface PluginRunResult {
     [key: string]: any;
 }
 
-export class PluginParameter {
-    name: string;
-    label?: string;
-    hint: string;
-    required: boolean;
-    isList: boolean = false;
-    type: 'text' | 'number' | 'selection' | 'position' | 'land' | 'blockType';
-    options?: { key: string, value: any }[];
-    defaultValue?: any;
-}

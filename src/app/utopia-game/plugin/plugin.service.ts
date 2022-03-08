@@ -15,6 +15,10 @@ export class PluginService {
 
     }
 
+    public getFile(url: string): Observable<string> {
+        return this.httpClient.get(url, { responseType: 'text' });
+    }
+
     public create(plugin: Plugin): Observable<Plugin> {
         return this.httpClient.post<Plugin>(this.endpoint + `/create`, JSON.stringify(plugin),
             { headers: new HttpHeaders().set('Content-Type', 'application/json') }

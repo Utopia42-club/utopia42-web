@@ -5,23 +5,17 @@ import { Observable, of, timer } from 'rxjs';
 import { Position } from '../position';
 import { Land } from '../../ehtereum/models';
 import { Web3Service } from '../../ehtereum/web3.service';
-import { PluginParameter } from './plugin-execution.service';
 import { UtopiaDialogService } from '../../utopia-dialog.service';
 import { PluginInputsEditor } from './plugin-inputs-editor/plugin-inputs-editor.component';
-import { Plugin } from './Plugin';
 import { MetaBlock } from './models';
+import { PluginParameter } from './plugin.parameter';
+import { Plugin } from './Plugin';
 
 @Injectable()
 export class UtopiaApiService {
 
-    private runningPlugin?: Plugin;
-
     constructor(readonly bridge: UtopiaBridgeService, readonly web3Service: Web3Service,
                 readonly dialogService: UtopiaDialogService, readonly vcr: ViewContainerRef) {
-    }
-
-    public setRunningPlugin(plugin: Plugin) {
-        this.runningPlugin = plugin;
     }
 
     public placeBlock(type: string, x: number, y: number, z: number): Observable<boolean> {
@@ -43,14 +37,14 @@ export class UtopiaApiService {
         return of(...slices).pipe(
             concatMap(slice => {
                     const modifiedSlice: any[] = slice.map((block: any) => {
-                        const modifiedBlock: any = {...block};
-                        if(block.type.metaBlock?.properties){
+                        const modifiedBlock: any = { ...block };
+                        if (block.type.metaBlock?.properties) {
                             modifiedBlock.type.metaBlock.properties = JSON.stringify(block.type.metaBlock.properties);
                         } else if (block.type.metaBlock) {
-                            modifiedBlock.type.metaBlock.properties = "";
+                            modifiedBlock.type.metaBlock.properties = '';
                         }
                         return modifiedBlock;
-                    })
+                    });
                     return this.bridge.call('UtopiaApi', 'PlaceMetaBlocks', JSON.stringify(modifiedSlice))
                         .pipe(
                             switchMap(res => timer(1).pipe(map(() => res)))
@@ -91,13 +85,13 @@ export class UtopiaApiService {
         return of(this.web3Service.wallet());
     }
 
-    public getInputsFromUser(inputs: PluginParameter[]): Observable<any> {
+    public getInputsFromUser(inputs: PluginParameter[], runningPlugin: Plugin): Observable<any> {
         return new Observable<any>(subscriber => {
             this.bridge.freezeGame();
             this.dialogService.open(PluginInputsEditor, {
                 data: {
                     inputs: inputs,
-                    plugin: this.runningPlugin
+                    plugin: runningPlugin
                 },
                 viewContainerRef: this.vcr,
                 disableClose: true,

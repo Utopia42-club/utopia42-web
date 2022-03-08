@@ -1,8 +1,8 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Plugin } from '../Plugin';
-import { PluginExecutionService } from '../plugin-execution.service';
 import * as Prism from 'prismjs';
+import { PluginService } from '../plugin.service';
 
 @Component({
     selector: 'app-plugin-confirmation-dialog',
@@ -16,9 +16,9 @@ export class PluginConfirmationDialog implements OnInit {
     code: any;
 
     constructor(readonly dialogRef: MatDialogRef<PluginConfirmationDialog>, @Inject(MAT_DIALOG_DATA) readonly data: any,
-                readonly pluginExecutionService: PluginExecutionService) {
+                readonly pluginService: PluginService) {
         this.plugin = data.plugin;
-        pluginExecutionService.getFile(this.plugin.scriptUrl)
+        pluginService.getFile(this.plugin.scriptUrl)
             .subscribe(code => {
                 this.code = Prism.highlight(code, Prism.languages.js, 'js');
             });

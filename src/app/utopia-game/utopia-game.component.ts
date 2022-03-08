@@ -10,6 +10,10 @@ import { Subscription } from 'rxjs';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { Web3Service } from '../ehtereum/web3.service';
 import { Plugin } from './plugin/Plugin';
+import { PluginService } from './plugin/plugin.service';
+import { UtopiaDialogService } from '../utopia-dialog.service';
+import { Overlay } from '@angular/cdk/overlay';
+import { v4 as UUIdV4 } from 'uuid';
 
 export const GAME_TOKEN = new InjectionToken<UtopiaGameComponent>('GAME_TOKEN');
 
@@ -17,7 +21,7 @@ export const GAME_TOKEN = new InjectionToken<UtopiaGameComponent>('GAME_TOKEN');
     selector: 'app-utopia-game',
     templateUrl: './utopia-game.component.html',
     styleUrls: ['./utopia-game.component.scss'],
-    providers: [UtopiaBridgeService, UtopiaApiService, PluginExecutionService]
+    providers: [UtopiaBridgeService, UtopiaApiService]
 })
 export class UtopiaGameComponent implements OnInit, OnDestroy {
     fullScreenAction: Action = {
@@ -32,15 +36,16 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
 
     pluginAction: Action;
     pluginActionTrigger?: MatMenuTrigger;
-    private sandBoxListener: (e) => void;
+
+    runningPlugins = new Map<string, PluginExecutionService>();
 
     private subscription = new Subscription();
 
     constructor(private bridge: UtopiaBridgeService, private appComponent: AppComponent,
                 private readonly toaster: ToastrService, private readonly route: ActivatedRoute,
                 readonly utopiaApi: UtopiaApiService, readonly zone: NgZone,
-                readonly pluginService: PluginExecutionService,
-                readonly loadingService: LoadingService, readonly web3Service: Web3Service) {
+                readonly loadingService: LoadingService, readonly web3Service: Web3Service,
+                readonly pluginService: PluginService, readonly dialog: UtopiaDialogService, readonly overlay: Overlay) {
         window.bridge = bridge;
 
         this.pluginAction = {
@@ -87,7 +92,11 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
 
     public runPlugin(plugin: Plugin) {
         this.closePluginMenu();
-        this.pluginService.runCode(plugin)
+        let pluginExecutionService = new PluginExecutionService(this.pluginService, this.utopiaApi, this.zone,
+            this.dialog, this.overlay, this.toaster);
+        let runId = UUIdV4();
+        this.runningPlugins.set(runId, pluginExecutionService);
+        pluginExecutionService.runPlugin(plugin, runId)
             .subscribe(() => {
             }, error => {
                 console.error(error);
@@ -180,7 +189,6 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this.removeFullScreenAction();
         this.removePluginAction();
-        window.removeEventListener('message', this.sandBoxListener);
         this.subscription.unsubscribe();
     }
 }

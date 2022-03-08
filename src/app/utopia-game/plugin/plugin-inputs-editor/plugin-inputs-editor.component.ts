@@ -1,6 +1,5 @@
 import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
 import { AbstractControl, FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
-import { PluginExecutionService, PluginParameter } from '../plugin-execution.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { LoadingService } from '../../../loading/loading.service';
 import { Plugin } from '../Plugin';
@@ -8,6 +7,7 @@ import { Marker, UtopiaApiService } from '../utopia-api.service';
 import { BehaviorSubject } from 'rxjs';
 import { Land } from '../../../ehtereum/models';
 import { Web3Service } from '../../../ehtereum/web3.service';
+import { PluginParameter } from '../plugin.parameter';
 
 @Component({
     selector: 'app-plugin-inputs-editor',
@@ -25,7 +25,7 @@ export class PluginInputsEditor implements OnInit {
     landOptions = new BehaviorSubject<Land[]>([]);
     blockTypes = new BehaviorSubject<string[]>([]);
 
-    constructor(readonly pluginExecutionService: PluginExecutionService, readonly loadingService: LoadingService,
+    constructor(readonly loadingService: LoadingService,
                 readonly dialogRef: MatDialogRef<PluginInputsEditor>, @Inject(MAT_DIALOG_DATA) readonly data: any,
                 readonly utopiaApiService: UtopiaApiService, readonly web3Service: Web3Service,
                 readonly cdr: ChangeDetectorRef) {
