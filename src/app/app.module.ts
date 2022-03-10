@@ -43,7 +43,6 @@ import { PluginSelectionComponent } from './utopia-game/plugin/plugin-selection/
 import { MatListModule } from '@angular/material/list';
 import { AuthInterceptor } from './auth.interceptor';
 import { GlobalErrorHandlerService } from './global-error-handler.service';
-import { PluginRunningOverlayComponent } from './utopia-game/plugin/plugin-running-overlay/plugin-running-overlay.component';
 import { SimpleDialogComponent } from './simple-dialog/simple-dialog.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { PositionFieldComponent } from './utopia-game/plugin/plugin-inputs-editor/position-field/position-field.component';
@@ -58,6 +57,7 @@ import { PluginStoreDialogComponent } from './utopia-game/plugin/plugin-store-di
 import { ColorPickerModule } from 'ngx-color-picker';
 import { BlockTypeFieldComponent } from './utopia-game/plugin/plugin-inputs-editor/block-type-field/block-type-field.component';
 import { PluginSearchBarComponent } from './utopia-game/plugin/plugin-search-bar/plugin-search-bar.component';
+import { MatTabsModule } from '@angular/material/tabs';
 
 @NgModule({
     declarations: [
@@ -78,7 +78,6 @@ import { PluginSearchBarComponent } from './utopia-game/plugin/plugin-search-bar
         FilterInputOptionsPipe,
         PluginEditorComponent,
         PluginSelectionComponent,
-        PluginRunningOverlayComponent,
         SimpleDialogComponent,
         PositionFieldComponent,
         LoadingComponent,
@@ -87,7 +86,7 @@ import { PluginSearchBarComponent } from './utopia-game/plugin/plugin-search-bar
         PluginTableComponent,
         PluginStoreDialogComponent,
         BlockTypeFieldComponent,
-        PluginSearchBarComponent
+        PluginSearchBarComponent,
     ],
     imports: [
         BrowserModule,
@@ -122,7 +121,8 @@ import { PluginSearchBarComponent } from './utopia-game/plugin/plugin-search-bar
         MatCheckboxModule,
         MatChipsModule,
         MatPaginatorModule,
-        ColorPickerModule
+        ColorPickerModule,
+        MatTabsModule
     ],
     providers: [
         {

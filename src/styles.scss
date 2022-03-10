@@ -63,16 +63,16 @@ body {
 
 
 .page-content {
-    margin-top: 4rem !important;
-    max-width: 100%;
-    width: fit-content;
-    margin: auto;
+    width: 100%;
     display: grid;
+    background-color: #231f20;
+    height: calc(100vh - 50px);
 }
 
 .full-content {
+    background-color: #231f20;
     width: 100vw;
-    height: calc(100vh - 56px);
+    height: 100%;
 }
 
 .loading-panel {
@@ -85,5 +85,9 @@ body {
 
 .transparent-backdrop {
     background-color: transparent;
+}
+
+.full-width {
+    width: 100%;
 }
 

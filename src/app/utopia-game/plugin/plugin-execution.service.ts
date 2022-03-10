@@ -2,19 +2,15 @@ import { NgZone } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 import { UtopiaApiService } from './utopia-api.service';
 import { catchError, switchMap, tap } from 'rxjs/operators';
-import { Overlay, OverlayRef } from '@angular/cdk/overlay';
-import { ComponentPortal } from '@angular/cdk/portal';
 import { SimpleDialogAction, SimpleDialogComponent, SimpleDialogData } from '../../simple-dialog/simple-dialog.component';
-import { PluginRunningOverlayComponent } from './plugin-running-overlay/plugin-running-overlay.component';
 import { ToastrService } from 'ngx-toastr';
 import { UtopiaDialogService } from 'src/app/utopia-dialog.service';
 import { Plugin } from './Plugin';
-import { MatDialogRef, MatDialogState } from '@angular/material/dialog';
+import { MatDialogRef } from '@angular/material/dialog';
 import { PluginService } from './plugin.service';
 
 export class PluginExecutionService {
     iframeSrc: string;
-    pluginOverlayRef: OverlayRef;
     private secureEvalIframe: HTMLIFrameElement;
     private windowListener: (event: MessageEvent) => void;
 
@@ -23,9 +19,10 @@ export class PluginExecutionService {
 
     resultMap = new Map<string, Subscription>();
 
+    private terminateConfirmationDialog: MatDialogRef<SimpleDialogComponent>;
+
     constructor(readonly pluginService: PluginService, readonly utopiaApi: UtopiaApiService,
-                readonly zone: NgZone, readonly dialog: UtopiaDialogService, readonly overlay: Overlay,
-                readonly toaster: ToastrService) {
+                readonly zone: NgZone, readonly dialog: UtopiaDialogService, readonly toaster: ToastrService) {
 
         this.pluginService.getFile('../../assets/sandbox.html')
             .subscribe(data => this.iframeSrc = data);
@@ -34,75 +31,50 @@ export class PluginExecutionService {
     runPlugin(plugin: Plugin, runId: string): Observable<PluginRunResult> {
         this.runId = runId;
         this.runningPlugin = plugin;
-        let code;
-        let confirmationDialog;
         return this.pluginService.getFile(plugin.scriptUrl)
             .pipe(
-                tap(c => {
-                    code = c;
-                    let positionStrategy = this.overlay.position()
-                        .global();
-                    this.pluginOverlayRef = this.overlay.create({
-                        positionStrategy,
-                        hasBackdrop: true,
-                    });
-                    const portal = new ComponentPortal(PluginRunningOverlayComponent);
-                    this.pluginOverlayRef.attach(portal);
-                    this.pluginOverlayRef.backdropClick()
-                        .subscribe(() => {
-                            confirmationDialog = this.dialog.open(SimpleDialogComponent, {
-                                data: new SimpleDialogData(
-                                    'Plugin Execution',
-                                    'Are you sure you want to cancel the plugin execution?',
-                                    [
-                                        new SimpleDialogAction('Cancel', () => {
-                                            confirmationDialog.subscribe((dialogRef) => {
-                                                dialogRef.close();
-                                            });
-                                        }, 'accent'),
-                                        new SimpleDialogAction('Yes', () => {
-                                            confirmationDialog.subscribe((dialogRef) => {
-                                                dialogRef.close();
-                                            });
-                                            this.pluginOverlayRef.dispose();
-                                            this.terminateFrame();
-                                        }, 'primary')
-                                    ]
-                                )
-                            });
-                        });
-                }),
-                switchMap(o =>
+                switchMap(code =>
                     this.doRunPlugin(code)
                 ),
                 catchError(err => {
-                    if (this.pluginOverlayRef != null) {
-                        this.pluginOverlayRef.dispose();
-                        if (confirmationDialog != null) {
-                            confirmationDialog.subscribe((dialogRef: MatDialogRef<any>) => {
-                                if (dialogRef.getState() == MatDialogState.OPEN) {
-                                    dialogRef.close();
-                                }
-                            });
-                        }
-                    }
+                    this.closeTerminateDialog(true);
                     throw err;
                 }),
                 tap({
                     complete: () => {
-                        if (this.pluginOverlayRef != null) {
-                            this.pluginOverlayRef.dispose();
-                            if (confirmationDialog != null) {
-                                confirmationDialog.subscribe((dialogRef: MatDialogRef<any>) => {
-                                    if (dialogRef.getState() == MatDialogState.OPEN) {
-                                        dialogRef.close();
-                                    }
-                                });
-                            }
-                        }
+                        this.closeTerminateDialog(true);
                     }
                 })
             );
+    }
+
+    private closeTerminateDialog(terminated: boolean) {
+        if (this.terminateConfirmationDialog) {
+            this.terminateConfirmationDialog.close(terminated);
+            this.terminateConfirmationDialog = null;
+        }
+    }
+
+    public openTerminateConfirmationDialog() {
+        return this.dialog.open(SimpleDialogComponent, {
+            data: new SimpleDialogData(
+                'Plugin Execution',
+                'Are you sure you want to cancel the plugin execution?',
+                [
+                    new SimpleDialogAction('Cancel', () => {
+                        this.closeTerminateDialog(false);
+                    }, 'accent'),
+                    new SimpleDialogAction('Yes', () => {
+                        this.terminateFrame();
+                        this.closeTerminateDialog(true);
+                    }, 'primary')
+                ]
+            )
+        }).pipe(
+            tap((ref) => {
+                this.terminateConfirmationDialog = ref;
+            })
+        );
     }
 
     private doRunPlugin(code: string): Observable<PluginRunResult> {
@@ -187,7 +159,7 @@ export class PluginExecutionService {
         });
     }
 
-    clearPluginFrame() {
+    private clearPluginFrame() {
         if (this.secureEvalIframe != null) {
             window.removeEventListener('message', this.windowListener);
             document.body.removeChild(this.secureEvalIframe);
@@ -197,7 +169,7 @@ export class PluginExecutionService {
         }
     }
 
-    terminateFrame() {
+    private terminateFrame() {
         this.secureEvalIframe.contentWindow.postMessage({
             type: 'end',
         }, '*');

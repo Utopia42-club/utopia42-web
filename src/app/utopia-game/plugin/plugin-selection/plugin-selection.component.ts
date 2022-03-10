@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
 import { PluginService } from '../plugin.service';
 import { LoadingService } from '../../../loading/loading.service';
 import { Plugin } from '../Plugin';
@@ -16,6 +16,7 @@ import { SearchCriteria } from '../SearchCriteria';
 import { debounceTime } from 'rxjs/operators';
 import { Web3Service } from '../../../ehtereum/web3.service';
 import { PluginStoreDialogComponent } from '../plugin-store-dialog/plugin-store-dialog.component';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
     selector: 'app-plugin-selection',
@@ -38,6 +39,8 @@ export class PluginSelectionComponent implements OnInit, OnDestroy {
     pluginTableLoader: PluginTableDataLoader;
 
     canEdit = (plugin: Plugin) => plugin.walletId == this.web3Service.wallet();
+
+    runningPluginsFilter?: string;
 
     pluginTableRowActions: PluginTableRowAction[] = [
         {
@@ -81,13 +84,20 @@ export class PluginSelectionComponent implements OnInit, OnDestroy {
         },
     ];
     @ViewChild(PluginTableComponent) pluginTable: PluginTableComponent;
+    selectedTab = new FormControl(0);
+
+    runningPluginsTableDisplayedColumns: string[] = ['index', 'name', 'actions'];
 
     constructor(readonly pluginService: PluginService, readonly loadingService: LoadingService,
                 readonly dialog: UtopiaDialogService, readonly toaster: ToastrService,
-                readonly web3Service: Web3Service,
-                readonly game: UtopiaGameComponent, private vcr: ViewContainerRef) {
+                readonly web3Service: Web3Service, readonly game: UtopiaGameComponent,
+                private vcr: ViewContainerRef,
+                readonly dialogRef: MatDialogRef<PluginSelectionComponent>, @Inject(MAT_DIALOG_DATA) readonly data: any) {
 
         let that = this;
+        if (data.mode == 'running') {
+            this.selectedTab.setValue(1);
+        }
 
         this.pluginTableLoader = {
             loadData(searchCriteria: SearchCriteria): Observable<Plugin[]> {
@@ -196,5 +206,9 @@ export class PluginSelectionComponent implements OnInit, OnDestroy {
                 this.pluginTable.reload();
             });
         });
+    }
+
+    getRunningTableDataSource() {
+        return [...this.game.runningPluginsKeys];
     }
 }

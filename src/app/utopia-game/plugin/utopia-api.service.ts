@@ -8,7 +8,7 @@ import { Web3Service } from '../../ehtereum/web3.service';
 import { UtopiaDialogService } from '../../utopia-dialog.service';
 import { PluginInputsEditor } from './plugin-inputs-editor/plugin-inputs-editor.component';
 import { MetaBlock } from './models';
-import { PluginInputFormDescriptor, PluginInput } from './pluginInput';
+import { PluginInputFormDescriptor } from './pluginInput';
 import { Plugin } from './Plugin';
 
 @Injectable()
@@ -19,17 +19,19 @@ export class UtopiaApiService {
     }
 
     public placeBlock(type: string, x: number, y: number, z: number): Observable<boolean> {
-        return this.bridge.call('UtopiaApi', 'PlaceBlock', JSON.stringify({
-            type: type,
+        return this.placeMetaBlocks([{
+            type: {
+                blockType: type,
+            },
             position: {
-                x: x,
-                y: y,
-                z: z
-            }
-        }));
+                x,
+                y,
+                z,
+            },
+        }]).pipe(map((dict) => Object.values(dict)[0]));
     }
 
-    public placeMetaBlocks(blocks: MetaBlock[]) {
+    public placeMetaBlocks(blocks: MetaBlock[]): Observable<Map<Position, boolean>> {
         const slices = [];
         while (blocks.length > 0) {
             slices.push(blocks.splice(0, 500));

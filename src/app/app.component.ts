@@ -35,17 +35,8 @@ import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 })
 export class AppComponent implements OnInit, AfterViewInit {
 
-    actions: Action[] = [];
-
-    constructor(private service: Web3Service, private dialog: UtopiaDialogService, private route: ActivatedRoute, router: Router,
-                readonly http: HttpClient) {
-        this.actions.push({
-            label: 'Home',
-            icon: 'home',
-            perform() {
-                router.navigate(['home']);
-            }
-        });
+    constructor(private service: Web3Service, private dialog: UtopiaDialogService, private route: ActivatedRoute,
+                readonly router: Router, readonly http: HttpClient) {
     }
 
     ngOnInit(): void {
@@ -103,6 +94,10 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     ngAfterViewInit() {
 
+    }
+
+    moveToHome() {
+        this.router.navigate(['home']);
     }
 
     public buyLands(request: BuyLandsRequest): void {
@@ -189,6 +184,10 @@ export class AppComponent implements OnInit, AfterViewInit {
             data: { wallet, network } as ConnectionDetail
         });
         return dialogRef$.pipe(switchMap((ref) => ref.componentInstance.result$));
+    }
+
+    isGameOpen() {
+        return window.bridge != null && window.bridge.game != null;
     }
 }
 

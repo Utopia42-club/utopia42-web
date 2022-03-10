@@ -1,5 +1,5 @@
 import { Injectable, NgZone } from '@angular/core';
-import { Observable, of, ReplaySubject, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, of, ReplaySubject, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AppComponent } from '../app.component';
 import { ConnectionDetail } from '../ehtereum/connection-detail';
@@ -9,12 +9,14 @@ import { BridgeMessage, Response, WebToUnityRequest } from './bridge-message';
 import { Clipboard } from '@angular/cdk/clipboard';
 import * as uuid from 'uuid';
 import { Position } from './position';
+import { UtopiaGameComponent } from './utopia-game.component';
 
 @Injectable()
 export class UtopiaBridgeService {
     public unityInstance;
+    public game: UtopiaGameComponent;
     private position?: Position;
-    private gameState = new Subject<State>();
+    private gameState = new BehaviorSubject<State>(null);
 
     private responseObservable = new Map<string, Subject<any>>(); // key: CallId, value: Observable
 
@@ -44,6 +46,16 @@ export class UtopiaBridgeService {
 
     public setNft(request: SetNftRequest): void {
         this.app.setNft(request);
+    }
+
+    public moveToHome(payload: BridgeMessage<undefined>): void {
+        this.app.moveToHome();
+    }
+
+    public openPluginsDialog(payload: OpenPluginDialogRequest): void {
+        if (this.gameState.getValue() == State.PLAYING) {
+            this.game?.openPluginDialog(payload.body);
+        }
     }
 
     public connectMetamask(payload: BridgeMessage<string>): Observable<ConnectionDetail> {
@@ -158,6 +170,8 @@ export type TransferLandRequest = BridgeMessage<number>;
 export type EditProfileRequest = BridgeMessage<string>; // FIXME: string --change to--> undefined (wallet id can be retrieved from connection)
 
 export type ReportGameStateRequest = BridgeMessage<string>;
+
+export type OpenPluginDialogRequest = BridgeMessage<'menu' | 'running'>;
 
 export enum State {
     LOADING = 'LOADING',
