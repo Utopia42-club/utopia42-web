@@ -7,7 +7,7 @@ export interface MetaBlock {
 
 interface MetaBlockType {
     blockType?: string;
-    metaBlock?: ImageBlockType | VideoBlockType | LinkBlockType | TdObjectBlockType | MarkerBlockType;
+    metaBlock?: ImageBlockType | NftBlockType | VideoBlockType | LinkBlockType | TdObjectBlockType | MarkerBlockType;
 }
 
 interface ImageBlockType {
@@ -19,6 +19,18 @@ interface ImageBlockType {
         left?: ImageFaceProps;
         top?: ImageFaceProps;
         bottom?: ImageFaceProps;
+    };
+}
+
+interface NftBlockType {
+    type: "nft";
+    properties: {
+        front?: NftFaceProps;
+        back?: NftFaceProps;
+        right?: NftFaceProps;
+        left?: NftFaceProps;
+        top?: NftFaceProps;
+        bottom?: NftFaceProps;
     };
 }
 
@@ -73,4 +85,8 @@ interface VideoFaceProps {
     height?: number;
     detectCollision?: boolean;
     previewTime?: number;
+}
+
+interface NftFaceProps extends ImageFaceProps {
+    marketUrl: string;
 }
