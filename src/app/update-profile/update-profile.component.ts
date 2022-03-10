@@ -1,4 +1,3 @@
-import { UtopiaDialogService } from './../utopia-dialog.service';
 import { ExceptionDialogContentComponent } from '../exception-dialog-content/exception-dialog-content.component';
 import { concatMap } from 'rxjs/operators';
 import { ProfileService } from './profile.service';
@@ -34,7 +33,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
     form: FormGroup;
 
     constructor(@Inject(MAT_DIALOG_DATA) public data: EditProfileData, private dialogRef: MatDialogRef<any>,
-                private dialog: UtopiaDialogService,
+                private dialog: MatDialog,
                 private readonly web3Service: Web3Service, private readonly profileService: ProfileService,
                 private readonly authService: AuthService, private readonly loadingService: LoadingService,
                 private readonly toaster: ToastrService) {

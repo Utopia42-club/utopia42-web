@@ -4,9 +4,8 @@ import { UtopiaApiService } from './utopia-api.service';
 import { catchError, switchMap, tap } from 'rxjs/operators';
 import { SimpleDialogAction, SimpleDialogComponent, SimpleDialogData } from '../../simple-dialog/simple-dialog.component';
 import { ToastrService } from 'ngx-toastr';
-import { UtopiaDialogService } from 'src/app/utopia-dialog.service';
 import { Plugin } from './Plugin';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { PluginService } from './plugin.service';
 
 export class PluginExecutionService {
@@ -22,7 +21,7 @@ export class PluginExecutionService {
     private terminateConfirmationDialog: MatDialogRef<SimpleDialogComponent>;
 
     constructor(readonly pluginService: PluginService, readonly utopiaApi: UtopiaApiService,
-                readonly zone: NgZone, readonly dialog: UtopiaDialogService, readonly toaster: ToastrService) {
+                readonly zone: NgZone, readonly dialog: MatDialog, readonly toaster: ToastrService) {
 
         this.pluginService.getFile('../../assets/sandbox.html')
             .subscribe(data => this.iframeSrc = data);
@@ -56,7 +55,7 @@ export class PluginExecutionService {
     }
 
     public openTerminateConfirmationDialog() {
-        return this.dialog.open(SimpleDialogComponent, {
+        this.terminateConfirmationDialog =  this.dialog.open(SimpleDialogComponent, {
             data: new SimpleDialogData(
                 'Plugin Execution',
                 'Are you sure you want to cancel the plugin execution?',
@@ -70,11 +69,8 @@ export class PluginExecutionService {
                     }, 'primary')
                 ]
             )
-        }).pipe(
-            tap((ref) => {
-                this.terminateConfirmationDialog = ref;
-            })
-        );
+        });
+        return this.terminateConfirmationDialog;
     }
 
     private doRunPlugin(code: string): Observable<PluginRunResult> {

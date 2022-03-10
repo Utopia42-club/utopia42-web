@@ -1,5 +1,5 @@
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { of, Subscription } from 'rxjs';
 import { catchError, concatMap, tap } from 'rxjs/operators';
 import { Land, PricedLand } from '../ehtereum/models';
@@ -8,8 +8,7 @@ import { LoadingService } from '../loading/loading.service';
 import { BuyLandValidation } from './buy-land-validation';
 import { BuyLandsData } from './buy-lands-data';
 import { BuyLandsService } from './buy-lands.service';
-import { ToastrService } from "ngx-toastr";
-import { UtopiaDialogService } from '../utopia-dialog.service';
+import { ToastrService } from 'ngx-toastr';
 
 
 @Component({
@@ -17,8 +16,7 @@ import { UtopiaDialogService } from '../utopia-dialog.service';
     templateUrl: './buy-lands.component.html',
     styleUrls: ['./buy-lands.component.scss'],
 })
-export class BuyLandsComponent implements OnInit, OnDestroy
-{
+export class BuyLandsComponent implements OnInit, OnDestroy {
     private subscription = new Subscription();
     readonly lands: PricedLand[];
     private signature: string;
@@ -27,21 +25,21 @@ export class BuyLandsComponent implements OnInit, OnDestroy
 
     constructor(@Inject(MAT_DIALOG_DATA) public data: BuyLandsData,
                 private dialogRef: MatDialogRef<any>,
-                private dialog: UtopiaDialogService,
+                private dialog: MatDialog,
                 private readonly loadingService: LoadingService,
                 private readonly toaster: ToastrService,
-                private readonly buyLandsService: BuyLandsService)
-    {
+                private readonly buyLandsService: BuyLandsService) {
         this.lands = data.request.body;
     }
 
-    ngOnInit(): void
-    {
+    ngOnInit(): void {
         this.subscription.add(
             this.loadingService.prepare(
                 of(this.lands).pipe(
                     concatMap((lands: Land[]) => {
-                        if (lands.length == 1) return of(lands[0]);
+                        if (lands.length == 1) {
+                            return of(lands[0]);
+                        }
                         throw new Error('Exactly one land should be selected for buying');
                     }),
                     concatMap((land: Land) => {
@@ -68,7 +66,7 @@ export class BuyLandsComponent implements OnInit, OnDestroy
                     catchError((e: Error) => {
                         this.dialog.open(ExceptionDialogContentComponent, {
                             data: {
-                                title: "Error",
+                                title: 'Error',
                                 content: e.message
                             },
                         });
@@ -77,29 +75,27 @@ export class BuyLandsComponent implements OnInit, OnDestroy
                     })
                 )
             ).subscribe()
-        )
+        );
     }
 
-    ngOnDestroy(): void
-    {
+    ngOnDestroy(): void {
         this.subscription.unsubscribe();
     }
 
-    buy(): void
-    {
+    buy(): void {
         this.subscription.add(
             this.loadingService.prepare(
                 of(this.lands[0]).pipe(
                     concatMap((land: Land) => {
                         return this.data.contract.assignPricedLand(
                             this.data.request.connection.wallet, land, this.lastLandCheckedId, this.signature
-                        )
+                        );
                     }),
                     catchError((e) => {
                         this.dialog.open(ExceptionDialogContentComponent, {
                             data: {
-                                title: "Error",
-                                content: e.message ? e.message : "Failed to buy the land"
+                                title: 'Error',
+                                content: e.message ? e.message : 'Failed to buy the land'
                             },
                         });
                         this.dialogRef.close();
@@ -116,31 +112,34 @@ export class BuyLandsComponent implements OnInit, OnDestroy
         );
     }
 
-    cancel(): void
-    {
+    cancel(): void {
         this.dialogRef.close();
     }
 
-    totalPrice(): number
-    {
+    totalPrice(): number {
         let price = 0;
-        for (let land of this.lands)
+        for (let land of this.lands) {
             price = price + land.price;
+        }
         return price;
     }
 
-    getLandProperty(land: PricedLand, property: string): Number
-    {
-        if (property == 'x1')
+    getLandProperty(land: PricedLand, property: string): Number {
+        if (property == 'x1') {
             return land.startCoordinate.x;
-        if (property == 'x2')
+        }
+        if (property == 'x2') {
             return land.endCoordinate.x;
-        if (property == 'y1')
+        }
+        if (property == 'y1') {
             return land.startCoordinate.z;
-        if (property == 'y2')
+        }
+        if (property == 'y2') {
             return land.endCoordinate.z;
-        if (property == 'price')
+        }
+        if (property == 'price') {
             return land.price;
+        }
         return null;
     }
 

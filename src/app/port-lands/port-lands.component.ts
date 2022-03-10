@@ -1,5 +1,5 @@
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Observable, of, Subscription } from 'rxjs';
 import { concatMap, map, tap, toArray } from 'rxjs/operators';
 import { AppComponent } from '../app.component';
@@ -9,8 +9,7 @@ import { UtopiaContract } from '../ehtereum/utopia-contract';
 import { Web3Service } from '../ehtereum/web3.service';
 import { ExceptionDialogContentComponent } from '../exception-dialog-content/exception-dialog-content.component';
 import { LoadingService } from '../loading/loading.service';
-import { ToastrService } from "ngx-toastr";
-import { UtopiaDialogService } from '../utopia-dialog.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
     selector: 'app-port-lands',
@@ -29,7 +28,7 @@ export class PortLandsComponent implements OnInit, OnDestroy
 
     constructor(
         private dialogRef: MatDialogRef<any>,
-        private dialog: UtopiaDialogService,
+        private dialog: MatDialog,
         private readonly loadingService: LoadingService,
         private readonly service: Web3Service,
         private readonly toaster: ToastrService,

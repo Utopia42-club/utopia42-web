@@ -1,4 +1,3 @@
-import { UtopiaDialogService } from './utopia-dialog.service';
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
@@ -27,6 +26,7 @@ import {
 } from './utopia-game/utopia-bridge.service';
 import { HttpClient } from '@angular/common/http';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
     selector: 'app-root',
@@ -35,7 +35,7 @@ import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 })
 export class AppComponent implements OnInit, AfterViewInit {
 
-    constructor(private service: Web3Service, private dialog: UtopiaDialogService, private route: ActivatedRoute,
+    constructor(private service: Web3Service, private dialog: MatDialog, private route: ActivatedRoute,
                 readonly router: Router, readonly http: HttpClient) {
     }
 
@@ -179,11 +179,11 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
     private connect(network: number, wallet: string): Observable<boolean> {
-        let dialogRef$ = this.dialog.open(MetaMaskConnectingComponent, {
+        let ref = this.dialog.open(MetaMaskConnectingComponent, {
             disableClose: true,
             data: { wallet, network } as ConnectionDetail
         });
-        return dialogRef$.pipe(switchMap((ref) => ref.componentInstance.result$));
+        return ref.componentInstance.result$;
     }
 
     isGameOpen() {

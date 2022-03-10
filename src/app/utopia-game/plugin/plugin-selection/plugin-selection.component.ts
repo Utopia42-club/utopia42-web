@@ -5,7 +5,6 @@ import { Plugin } from '../Plugin';
 import { PluginEditorComponent } from '../plugin-editor/plugin-editor.component';
 import { ToastrService } from 'ngx-toastr';
 import { UtopiaGameComponent } from '../../utopia-game.component';
-import { UtopiaDialogService } from 'src/app/utopia-dialog.service';
 import { merge, Observable, Subscription } from 'rxjs';
 import { PluginConfirmationDialog } from '../plugin-confirmation-dialog/plugin-confirmation-dialog.component';
 import { MatChip } from '@angular/material/chips';
@@ -16,7 +15,7 @@ import { SearchCriteria } from '../SearchCriteria';
 import { debounceTime } from 'rxjs/operators';
 import { Web3Service } from '../../../ehtereum/web3.service';
 import { PluginStoreDialogComponent } from '../plugin-store-dialog/plugin-store-dialog.component';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
     selector: 'app-plugin-selection',
@@ -89,7 +88,7 @@ export class PluginSelectionComponent implements OnInit, OnDestroy {
     runningPluginsTableDisplayedColumns: string[] = ['index', 'name', 'actions'];
 
     constructor(readonly pluginService: PluginService, readonly loadingService: LoadingService,
-                readonly dialog: UtopiaDialogService, readonly toaster: ToastrService,
+                readonly dialog: MatDialog, readonly toaster: ToastrService,
                 readonly web3Service: Web3Service, readonly game: UtopiaGameComponent,
                 private vcr: ViewContainerRef,
                 readonly dialogRef: MatDialogRef<PluginSelectionComponent>, @Inject(MAT_DIALOG_DATA) readonly data: any) {
@@ -125,45 +124,40 @@ export class PluginSelectionComponent implements OnInit, OnDestroy {
     }
 
     createNewPlugin() {
-        this.dialog.open(PluginEditorComponent).subscribe(ref => {
-            ref.afterClosed().subscribe((plugin) => {
+        this.subscription.add(this.dialog.open(PluginEditorComponent)
+            .afterClosed().subscribe((plugin) => {
                 if (plugin) {
                     let value = this.selectedFilters.value;
                     if (value == null || value.includes('owned') || !value.includes('installed')) {
                         this.pluginTable.reload();
                     }
                 }
-            });
-        });
+            }));
     }
 
     runPlugin(plugin: Plugin) {
-        this.dialog.open(PluginConfirmationDialog, {
+        this.subscription.add(this.dialog.open(PluginConfirmationDialog, {
             data: {
                 plugin: plugin,
             },
             viewContainerRef: this.vcr,
             disableClose: true
-        }).subscribe((ref) => {
-            ref.afterClosed().subscribe(result => {
-                if (result.acceptedTerms) {
-                    this.game.runPlugin(plugin);
-                }
-            });
-        });
+        }).afterClosed().subscribe(result => {
+            if (result.acceptedTerms) {
+                this.game.runPlugin(plugin);
+            }
+        }));
     }
 
     editPlugin(plugin: Plugin) {
-        this.dialog.open(PluginEditorComponent, {
+        this.subscription.add(this.dialog.open(PluginEditorComponent, {
             data: plugin.id,
             viewContainerRef: this.vcr
-        }).subscribe((ref) => {
-            ref.afterClosed().subscribe(result => {
-                if (result != null) {
-                    Object.assign(plugin, result);
-                }
-            });
-        });
+        }).afterClosed().subscribe(result => {
+            if (result != null) {
+                Object.assign(plugin, result);
+            }
+        }));
     }
 
     deletePlugin(plugin: Plugin) {
@@ -199,13 +193,11 @@ export class PluginSelectionComponent implements OnInit, OnDestroy {
     }
 
     openPluginStore() {
-        this.dialog.open(PluginStoreDialogComponent, {
+        this.subscription.add(this.dialog.open(PluginStoreDialogComponent, {
             viewContainerRef: this.vcr
-        }).subscribe((ref) => {
-            ref.afterClosed().subscribe(result => {
-                this.pluginTable.reload();
-            });
-        });
+        }).afterClosed().subscribe(result => {
+            this.pluginTable.reload();
+        }));
     }
 
     getRunningTableDataSource() {

@@ -10,11 +10,10 @@ import { Subscription } from 'rxjs';
 import { Web3Service } from '../ehtereum/web3.service';
 import { Plugin } from './plugin/Plugin';
 import { PluginService } from './plugin/plugin.service';
-import { UtopiaDialogService } from '../utopia-dialog.service';
 import { Overlay } from '@angular/cdk/overlay';
 import { v4 as UUIdV4 } from 'uuid';
 import { PluginSelectionComponent } from './plugin/plugin-selection/plugin-selection.component';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 
 export const GAME_TOKEN = new InjectionToken<UtopiaGameComponent>('GAME_TOKEN');
 
@@ -39,7 +38,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
                 private readonly toaster: ToastrService, private readonly route: ActivatedRoute,
                 readonly utopiaApi: UtopiaApiService, readonly zone: NgZone,
                 readonly loadingService: LoadingService, readonly web3Service: Web3Service,
-                readonly pluginService: PluginService, readonly dialogService: UtopiaDialogService, readonly overlay: Overlay,
+                readonly pluginService: PluginService, readonly dialogService: MatDialog, readonly overlay: Overlay,
                 readonly vcr: ViewContainerRef, readonly cdr: ChangeDetectorRef) {
         window.bridge = bridge;
 
@@ -58,20 +57,18 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
 
     openPluginDialog(mode: 'menu' | 'running') {
         this.bridge.freezeGame();
-        this.dialogService.open(PluginSelectionComponent, {
+        this.pluginDialogRef = this.dialogService.open(PluginSelectionComponent, {
             data: {
                 mode: mode,
             },
             viewContainerRef: this.vcr,
             width: '60em',
             height: '50em',
-        }).subscribe((ref) => {
-            this.pluginDialogRef = ref;
-            ref.afterClosed().subscribe(result => {
-                this.onPluginDialogClosed();
-            }, error => {
-                this.onPluginDialogClosed();
-            });
+        });
+        this.pluginDialogRef.afterClosed().subscribe(result => {
+            this.onPluginDialogClosed();
+        }, error => {
+            this.onPluginDialogClosed();
         });
     }
 
@@ -163,13 +160,11 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
         let pluginExecutionService = this.runningPlugins.get(pluginRunId);
         if (pluginExecutionService) {
             pluginExecutionService.openTerminateConfirmationDialog()
-                .subscribe(res => {
-                    res.afterClosed().subscribe(result => {
-                        if (result) {
-                            this.onPluginRunEnded(pluginRunId);
-                        }
-                    });
-                });
+                .afterClosed().subscribe(result => {
+                if (result) {
+                    this.onPluginRunEnded(pluginRunId);
+                }
+            });
         }
     }
 

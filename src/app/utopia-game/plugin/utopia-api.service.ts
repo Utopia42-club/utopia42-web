@@ -5,17 +5,17 @@ import { Observable, of, timer } from 'rxjs';
 import { Position } from '../position';
 import { Land } from '../../ehtereum/models';
 import { Web3Service } from '../../ehtereum/web3.service';
-import { UtopiaDialogService } from '../../utopia-dialog.service';
 import { PluginInputsEditor } from './plugin-inputs-editor/plugin-inputs-editor.component';
 import { MetaBlock } from './models';
 import { PluginInputFormDescriptor } from './pluginInput';
 import { Plugin } from './Plugin';
+import { MatDialog } from '@angular/material/dialog';
 
 @Injectable()
 export class UtopiaApiService {
 
     constructor(readonly bridge: UtopiaBridgeService, readonly web3Service: Web3Service,
-                readonly dialogService: UtopiaDialogService, readonly vcr: ViewContainerRef) {
+                readonly dialogService: MatDialog, readonly vcr: ViewContainerRef) {
     }
 
     public placeBlock(type: string, x: number, y: number, z: number): Observable<boolean> {
@@ -100,19 +100,17 @@ export class UtopiaApiService {
                 backdropClass: 'transparent-backdrop',
                 maxWidth: '80vw',
                 maxHeight: '80vh',
-            }).subscribe((ref) => {
-                ref.afterClosed().subscribe(result => {
-                    this.bridge.unFreezeGame();
-                    if (result != null) {
-                        subscriber.next(result.inputs);
-                        subscriber.complete();
-                    } else {
-                        subscriber.error(new Error('User cancelled'));
-                    }
-                }, error => {
-                    this.bridge.unFreezeGame();
-                    subscriber.error(error);
-                });
+            }).afterClosed().subscribe(result => {
+                this.bridge.unFreezeGame();
+                if (result != null) {
+                    subscriber.next(result.inputs);
+                    subscriber.complete();
+                } else {
+                    subscriber.error(new Error('User cancelled'));
+                }
+            }, error => {
+                this.bridge.unFreezeGame();
+                subscriber.error(error);
             });
         });
     }
