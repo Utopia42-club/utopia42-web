@@ -58,6 +58,8 @@ import { ColorPickerModule } from 'ngx-color-picker';
 import { BlockTypeFieldComponent } from './utopia-game/plugin/plugin-inputs-editor/block-type-field/block-type-field.component';
 import { PluginSearchBarComponent } from './utopia-game/plugin/plugin-search-bar/plugin-search-bar.component';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MaterialFileInputModule } from 'ngx-material-file-input';
+import { FileFieldComponent } from './utopia-game/plugin/plugin-inputs-editor/file-field/file-field.component';
 
 @NgModule({
     declarations: [
@@ -87,6 +89,7 @@ import { MatTabsModule } from '@angular/material/tabs';
         PluginStoreDialogComponent,
         BlockTypeFieldComponent,
         PluginSearchBarComponent,
+        FileFieldComponent
     ],
     imports: [
         BrowserModule,
@@ -122,7 +125,8 @@ import { MatTabsModule } from '@angular/material/tabs';
         MatChipsModule,
         MatPaginatorModule,
         ColorPickerModule,
-        MatTabsModule
+        MatTabsModule,
+        MaterialFileInputModule
     ],
     providers: [
         {

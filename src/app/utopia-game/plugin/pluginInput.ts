@@ -15,7 +15,7 @@ export class PluginInput {
     hint: string;
     required: boolean;
     isList: boolean = false;
-    type: 'text' | 'number' | 'selection' | 'position' | 'land' | 'blockType';
+    type: 'text' | 'number' | 'selection' | 'position' | 'land' | 'blockType' | 'file';
     options?: { key: string, value: any }[];
     defaultValue?: any;
 }

@@ -88,6 +88,11 @@
                 *ngTemplateOutlet="blockTypeField; context: {input: input, formControl:formControl}">
             </ng-container>
         </ng-container>
+        <ng-container *ngSwitchCase="'file'">
+            <ng-container
+                *ngTemplateOutlet="fileField; context: {input: input, formControl:formControl}">
+            </ng-container>
+        </ng-container>
     </ng-container>
 </ng-template>
 
@@ -177,4 +182,11 @@
                           [label]="input.label ?? input.name" [hint]="input.hint" [isList]="input.isList"
                           [blockTypes]="blockTypes | async" style="width: 100%">
     </app-block-type-field>
+</ng-template>
+
+<ng-template #fileField let-input="input" let-formControl="formControl">
+    <app-file-field [required]="input.required" [formControl]="formControl"
+                    [label]="input.label ?? input.name" [hint]="input.hint" [isList]="input.isList"
+                    style="width: 100%">
+    </app-file-field>
 </ng-template>
