@@ -19,7 +19,7 @@ export class UtopiaApiService {
     }
 
     public placeBlock(type: string, x: number, y: number, z: number): Observable<boolean> {
-        return this.placeMetaBlocks([{
+        return this.placeBlocks([{
             type: {
                 blockType: type,
             },
@@ -31,7 +31,7 @@ export class UtopiaApiService {
         }]).pipe(map((dict) => Object.values(dict)[0]));
     }
 
-    public placeMetaBlocks(blocks: MetaBlock[]): Observable<Map<Position, boolean>> {
+    public placeBlocks(blocks: MetaBlock[]): Observable<Map<Position, boolean>> {
         const slices = [];
         while (blocks.length > 0) {
             slices.push(blocks.splice(0, 500));

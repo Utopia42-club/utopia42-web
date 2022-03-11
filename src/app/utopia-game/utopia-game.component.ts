@@ -139,6 +139,10 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
         }).catch((message: any) => {
             alert(message);
         });
+
+        document.addEventListener('pointerlockchange', () => {
+            this.bridge.cursorStateChanged(document.pointerLockElement == this.gameCanvas.nativeElement);
+        }, false);
     }
 
     showBanner(msg, type) {

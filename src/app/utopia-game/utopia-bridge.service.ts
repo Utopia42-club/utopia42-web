@@ -150,6 +150,15 @@ export class UtopiaBridgeService {
     public unFreezeGame() {
         this.unityInstance.SendMessage('GameManager', 'UnFreezeGame', '');
     }
+    
+    public cursorStateChanged(locked: boolean) {
+        if (this.gameState.getValue() != State.PLAYING) return;
+        if (locked)
+            this.unityInstance.SendMessage('GameManager', 'LockCursor', '');
+        else
+            this.unityInstance.SendMessage('GameManager', 'UnlockCursor', '');
+
+    }
 }
 
 
