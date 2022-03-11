@@ -1,7 +1,7 @@
 <div class="file-field" fxLayout="row" fxLayoutAlign="space-between center">
     <mat-form-field style="width: 100%">
         <mat-label *ngIf="!isList" [innerHtml]="label | sanitize"></mat-label>
-        <ngx-mat-file-input style="width: 100%" [formControl]="formControl"></ngx-mat-file-input>
+        <ngx-mat-file-input style="width: 100%" [formControl]="formControl" [required]="required"></ngx-mat-file-input>
         <mat-icon matSuffix>folder</mat-icon>
         <mat-hint *ngIf="hint != null" [innerHtml]="hint | sanitize"></mat-hint>
     </mat-form-field>
