@@ -11,7 +11,7 @@
                 <td mat-cell *matCellDef="let row">
                     <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="0.3em">
                         <span>{{row.name}}</span>
-                        <mat-icon *ngIf="isPluginVerified(row)" matTooltip="Verified" style="color: green">
+                        <mat-icon *ngIf="isPluginVerified(row)" matTooltip="Verified" style="color: dodgerblue">
                             check_circle
                         </mat-icon>
                         <mat-icon *ngIf="row.state == pluginState.DEPRECATED" matTooltip="Deprecated"
