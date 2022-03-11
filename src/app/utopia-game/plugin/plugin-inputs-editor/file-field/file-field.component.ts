@@ -48,7 +48,6 @@ export class FileFieldComponent implements OnInit, OnDestroy, ControlValueAccess
         } else {
             this.propagateChange(this.formControl.value.files[0]);
         }
-        this.propagateChange(this.formControl.value);
     }
 
     writeValue(file: File): void {
