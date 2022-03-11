@@ -31,10 +31,10 @@
                         ],
                         "styles": [
                             "src/styles.scss",
-                            "src/assets/game/v0.13-rc1/TemplateData/style.css"
+                            "src/assets/game/v0.13-rc2/TemplateData/style.css"
                         ],
                         "scripts": [
-                            "src/assets/game/v0.13-rc1/Build/web.loader.js"
+                            "src/assets/game/v0.13-rc2/Build/web.loader.js"
                         ],
                         "vendorChunk": true,
                         "extractLicenses": false,
