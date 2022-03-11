@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
-import { Plugin } from '../Plugin';
+import { Plugin, PluginState } from '../Plugin';
 import { MatPaginator, MatPaginatorIntl } from '@angular/material/paginator';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { SearchCriteria } from '../SearchCriteria';
@@ -7,6 +7,7 @@ import { Observable } from 'rxjs';
 import { Web3Service } from '../../../ehtereum/web3.service';
 import { PluginService } from '../plugin.service';
 import { LoadingService } from '../../../loading/loading.service';
+import { Configurations } from '../../../configurations';
 
 export class CustomMatPaginatorIntl extends MatPaginatorIntl {
     getRangeLabel = (page: number, pageSize: number, length: number) => {
@@ -39,6 +40,8 @@ export class PluginTableComponent implements OnInit, AfterViewInit {
     @Input() loader: PluginTableDataLoader;
     @Input() rowActions: PluginTableRowAction[];
     @Output() loadError = new EventEmitter<any>();
+
+    pluginState = PluginState;
 
     constructor(readonly pluginService: PluginService, readonly loadingService: LoadingService, readonly web3Service: Web3Service) {
     }
@@ -99,6 +102,10 @@ export class PluginTableComponent implements OnInit, AfterViewInit {
     removeFromTable(plugin: Plugin) {
         this.allPlugins = this.allPlugins.filter(p => p.id !== plugin.id);
         this.load();
+    }
+
+    isPluginVerified(plugin: Plugin): boolean {
+        return plugin.scriptUrl.trim().startsWith(Configurations.PLUGINS_REPO_PREFIX);
     }
 }
 
