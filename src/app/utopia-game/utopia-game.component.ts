@@ -33,6 +33,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
 
     private subscription = new Subscription();
     private pluginDialogRef: MatDialogRef<PluginSelectionComponent>;
+    private script: HTMLScriptElement;
 
     constructor(private bridge: UtopiaBridgeService, private appComponent: AppComponent,
                 private readonly toaster: ToastrService, private readonly route: ActivatedRoute,
@@ -104,6 +105,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
 
     private startGame() {
         let buildUrl = '/assets/game/v0.13-rc2/Build';
+        let loaderUrl = buildUrl + '/web.loader.js';
         let config = {
             dataUrl: buildUrl + '/web.data',
             frameworkUrl: buildUrl + '/web.framework.js',
@@ -116,29 +118,19 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
         };
 
         let canvas = document.querySelector('#unity-canvas') as any;
-        // if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        //     container.className = "unity-mobile";
-        //     // Avoid draining fillrate performance on mobile devices,
-        //     // and default/override low DPI mode on mobile browsers.
-        //     config.devicePixelRatio = 1;
-        //     mobileWarning.style.display = "block";
-        //     setTimeout(() => {
-        //         mobileWarning.style.display = "none";
-        //     }, 5000);
-        // } else {
-        // canvas.style.width = "960px";
-        // canvas.style.height = "600px";
-        // }
-        // loadingBar.style.display = "block";
 
-        window.createUnityInstance(canvas, config, (progress: any) => {
-            this.progress = progress * 100;
-        }).then((unityInstance: any) => {
-            // loadingBar.style.display = "none";
-            this.bridge.unityInstance = unityInstance;
-        }).catch((message: any) => {
-            alert(message);
-        });
+        this.script = document.createElement('script');
+        this.script.src = loaderUrl;
+        this.script.onload = () => {
+            window.createUnityInstance(canvas, config, (progress: any) => {
+                this.progress = progress * 100;
+            }).then((unityInstance: any) => {
+                this.bridge.unityInstance = unityInstance;
+            }).catch((message: any) => {
+                alert(message);
+            });
+        };
+        document.body.appendChild(this.script);
 
         document.addEventListener('pointerlockchange', () => {
             this.bridge.cursorStateChanged(document.pointerLockElement == this.gameCanvas.nativeElement);
@@ -155,9 +147,18 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
         }
     }
 
-    ngOnDestroy(): void {
+    async requestClose() {
+        if (this.bridge.unityInstance != null) {
+            await this.bridge.unityInstance.Quit();
+        }
+    }
+
+    ngOnDestroy() {
         this.subscription.unsubscribe();
         this.bridge.game = null;
+        if (this.script != null) {
+            document.body.removeChild(this.script);
+        }
     }
 
     terminatePlugin(pluginRunId: string) {

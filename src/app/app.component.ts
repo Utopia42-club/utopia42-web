@@ -96,7 +96,10 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     }
 
-    moveToHome() {
+    async moveToHome() {
+        if (this.isGameOpen()) {
+            await window.bridge.game.requestClose();
+        }
         this.router.navigate(['home']);
     }
 
