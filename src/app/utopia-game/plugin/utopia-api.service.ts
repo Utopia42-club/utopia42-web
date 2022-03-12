@@ -63,6 +63,10 @@ export class UtopiaApiService {
         return this.bridge.call('UtopiaApi', 'CurrentLand', null);
     }
 
+    public blockPlaced(): Observable<any> {
+        return this.bridge.call('UtopiaApi', 'BlockPlaced', null);
+    }
+
     public getPlayerPosition(): Observable<Position> {
         return this.bridge.call('UtopiaApi', 'GetPlayerPosition', null);
     }
