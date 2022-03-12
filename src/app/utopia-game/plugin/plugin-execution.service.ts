@@ -9,7 +9,6 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { PluginService } from './plugin.service';
 
 export class PluginExecutionService {
-    iframeSrc: string;
     private secureEvalIframe: HTMLIFrameElement;
     private windowListener: (event: MessageEvent) => void;
 
@@ -22,9 +21,6 @@ export class PluginExecutionService {
 
     constructor(readonly pluginService: PluginService, readonly utopiaApi: UtopiaApiService,
                 readonly zone: NgZone, readonly dialog: MatDialog, readonly toaster: ToastrService) {
-
-        this.pluginService.getFile('../../assets/sandbox.html')
-            .subscribe(data => this.iframeSrc = data);
     }
 
     runPlugin(plugin: Plugin, runId: string): Observable<PluginRunResult> {
@@ -55,7 +51,7 @@ export class PluginExecutionService {
     }
 
     public openTerminateConfirmationDialog() {
-        this.terminateConfirmationDialog =  this.dialog.open(SimpleDialogComponent, {
+        this.terminateConfirmationDialog = this.dialog.open(SimpleDialogComponent, {
             data: new SimpleDialogData(
                 'Plugin Execution',
                 'Are you sure you want to cancel the plugin execution?',
@@ -74,85 +70,89 @@ export class PluginExecutionService {
     }
 
     private doRunPlugin(code: string): Observable<PluginRunResult> {
-        return new Observable<PluginRunResult>(subs => {
-            this.secureEvalIframe = document.createElement('iframe');
-            this.secureEvalIframe.setAttribute('sandbox', 'allow-scripts');
-            this.secureEvalIframe.setAttribute('style', 'display: none;');
+        return this.pluginService.getFile('../../assets/sandbox.html')
+            .pipe(
+                switchMap(iframeSrc => {
+                    return new Observable<PluginRunResult>(subs => {
+                        this.secureEvalIframe = document.createElement('iframe');
+                        this.secureEvalIframe.setAttribute('sandbox', 'allow-scripts');
+                        this.secureEvalIframe.setAttribute('style', 'display: none;');
 
-            this.secureEvalIframe.setAttribute('src', 'data:text/html;base64,' + btoa(this.iframeSrc));
+                        this.secureEvalIframe.setAttribute('src', 'data:text/html;base64,' + btoa(iframeSrc));
+                        document.body.appendChild(this.secureEvalIframe);
 
-            document.body.appendChild(this.secureEvalIframe);
+                        this.secureEvalIframe.addEventListener('load', () => {
+                            this.secureEvalIframe.contentWindow.postMessage({
+                                type: 'request',
+                                body: {
+                                    code: code
+                                }
+                            }, '*');
+                        });
 
-            this.secureEvalIframe.addEventListener('load', () => {
-                this.secureEvalIframe.contentWindow.postMessage({
-                    type: 'request',
-                    body: {
-                        code: code
-                    }
-                }, '*');
-            });
-
-            let that = this;
-            this.windowListener = function windowListener(event: MessageEvent) {
-                if ((event.origin === 'null' && event.source === that.secureEvalIframe.contentWindow)) {
-                    let message = event.data;
-                    switch (message.type) {
-                        case 'request': {
-                            if (message.body.method == 'getInputsFromUser') {
-                                message.body.params.push(that.runningPlugin);
+                        let that = this;
+                        this.windowListener = function windowListener(event: MessageEvent) {
+                            if ((event.origin === 'null' && event.source === that.secureEvalIframe.contentWindow)) {
+                                let message = event.data;
+                                switch (message.type) {
+                                    case 'request': {
+                                        if (message.body.method == 'getInputsFromUser') {
+                                            message.body.params.push(that.runningPlugin);
+                                        }
+                                        let res = that.zone.run(() => that.utopiaApi[message.body.method].apply(that.utopiaApi, message.body.params));
+                                        if (res instanceof Observable) {
+                                            that.resultMap.set(message.id, res.subscribe(value => {
+                                                that.secureEvalIframe.contentWindow.postMessage({
+                                                    id: message.id,
+                                                    type: 'response',
+                                                    body: value
+                                                }, '*');
+                                            }, error => {
+                                                that.secureEvalIframe.contentWindow.postMessage({
+                                                    id: message.id,
+                                                    type: 'responseError',
+                                                    body: error
+                                                }, '*');
+                                            }, () => {
+                                                that.secureEvalIframe.contentWindow.postMessage({
+                                                    id: message.id,
+                                                    type: 'complete'
+                                                }, '*');
+                                            }));
+                                        }
+                                        break;
+                                    }
+                                    case 'cancel': {
+                                        if (that.resultMap.has(message.id)) {
+                                            that.resultMap.get(message.id).unsubscribe();
+                                            that.resultMap.delete(message.id);
+                                        } else {
+                                            subs.error(new Error('Invalid message from plugin: ' + message.id));
+                                        }
+                                        break;
+                                    }
+                                    case 'end': {
+                                        that.clearPluginFrame();
+                                        subs.complete();
+                                        break;
+                                    }
+                                    case 'error': {
+                                        that.clearPluginFrame();
+                                        subs.error(message.body);
+                                        break;
+                                    }
+                                    default: {
+                                        that.clearPluginFrame();
+                                        subs.error(new Error('Unknown message type from plugin: ' + message.type));
+                                    }
+                                }
                             }
-                            let res = that.zone.run(() => that.utopiaApi[message.body.method].apply(that.utopiaApi, message.body.params));
-                            if (res instanceof Observable) {
-                                that.resultMap.set(message.id, res.subscribe(value => {
-                                    that.secureEvalIframe.contentWindow.postMessage({
-                                        id: message.id,
-                                        type: 'response',
-                                        body: value
-                                    }, '*');
-                                }, error => {
-                                    that.secureEvalIframe.contentWindow.postMessage({
-                                        id: message.id,
-                                        type: 'responseError',
-                                        body: error
-                                    }, '*');
-                                }, () => {
-                                    that.secureEvalIframe.contentWindow.postMessage({
-                                        id: message.id,
-                                        type: 'complete'
-                                    }, '*');
-                                }));
-                            }
-                            break;
-                        }
-                        case 'cancel': {
-                            if (that.resultMap.has(message.id)) {
-                                that.resultMap.get(message.id).unsubscribe();
-                                that.resultMap.delete(message.id);
-                            } else {
-                                subs.error(new Error('Invalid message from plugin: ' + message.id));
-                            }
-                            break;
-                        }
-                        case 'end': {
-                            that.clearPluginFrame();
-                            subs.complete();
-                            break;
-                        }
-                        case 'error': {
-                            that.clearPluginFrame();
-                            subs.error(message.body);
-                            break;
-                        }
-                        default: {
-                            that.clearPluginFrame();
-                            subs.error(new Error('Unknown message type from plugin: ' + message.type));
-                        }
-                    }
-                }
-            };
+                        };
 
-            window.addEventListener('message', this.windowListener);
-        });
+                        window.addEventListener('message', this.windowListener);
+                    });
+                })
+            );
     }
 
     private clearPluginFrame() {
