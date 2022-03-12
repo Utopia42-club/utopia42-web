@@ -1,3 +1,4 @@
+import { SerializableVector3Int } from 'src/app/ehtereum/models';
 import { Injectable, ViewContainerRef } from '@angular/core';
 import { UtopiaBridgeService } from '../utopia-bridge.service';
 import { concatMap, map, switchMap, toArray } from 'rxjs/operators';
@@ -63,7 +64,7 @@ export class UtopiaApiService {
         return this.bridge.call('UtopiaApi', 'CurrentLand', null);
     }
 
-    public blockPlaced(): Observable<any> {
+    public blockPlaced(): Observable<BlockPlaced> {
         return this.bridge.call('UtopiaApi', 'BlockPlaced', null);
     }
 
@@ -124,3 +125,9 @@ export interface Marker {
     name: string;
     position: Position;
 }
+
+interface BlockPlaced {
+    position: Position;
+    type: string;
+}
+
