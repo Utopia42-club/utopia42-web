@@ -60,6 +60,25 @@ export class UtopiaApiService {
             }, {})));
     }
 
+    public selectBlocks(positions: Position[]): Observable<Map<Position, boolean>> {
+        const slices = [];
+        while (positions.length > 0) {
+            slices.push(positions.splice(0, 500));
+        }
+        return of(...slices).pipe(
+            concatMap(slice => {
+                    return this.bridge.call('UtopiaApi', 'SelectBlocks', JSON.stringify(slice))
+                        .pipe(
+                            switchMap(res => timer(1).pipe(map(() => res)))
+                        );
+                }
+            ),
+            toArray(),
+            map(array => array.reduce((a, b) => {
+                return { ...a, ...b };
+            }, {})));
+    }
+
     public currentLand(): Observable<Land> {
         return this.bridge.call('UtopiaApi', 'CurrentLand', null);
     }
