@@ -15,9 +15,9 @@ import { merge, Subscription } from 'rxjs';
     ]
 })
 export class PluginSearchBarComponent implements OnInit, OnDestroy, ControlValueAccessor {
-    type: string = 'generalSearch';
 
     stringFilter = new FormControl();
+    typeControl = new FormControl('generalSearch');
 
     numberFilter = new FormControl();
 
@@ -26,7 +26,7 @@ export class PluginSearchBarComponent implements OnInit, OnDestroy, ControlValue
     private subscription = new Subscription();
 
     constructor() {
-        this.subscription.add(merge(this.stringFilter.valueChanges, this.numberFilter.valueChanges)
+        this.subscription.add(merge(this.stringFilter.valueChanges, this.numberFilter.valueChanges, this.typeControl.valueChanges)
             .subscribe(() => this.updateValue()));
     }
 
@@ -34,7 +34,7 @@ export class PluginSearchBarComponent implements OnInit, OnDestroy, ControlValue
     }
 
     private updateValue() {
-        if (this.type === 'generalSearch') {
+        if (this.typeControl.value === 'generalSearch') {
             let value = this.getStringSearchTerm();
             if (value == null) {
                 this.propagateChange(null);
@@ -49,7 +49,7 @@ export class PluginSearchBarComponent implements OnInit, OnDestroy, ControlValue
                 this.propagateChange(null);
             } else {
                 this.propagateChange({
-                    [this.type]: value
+                    [this.typeControl.value]: value
                 });
             }
         }
@@ -61,7 +61,7 @@ export class PluginSearchBarComponent implements OnInit, OnDestroy, ControlValue
     }
 
     isNumberType(): boolean {
-        return this.type === 'id';
+        return this.typeControl.value === 'id';
     }
 
     writeValue(value: any): void {
@@ -71,19 +71,19 @@ export class PluginSearchBarComponent implements OnInit, OnDestroy, ControlValue
             } else {
                 let keys = Object.keys(value);
                 if (keys.length > 0) {
-                    this.type = keys[0];
+                    this.typeControl.setValue(keys[0]);
                     if (this.isNumberType()) {
-                        this.setValue(value[this.type], null);
+                        this.setValue(value[this.typeControl.value], null);
                     } else {
-                        this.setValue(null, value[this.type]);
+                        this.setValue(null, value[this.typeControl.value]);
                     }
                 } else {
-                    this.type = 'generalSearch';
+                    this.typeControl.setValue('generalSearch');
                     this.setValue(null, null);
                 }
             }
         } else {
-            this.type = 'generalSearch';
+            this.typeControl.setValue('generalSearch');
             this.setValue(null, null);
         }
     }

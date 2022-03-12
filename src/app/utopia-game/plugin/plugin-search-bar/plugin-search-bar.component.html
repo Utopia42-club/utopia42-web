@@ -1,7 +1,7 @@
 <div class="plugin-search-bar"
      fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="0.3em">
     <mat-form-field fxFlex="20">
-        <mat-select [(ngModel)]="type">
+        <mat-select [formControl]="typeControl">
             <mat-option [value]="'generalSearch'">All</mat-option>
             <mat-option [value]="'id'">Id</mat-option>
             <mat-option [value]="'walletId'">Wallet Id</mat-option>
