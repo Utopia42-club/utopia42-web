@@ -1,3 +1,5 @@
+@use '@angular/material' as mat;
+
 .table-container {
     overflow-y: auto;
 }
@@ -17,7 +19,7 @@ table {
 }
 
 .mat-column-actions {
-    border-left: 1px solid #e0e0e0;
+    border-left: 1px solid var(--background-lighter-color);
     text-align: center;
 }
 
@@ -26,11 +28,10 @@ tr.row__detail {
 }
 
 tr.simple-row:not(.expanded-row):hover {
-    background: whitesmoke;
+    background: var(--background-lighter-color);
 }
 
 tr.simple-row:not(.expanded-row):active {
-    background: #efefef;
 }
 
 tr.detail-row {

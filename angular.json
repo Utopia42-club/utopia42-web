@@ -1,7 +1,7 @@
 {
     "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
     "cli": {
-      "analytics": false
+        "analytics": false
     },
     "version": 1,
     "newProjectRoot": "projects",
@@ -30,6 +30,9 @@
                             "src/assets"
                         ],
                         "styles": [
+                            {
+                                "input": "src/utopia-dark-theme.scss"
+                            },
                             "src/styles.scss",
                             "src/assets/game/v0.13/TemplateData/style.css"
                         ],
@@ -102,7 +105,6 @@
                             "src/assets"
                         ],
                         "styles": [
-                            "./node_modules/@angular/material/prebuilt-themes/deeppurple-amber.css",
                             "src/styles.scss"
                         ],
                         "scripts": []

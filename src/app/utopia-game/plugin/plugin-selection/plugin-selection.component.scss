@@ -32,7 +32,7 @@
 }
 
 .mat-column-actions {
-    border-left: 1px solid #e0e0e0;
+    border-left: 1px solid var(--background-lighter-color);
     text-align: center;
 }
 
@@ -55,8 +55,8 @@
         cursor: pointer;
 
         &:not(.mat-chip-selected) {
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            background-color: white !important;
+            border: 1px solid var(--background-contrast-color);
+            background-color: transparent;
         }
     }
 }
@@ -79,12 +79,12 @@
     justify-content: center;
     font-size: 1.2em;
     font-weight: 450;
-    color: rgba(0, 0, 0, 0.5);
+    color: var(--background-contrast-color);
     margin-top: 3em;
 }
 
 .title {
     font-size: 1.4em;
     font-weight: 500;
-    color: #737373;
+    color: var(--background-contrast-color);
 }

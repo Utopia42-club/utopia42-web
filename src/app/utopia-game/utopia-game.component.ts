@@ -158,6 +158,13 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
     }
 
     async requestClose() {
+        this.runningPluginsKeys.forEach((pluginRunId) => {
+            let pluginExecutionService = this.runningPlugins.get(pluginRunId);
+            if (pluginExecutionService) {
+                pluginExecutionService.terminateFrame();
+                this.onPluginRunEnded(pluginRunId);
+            }
+        });
         if (this.bridge.unityInstance != null) {
             await this.bridge.unityInstance.Quit();
         }

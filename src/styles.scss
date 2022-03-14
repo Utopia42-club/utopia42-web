@@ -3,28 +3,9 @@
 @import '~ngx-toastr/toastr';
 @import "~prismjs/themes/prism-coy.css";
 
-@include mat.core();
-
-$primary: mat.define-palette(mat.$deep-purple-palette);
-$accent: mat.define-palette(mat.$amber-palette, A200, A100, A400);
-$warn: mat.define-palette(mat.$red-palette);
-$theme: mat.define-light-theme($primary, $accent, $warn);
-@include mat.all-component-themes($theme);
-
-:root {
-    --accent-color: #{mat.get-color-from-palette($accent, default)};
-    --primary-color: #{mat.get-color-from-palette($primary, default)};
-    --primary-contrast-color: #{mat.get-color-from-palette($primary, default-contrast)};
-    --accent-contrast-color: #{mat.get-color-from-palette($primary, default-contrast)};
-}
-
 $pink-palette: mat.define-palette(mat.$pink-palette);
 $indigo-palette: mat.define-palette(mat.$indigo-palette);
 $orange-palette: mat.define-palette(mat.$blue-palette);
-
-//.dark-background {
-//    background: #424242;
-//}
 
 .pink {
     background-color: mat.get-color-from-palette($pink-palette, default);
@@ -41,16 +22,6 @@ $orange-palette: mat.define-palette(mat.$blue-palette);
     color: mat.get-color-from-palette($orange-palette, default-contrast);
 }
 
-.primary {
-    background-color: mat.get-color-from-palette($primary, default);
-    color: mat.get-color-from-palette($primary, default-contrast);
-}
-
-.accent {
-    background-color: mat.get-color-from-palette($accent, default);
-    color: mat.get-color-from-palette($accent, default-contrast);
-}
-
 html,
 body {
     height: 100%;
@@ -61,16 +32,15 @@ body {
     font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
-
 .page-content {
     width: 100%;
     display: grid;
-    background-color: #231f20;
+    background-color: var(--background-color);
     height: calc(100vh - 50px);
 }
 
 .full-content {
-    background-color: #231f20;
+    background-color: var(--background-color);
     width: 100vw;
     height: 100%;
 }

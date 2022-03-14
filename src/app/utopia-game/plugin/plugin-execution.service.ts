@@ -165,7 +165,7 @@ export class PluginExecutionService {
         }
     }
 
-    private terminateFrame() {
+    public terminateFrame() {
         this.secureEvalIframe.contentWindow.postMessage({
             type: 'end',
         }, '*');
