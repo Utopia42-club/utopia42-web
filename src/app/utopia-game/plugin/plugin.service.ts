@@ -1,9 +1,10 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { Configurations } from '../../configurations';
 import { Plugin } from './Plugin';
 import { SearchCriteria } from './SearchCriteria';
+import { concatMap, map } from 'rxjs/operators';
 
 @Injectable({
     providedIn: 'root',
@@ -41,6 +42,26 @@ export class PluginService {
 
     public getPluginsForUser(searchCriteria: SearchCriteria): Observable<Plugin[]> {
         return this.httpClient.post<Plugin[]>(this.endpoint + `/for-user`, searchCriteria);
+    }
+
+    public getAutostartPluginsForUser(searchCriteria: SearchCriteria): Observable<Plugin[]> {
+        return this.httpClient.post<Plugin[]>(this.endpoint + `/for-user/autostart`, searchCriteria);
+    }
+
+    public getAllAutostartPluginsForUser(searchCriteria: SearchCriteria): Observable<Plugin[]> {
+        const limit = 100;
+        searchCriteria.limit = limit;
+        return this.httpClient.post<Plugin[]>(this.endpoint + `/for-user/autostart`, searchCriteria)
+            .pipe(concatMap(val => {
+                if (val.length == limit) {
+                    searchCriteria.lastId = val[val.length - 1].id;
+                    return this.getAllAutostartPluginsForUser(searchCriteria)
+                        .pipe(map(value => {
+                            return val.concat(value);
+                        }));
+                }
+                return of(val);
+            }));
     }
 
     public getInstalledPlugins(searchCriteria: SearchCriteria, complement: boolean = false): Observable<Plugin[]> {

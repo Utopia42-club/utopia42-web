@@ -26,6 +26,7 @@ export class PluginEditorComponent implements OnInit {
             walletId: new FormControl(null),
             scriptUrl: new FormControl(null, [Validators.required]),
             state: new FormControl(null, [Validators.required]),
+            autostart: new FormControl(false, [Validators.required]),
         });
         if (pluginId != null) {
             this.loadingService.prepare(

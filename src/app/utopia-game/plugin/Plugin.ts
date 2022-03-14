@@ -4,6 +4,7 @@ export class Plugin {
     name?: string;
     description?: string;
     scriptUrl?: string;
+    autostart?: boolean;
 }
 
 export enum PluginState {

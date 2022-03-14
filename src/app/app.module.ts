@@ -60,6 +60,7 @@ import { PluginSearchBarComponent } from './utopia-game/plugin/plugin-search-bar
 import { MatTabsModule } from '@angular/material/tabs';
 import { MaterialFileInputModule } from 'ngx-material-file-input';
 import { FileFieldComponent } from './utopia-game/plugin/plugin-inputs-editor/file-field/file-field.component';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 @NgModule({
     declarations: [
@@ -126,7 +127,8 @@ import { FileFieldComponent } from './utopia-game/plugin/plugin-inputs-editor/fi
         MatPaginatorModule,
         ColorPickerModule,
         MatTabsModule,
-        MaterialFileInputModule
+        MaterialFileInputModule,
+        MatSlideToggleModule
     ],
     providers: [
         {

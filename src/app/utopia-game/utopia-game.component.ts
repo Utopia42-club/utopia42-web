@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, InjectionToken, NgZone, OnDestroy, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
 import { AppComponent } from '../app.component';
-import { UtopiaBridgeService } from './utopia-bridge.service';
+import { State, UtopiaBridgeService } from './utopia-bridge.service';
 import { ToastrService } from 'ngx-toastr';
 import { ActivatedRoute } from '@angular/router';
 import { UtopiaApiService } from './plugin/utopia-api.service';
@@ -14,6 +14,7 @@ import { Overlay } from '@angular/cdk/overlay';
 import { v4 as UUIdV4 } from 'uuid';
 import { PluginSelectionComponent } from './plugin/plugin-selection/plugin-selection.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { SearchCriteria } from './plugin/SearchCriteria';
 
 export const GAME_TOKEN = new InjectionToken<UtopiaGameComponent>('GAME_TOKEN');
 
@@ -35,6 +36,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
     private pluginDialogRef: MatDialogRef<PluginSelectionComponent>;
     private script: HTMLScriptElement;
 
+
     constructor(private bridge: UtopiaBridgeService, private appComponent: AppComponent,
                 private readonly toaster: ToastrService, private readonly route: ActivatedRoute,
                 readonly utopiaApi: UtopiaApiService, readonly zone: NgZone,
@@ -54,6 +56,13 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
                 this.bridge.setStartingPosition(position);
             }
         });
+        let playSubscription = this.bridge.gameState$().subscribe(state => {
+            if (state == State.PLAYING) {
+                this.runAutoStartPlugins();
+                playSubscription.unsubscribe();
+            }
+        });
+        this.subscription.add(playSubscription);
     }
 
     openPluginDialog(mode: 'menu' | 'running') {
@@ -135,6 +144,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
         document.addEventListener('pointerlockchange', () => {
             this.bridge.cursorStateChanged(document.pointerLockElement == this.gameCanvas.nativeElement);
         }, false);
+
     }
 
     showBanner(msg, type) {
@@ -176,5 +186,14 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
     private onPluginRunEnded(pluginRunId: string) {
         this.runningPlugins.delete(pluginRunId);
         this.runningPluginsKeys.delete(pluginRunId);
+    }
+
+    private runAutoStartPlugins() {
+        this.pluginService.getAllAutostartPluginsForUser(new SearchCriteria(null, 100)).subscribe(plugins => {
+            for (let plugin of plugins) {
+                console.debug('Running autostart plugin: ' + plugin.name);
+                this.runPlugin(plugin);
+            }
+        });
     }
 }
