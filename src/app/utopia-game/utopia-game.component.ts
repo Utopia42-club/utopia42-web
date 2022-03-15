@@ -66,6 +66,8 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
     }
 
     openPluginDialog(mode: 'menu' | 'running') {
+        if(this.pluginDialogRef != null)
+            return;
         this.bridge.freezeGame();
         this.pluginDialogRef = this.dialogService.open(PluginSelectionComponent, {
             data: {
@@ -85,6 +87,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
     onPluginDialogClosed() {
         this.bridge.unFreezeGame();
         setTimeout(() => this.gameCanvas.nativeElement.focus(), 300);
+        this.pluginDialogRef = null;
     }
 
     closePluginDialog() {
