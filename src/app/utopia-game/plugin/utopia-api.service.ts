@@ -130,7 +130,7 @@ export class UtopiaApiService {
                     subscriber.next(result.inputs);
                     subscriber.complete();
                 } else {
-                    subscriber.error(new Error('User cancelled'));
+                    subscriber.error('User cancelled');
                 }
             }, error => {
                 this.bridge.unFreezeGame();
