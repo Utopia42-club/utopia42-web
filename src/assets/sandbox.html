@@ -45,7 +45,10 @@
 
                     UtopiaApi = {
                         getInputsFromUser: function (inputs) {
-                            return callMethod('getInputsFromUser', [inputs]);
+                            return callMethod('getInputsFromUser', [inputs, false]);
+                        },
+                        getInputsFromUser: function (inputs, useCache) {
+                            return callMethod('getInputsFromUser', [inputs, useCache]);
                         },
                         placeBlock: function (type, x, y, z) {
                             return callMethod('placeBlock', [type, x, y, z]);

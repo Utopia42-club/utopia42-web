@@ -1,4 +1,3 @@
-import { SerializableVector3Int } from 'src/app/ehtereum/models';
 import { Injectable, ViewContainerRef } from '@angular/core';
 import { UtopiaBridgeService } from '../utopia-bridge.service';
 import { concatMap, map, switchMap, toArray } from 'rxjs/operators';
@@ -11,12 +10,14 @@ import { MetaBlock } from './models';
 import { PluginInputFormDescriptor } from './pluginInput';
 import { Plugin } from './Plugin';
 import { MatDialog } from '@angular/material/dialog';
+import { PluginService } from './plugin.service';
 
 @Injectable()
 export class UtopiaApiService {
 
     constructor(readonly bridge: UtopiaBridgeService, readonly web3Service: Web3Service,
-                readonly dialogService: MatDialog, readonly vcr: ViewContainerRef) {
+                readonly dialogService: MatDialog, readonly vcr: ViewContainerRef,
+                readonly pluginService: PluginService) {
     }
 
     public placeBlock(type: string, x: number, y: number, z: number): Observable<boolean> {
@@ -111,13 +112,34 @@ export class UtopiaApiService {
         return of(this.web3Service.wallet());
     }
 
-    public getInputsFromUser(descriptor: PluginInputFormDescriptor, runningPlugin: Plugin): Observable<any> {
+    public getInputsFromUser(descriptor: PluginInputFormDescriptor, useCache: boolean, runningPlugin: Plugin): Observable<any> {
+        if (useCache) {
+            let inputCache = this.pluginService.getInputCacheForPlugin(runningPlugin.id);
+            let inputs = {};
+            if (inputCache != null) {
+                descriptor.inputs.forEach(input => {
+                    if (input.type != 'file' && inputCache[input.name] != null) {
+                        inputs[input.name] = inputCache[input.name];
+                    }
+                });
+            }
+            if (descriptor.inputs.length != Object.keys(inputs).length) {
+                return this.doGetInputsFromUser(descriptor, useCache, runningPlugin, inputs);
+            } else {
+                return of(inputs);
+            }
+        }
+        return this.doGetInputsFromUser(descriptor, useCache, runningPlugin);
+    }
+
+    private doGetInputsFromUser(descriptor: PluginInputFormDescriptor, useCache: boolean, runningPlugin: Plugin, cachedInputs: any = null) {
         return new Observable<any>(subscriber => {
             this.bridge.freezeGame();
             this.dialogService.open(PluginInputsEditor, {
                 data: {
                     descriptor: descriptor,
-                    plugin: runningPlugin
+                    plugin: runningPlugin,
+                    cachedInputs: cachedInputs
                 },
                 viewContainerRef: this.vcr,
                 disableClose: true,
@@ -129,6 +151,9 @@ export class UtopiaApiService {
                 if (result != null) {
                     subscriber.next(result.inputs);
                     subscriber.complete();
+                    if (useCache) {
+                        this.pluginService.setInputCacheForPlugin(runningPlugin.id, result.inputs);
+                    }
                 } else {
                     subscriber.error('User cancelled');
                 }

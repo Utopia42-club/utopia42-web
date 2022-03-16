@@ -7,7 +7,7 @@ import { Marker, UtopiaApiService } from '../utopia-api.service';
 import { BehaviorSubject } from 'rxjs';
 import { Land } from '../../../ehtereum/models';
 import { Web3Service } from '../../../ehtereum/web3.service';
-import { PluginInputFormDescriptor, PluginInput } from '../pluginInput';
+import { PluginInput, PluginInputFormDescriptor } from '../pluginInput';
 
 @Component({
     selector: 'app-plugin-inputs-editor',
@@ -29,6 +29,7 @@ export class PluginInputsEditor implements OnInit {
     gridAreas: string;
     templateColumns: string;
     templateRows: string;
+    private cachedInputs: any = {};
 
     constructor(readonly loadingService: LoadingService,
                 readonly dialogRef: MatDialogRef<PluginInputsEditor>, @Inject(MAT_DIALOG_DATA) readonly data: any,
@@ -39,6 +40,7 @@ export class PluginInputsEditor implements OnInit {
             throw new Error('Plugin/Descriptor is required');
         }
         this.plugin = data.plugin;
+        this.cachedInputs = data.cachedInputs;
         this.prepareInputs(data.descriptor);
     }
 
@@ -135,13 +137,13 @@ export class PluginInputsEditor implements OnInit {
         let formControl;
         params.forEach(param => {
             if (param.isList) {
-                if (param.defaultValue != null) {
-                    formControl = new FormArray(param.defaultValue.map(value => new FormControl(value)));
+                if (this.getCacheValue(param.name) != null || param.defaultValue != null) {
+                    formControl = new FormArray((this.getCacheValue(param.name) ?? param.defaultValue).map(value => new FormControl(value)));
                 } else {
                     formControl = new FormArray([new FormControl(null)]);
                 }
             } else {
-                formControl = new FormControl(param.defaultValue || null);
+                formControl = new FormControl(this.getCacheValue(param.name) ?? param.defaultValue ?? null);
             }
             if (param.required) {
                 formControl.setValidators([Validators.required]);
@@ -149,6 +151,10 @@ export class PluginInputsEditor implements OnInit {
             group[param.name] = formControl;
         });
         return new FormGroup(group);
+    }
+
+    getCacheValue(name: string) {
+        return this.cachedInputs != null ? this.cachedInputs[name] : null;
     }
 
     asFormArray(form: any): FormArray {

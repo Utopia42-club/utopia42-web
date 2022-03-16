@@ -86,4 +86,28 @@ export class PluginService {
         return this.httpClient.delete<void>(this.endpoint + `/${id}`);
     }
 
+    public getInputCacheForPlugin(pluginId: number): any {
+        return JSON.parse(localStorage.getItem(`UTOPIA_PLUGIN_INPUT_CACHE_${pluginId}`) ?? '[]');
+    }
+
+    public setInputCacheForPlugin(pluginId: number, inputs: any): void {
+        let cachedInputs = this.getInputCacheForPlugin(pluginId);
+        let inputKeys = new Set<string>();
+        Object.keys(cachedInputs).forEach(key => {
+            inputKeys.add(key);
+        });
+        Object.keys(inputs).forEach(key => {
+            inputKeys.add(key);
+        });
+        let mergedInputs = {};
+        inputKeys.forEach(name => {
+            let input = inputs[name];
+            if (input != null) {
+                mergedInputs[name] = input;
+            } else {
+                mergedInputs[name] = cachedInputs[name];
+            }
+        });
+        localStorage.setItem(`UTOPIA_PLUGIN_INPUT_CACHE_${pluginId}`, JSON.stringify(mergedInputs));
+    }
 }
