@@ -77,7 +77,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
             width: '60em',
             height: '50em',
         });
-        this.pluginDialogRef.afterClosed().subscribe(result => {
+        this.pluginDialogRef.beforeClosed().subscribe(result => {
             this.onPluginDialogClosed();
         }, error => {
             this.onPluginDialogClosed();
