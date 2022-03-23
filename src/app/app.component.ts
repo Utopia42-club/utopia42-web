@@ -1,6 +1,4 @@
-import { UtopiaDialogService } from './utopia-dialog.service';
 import { AfterViewInit, Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
@@ -28,6 +26,7 @@ import {
 } from './utopia-game/utopia-bridge.service';
 import { HttpClient } from '@angular/common/http';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
     selector: 'app-root',
@@ -36,17 +35,8 @@ import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 })
 export class AppComponent implements OnInit, AfterViewInit {
 
-    actions: Action[] = [];
-
-    constructor(private service: Web3Service, private dialog: UtopiaDialogService, private route: ActivatedRoute, router: Router,
-                readonly http: HttpClient) {
-        this.actions.push({
-            label: 'Home',
-            icon: 'home',
-            perform() {
-                router.navigate(['home']);
-            }
-        });
+    constructor(private service: Web3Service, private dialog: MatDialog, private route: ActivatedRoute,
+                readonly router: Router, readonly http: HttpClient) {
     }
 
     ngOnInit(): void {
@@ -64,7 +54,8 @@ export class AppComponent implements OnInit, AfterViewInit {
                                 .map(l => {
                                     let coords = l.split('_').map(v => Number(v));
                                     return {
-                                        x1: coords[0], y1: coords[1], x2: coords[2], y2: coords[3]
+                                        startCoordinate: { x: coords[0], y: 0, z: coords[1] },
+                                        endCoordinate: { x: coords[2], y: 0, z: coords[3] }
                                     };
                                 })
                         });
@@ -103,6 +94,13 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     ngAfterViewInit() {
 
+    }
+
+    async moveToHome() {
+        if (this.isGameOpen()) {
+            await window.bridge.game.requestClose();
+        }
+        this.router.navigate(['home']);
     }
 
     public buyLands(request: BuyLandsRequest): void {
@@ -184,11 +182,15 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
     private connect(network: number, wallet: string): Observable<boolean> {
-        let dialogRef$ = this.dialog.open(MetaMaskConnectingComponent, {
+        let ref = this.dialog.open(MetaMaskConnectingComponent, {
             disableClose: true,
             data: { wallet, network } as ConnectionDetail
         });
-        return dialogRef$.pipe(switchMap((ref) => ref.componentInstance.result$));
+        return ref.componentInstance.result$;
+    }
+
+    isGameOpen() {
+        return window.bridge != null && window.bridge.game != null;
     }
 }
 

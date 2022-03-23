@@ -10,9 +10,12 @@ export interface WebToUnityRequest {
     objectName: string;
     methodName: string;
     parameter: string;
+    command: 'cancel';
 }
 
 export interface Response {
     id: string;
     body: string;
+    error: string;
+    command: 'complete';
 }

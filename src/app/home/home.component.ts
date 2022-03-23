@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppComponent } from '../app.component';
 import { PortLandsComponent } from '../port-lands/port-lands.component';
-import { Configurations } from "../configurations";
+import { Configurations } from '../configurations';
 import { OpenGameAtComponent } from '../open-game-at/open-game-at.component';
-import { UtopiaDialogService } from '../utopia-dialog.service';
+import { MatDialog } from '@angular/material/dialog';
 
 
 @Component({
@@ -18,7 +18,7 @@ export class HomeComponent implements OnInit
 
 
     constructor(private router: Router,
-                private dialog: UtopiaDialogService,
+                private dialog: MatDialog,
                 private app: AppComponent)
     {
     }
@@ -37,7 +37,7 @@ export class HomeComponent implements OnInit
         this.router.navigate(['game']);
     }
 
-    
+
     startGameAt() {
         this.dialog.open(OpenGameAtComponent, { data: this.app });
     }

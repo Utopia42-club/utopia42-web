@@ -1,9 +1,10 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { Configurations } from './configurations';
-import { concatMap, map, tap } from 'rxjs/operators';
+import { concatMap, map, switchMap, tap } from 'rxjs/operators';
 import { Web3Service } from './ehtereum/web3.service';
+import { UtopiaError } from './UtopiaError';
 
 export const AUTH_STORAGE_KEY = 'AUTH_STORAGE_KEY';
 export const TOKEN_HEADER_KEY = 'X-Auth-Token';
@@ -44,42 +45,52 @@ export class AuthService {
             return of(authToken);
         }
         let provider;
-        return this.web3Service.provider()
-            .pipe(
-                concatMap((p) => {
-                    provider = p;
-                    return this.requestNonce(
-                        provider.networkVersion,
-                        provider.selectedAddress.toLowerCase()
-                    );
-                }),
+        return this.web3Service.connect()
+            .pipe(switchMap(value => {
+                if (!value) {
+                    return throwError(new UtopiaError('Connection to MetaMask failed'));
+                } else {
+                    return this.web3Service.provider()
+                        .pipe(
+                            concatMap((p) => {
+                                provider = p;
+                                if (p.selectedAddress == null) {
+                                    return throwError('No provider found');
+                                }
+                                return this.requestNonce(
+                                    provider.networkVersion,
+                                    provider.selectedAddress.toLowerCase()
+                                );
+                            }),
 
-                concatMap((data) => {
-                    return provider.request({
-                        method: 'eth_signTypedData_v4',
-                        params: [
-                            provider.selectedAddress.toLowerCase(),
-                            JSON.stringify(data),
-                        ],
-                        from: provider.selectedAddress.toLowerCase(),
-                    });
-                }),
+                            concatMap((data) => {
+                                return provider.request({
+                                    method: 'eth_signTypedData_v4',
+                                    params: [
+                                        provider.selectedAddress.toLowerCase(),
+                                        JSON.stringify(data),
+                                    ],
+                                    from: provider.selectedAddress.toLowerCase(),
+                                });
+                            }),
 
-                concatMap((signature) => {
-                    return this.login(
-                        provider.selectedAddress,
-                        <string> signature
-                    );
-                }),
+                            concatMap((signature) => {
+                                return this.login(
+                                    provider.selectedAddress,
+                                    <string> signature
+                                );
+                            }),
 
-                map((res) => {
-                    return res.headers.get('X-Auth-Token');
-                }),
+                            map((res) => {
+                                return res.headers.get('X-Auth-Token');
+                            }),
 
-                tap((token) => {
-                    localStorage.setItem(AUTH_STORAGE_KEY, token);
-                })
-            );
+                            tap((token) => {
+                                localStorage.setItem(AUTH_STORAGE_KEY, token);
+                            })
+                        );
+                }
+            }));
     }
 }
 

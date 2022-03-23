@@ -1,17 +1,11 @@
 .root {
-    width: 55em;
-    height: 25em;
+    height: min-content;
 }
 
 .inputs {
     width: 100%;
-    display: flex;
-    flex-wrap: wrap;
     gap: 0.6em;
-}
-
-.inputs > * {
-    flex-grow: 1;
+    padding: 0.5em;
 }
 
 .input-field {
@@ -23,7 +17,7 @@
     height: 100%;
     font-size: 2em;
     font-weight: 500;
-    color: #737373;
+    color: var(--background-contrast-color);
 }
 
 .actions {
@@ -33,5 +27,32 @@
 .title {
     font-size: 1.4em;
     font-weight: 500;
-    color: #737373;
+    color: var(--background-contrast-color);
+}
+
+.subtitle {
+    font-size: 1.1em;
+    font-weight: 400;
+    color: var(--background-contrast-color);
+}
+
+.terms {
+    width: 100%;
+}
+
+.footer {
+    width: 100%;
+}
+
+.list-field {
+    border: 1px solid var(--background-contrast-color);
+    border-radius: 4px;
+    padding: 0.5em;
+}
+
+.list-field__label {
+    font-size: 1em;
+    font-weight: 400;
+    color: var(--background-contrast-color);
+    margin: 0;
 }

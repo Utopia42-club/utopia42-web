@@ -15,7 +15,7 @@ import { UtopiaContract } from './utopia-contract';
 })
 export class Web3Service {
     private connectedAccounts: string[] = [];
-    private web3ProviderCashe = new Map<number, Web3>();
+    private web3ProviderCache = new Map<number, Web3>();
     private contractCache = new Map<number, UtopiaContract>();
     private readonly connectedSubject = new BehaviorSubject(false);
     readonly connected$ = this.connectedSubject.asObservable().pipe(distinctUntilChanged());
@@ -36,20 +36,20 @@ export class Web3Service {
         if (!Networks.supported.has(networkId)) {
             return null;
         }
-        if (this.web3ProviderCashe.has(networkId)) {
-            return this.web3ProviderCashe.get(networkId)!;
+        if (this.web3ProviderCache.has(networkId)) {
+            return this.web3ProviderCache.get(networkId)!;
         }
 
         let network = Networks.all.get(networkId);
-        this.web3ProviderCashe.set(networkId, new Web3(new Web3.providers.HttpProvider(network.provider)));
-        return this.web3ProviderCashe.get(networkId)!;
+        this.web3ProviderCache.set(networkId, new Web3(new Web3.providers.HttpProvider(network.provider)));
+        return this.web3ProviderCache.get(networkId)!;
     }
 
     public getSmartContract(networkId?: number): UtopiaContract {
         if (networkId == null || this.networkId() == networkId) {
             networkId = this.metaMaskProvider != undefined ? this.networkId() : Networks.MainNet().id;
-            if (!this.web3ProviderCashe.has(networkId)) {
-                this.web3ProviderCashe.set(networkId, new Web3(this.metaMaskProvider));
+            if (!this.web3ProviderCache.has(networkId)) {
+                this.web3ProviderCache.set(networkId, new Web3(this.metaMaskProvider));
             }
         }
 

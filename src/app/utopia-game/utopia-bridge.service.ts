@@ -1,5 +1,5 @@
 import { Injectable, NgZone } from '@angular/core';
-import { Observable, of, ReplaySubject, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, of, ReplaySubject, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AppComponent } from '../app.component';
 import { ConnectionDetail } from '../ehtereum/connection-detail';
@@ -9,12 +9,14 @@ import { BridgeMessage, Response, WebToUnityRequest } from './bridge-message';
 import { Clipboard } from '@angular/cdk/clipboard';
 import * as uuid from 'uuid';
 import { Position } from './position';
+import { UtopiaGameComponent } from './utopia-game.component';
 
 @Injectable()
 export class UtopiaBridgeService {
     public unityInstance;
+    public game: UtopiaGameComponent;
     private position?: Position;
-    private gameState = new Subject<State>();
+    private gameState = new BehaviorSubject<State>(null);
 
     private responseObservable = new Map<string, Subject<any>>(); // key: CallId, value: Observable
 
@@ -44,6 +46,16 @@ export class UtopiaBridgeService {
 
     public setNft(request: SetNftRequest): void {
         this.app.setNft(request);
+    }
+
+    public moveToHome(payload: BridgeMessage<undefined>): void {
+        this.app.moveToHome();
+    }
+
+    public openPluginsDialog(payload: OpenPluginDialogRequest): void {
+        if (this.gameState.getValue() == State.PLAYING) {
+            this.game?.openPluginDialog(payload.body);
+        }
     }
 
     public connectMetamask(payload: BridgeMessage<string>): Observable<ConnectionDetail> {
@@ -98,17 +110,54 @@ export class UtopiaBridgeService {
             parameter: parameter,
         } as WebToUnityRequest);
         window.bridge.unityInstance.SendMessage('WebBridge', 'Request', request);
-        return subject.asObservable();
+        return new Observable<any>(observer => {
+            const subscription = subject.subscribe(observer);
+            return () => {
+                this.responseObservable.delete(id);
+                subscription.unsubscribe();
+                let cancelRequest = JSON.stringify({
+                    id: id,
+                    command: 'cancel',
+                } as WebToUnityRequest);
+                window.bridge.unityInstance.SendMessage('WebBridge', 'Request', cancelRequest);
+            };
+        }).pipe(map(res => JSON.parse(res)));
     }
 
     public respond(res: BridgeMessage<string>): void {
         let response: Response = JSON.parse(res.body);
         let subject = this.responseObservable.get(response.id);
         if (subject) {
-            subject.next(response.body);
-            subject.complete();
-            this.responseObservable.delete(response.id);
+            if (response.command == 'complete') {
+                subject.complete();
+                this.responseObservable.delete(response.id);
+            } else if (response.body != null) {
+                subject.next(response.body);
+            } else if (response.error != null) {
+                subject.error(response.error);
+                subject.complete();
+                this.responseObservable.delete(response.id);
+            }
+        } else {
+            console.log('Invalid response from unity. ID: ' + response.id);
         }
+    }
+
+    public freezeGame() {
+        this.unityInstance.SendMessage('GameManager', 'FreezeGame', '');
+    }
+
+    public unFreezeGame() {
+        this.unityInstance.SendMessage('GameManager', 'UnFreezeGame', '');
+    }
+    
+    public cursorStateChanged(locked: boolean) {
+        if (this.gameState.getValue() != State.PLAYING) return;
+        if (locked)
+            this.unityInstance.SendMessage('GameManager', 'LockCursor', '');
+        else
+            this.unityInstance.SendMessage('GameManager', 'UnlockCursor', '');
+
     }
 }
 
@@ -130,6 +179,8 @@ export type TransferLandRequest = BridgeMessage<number>;
 export type EditProfileRequest = BridgeMessage<string>; // FIXME: string --change to--> undefined (wallet id can be retrieved from connection)
 
 export type ReportGameStateRequest = BridgeMessage<string>;
+
+export type OpenPluginDialogRequest = BridgeMessage<'menu' | 'running'>;
 
 export enum State {
     LOADING = 'LOADING',

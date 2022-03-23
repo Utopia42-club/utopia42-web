@@ -1,5 +1,5 @@
-import { Component, InjectionToken, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Action, AppComponent } from '../app.component';
+import { ChangeDetectorRef, Component, InjectionToken, NgZone, OnDestroy, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
+import { AppComponent } from '../app.component';
 import { State, UtopiaBridgeService } from './utopia-bridge.service';
 import { ToastrService } from 'ngx-toastr';
 import { ActivatedRoute } from '@angular/router';
@@ -7,9 +7,14 @@ import { UtopiaApiService } from './plugin/utopia-api.service';
 import { PluginExecutionService } from './plugin/plugin-execution.service';
 import { LoadingService } from '../loading/loading.service';
 import { Subscription } from 'rxjs';
-import { UtopiaDialogService } from '../utopia-dialog.service';
-import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { Web3Service } from '../ehtereum/web3.service';
+import { Plugin } from './plugin/Plugin';
+import { PluginService } from './plugin/plugin.service';
+import { Overlay } from '@angular/cdk/overlay';
+import { v4 as UUIdV4 } from 'uuid';
+import { PluginSelectionComponent } from './plugin/plugin-selection/plugin-selection.component';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { SearchCriteria } from './plugin/SearchCriteria';
 
 export const GAME_TOKEN = new InjectionToken<UtopiaGameComponent>('GAME_TOKEN');
 
@@ -17,48 +22,30 @@ export const GAME_TOKEN = new InjectionToken<UtopiaGameComponent>('GAME_TOKEN');
     selector: 'app-utopia-game',
     templateUrl: './utopia-game.component.html',
     styleUrls: ['./utopia-game.component.scss'],
-    providers: [UtopiaBridgeService, UtopiaApiService, PluginExecutionService]
+    providers: [UtopiaBridgeService, UtopiaApiService]
 })
 export class UtopiaGameComponent implements OnInit, OnDestroy {
-    fullScreenAction: Action = {
-        label: 'Fullscreen',
-        icon: 'fullscreen', perform: () => {
-        }
-    };
     progress = 0;
 
     @ViewChild('gameCanvas', { static: true }) gameCanvas;
-    @ViewChild('pluginMenu', { static: true }) pluginMenu: MatMenu;
 
-    pluginAction: Action;
-    pluginActionTrigger?: MatMenuTrigger;
-    private sandBoxListener: (e) => void;
+    runningPlugins = new Map<string, PluginExecutionService>();
+    runningPluginsKeys = new Set<string>();
 
     private subscription = new Subscription();
+    private pluginDialogRef: MatDialogRef<PluginSelectionComponent>;
+    private script: HTMLScriptElement;
+
 
     constructor(private bridge: UtopiaBridgeService, private appComponent: AppComponent,
                 private readonly toaster: ToastrService, private readonly route: ActivatedRoute,
                 readonly utopiaApi: UtopiaApiService, readonly zone: NgZone,
-                readonly dialog: UtopiaDialogService, readonly pluginService: PluginExecutionService,
-                readonly loadingService: LoadingService, readonly web3Service: Web3Service) {
+                readonly loadingService: LoadingService, readonly web3Service: Web3Service,
+                readonly pluginService: PluginService, readonly dialogService: MatDialog, readonly overlay: Overlay,
+                readonly vcr: ViewContainerRef, readonly cdr: ChangeDetectorRef) {
         window.bridge = bridge;
 
-        this.pluginAction = {
-            label: 'Plugins',
-            icon: 'extension',
-            perform: (event) => {
-                this.freezeGame();
-                this.pluginActionTrigger = event.menuTrigger;
-            },
-        };
-
-        this.subscription.add(this.bridge.gameState$().subscribe(value => {
-            if (value == State.PLAYING || value == State.FREEZE) {
-                this.addPluginAction();
-            } else {
-                this.removePluginAction();
-            }
-        }));
+        bridge.game = this;
     }
 
     ngOnInit(): void {
@@ -69,71 +56,68 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
                 this.bridge.setStartingPosition(position);
             }
         });
-        this.pluginAction.menu = this.pluginMenu;
-        this.pluginMenu.hasBackdrop = true;
+        let playSubscription = this.bridge.gameState$().subscribe(state => {
+            if (state == State.PLAYING) {
+                this.runAutoStartPlugins();
+                playSubscription.unsubscribe();
+            }
+        });
+        this.subscription.add(playSubscription);
     }
 
-    onPluginMenuClosed() {
-        this.unFreezeGame();
-        this.gameCanvas.nativeElement.focus();
+    openPluginDialog(mode: 'menu' | 'running') {
+        if(this.pluginDialogRef != null)
+            return;
+        this.bridge.freezeGame();
+        this.pluginDialogRef = this.dialogService.open(PluginSelectionComponent, {
+            data: {
+                mode: mode,
+            },
+            viewContainerRef: this.vcr,
+            width: '60em',
+            height: '50em',
+        });
+        this.pluginDialogRef.beforeClosed().subscribe(result => {
+            this.onPluginDialogClosed();
+        }, error => {
+            this.onPluginDialogClosed();
+        });
     }
 
-    closePluginMenu() {
-        this.pluginActionTrigger.closeMenu();
-        this.onPluginMenuClosed();
+    onPluginDialogClosed() {
+        this.bridge.unFreezeGame();
+        setTimeout(() => this.gameCanvas.nativeElement.focus(), 300);
+        this.pluginDialogRef = null;
     }
 
-    public runPlugin(code: string, inputs: any) {
-        this.closePluginMenu();
-        this.pluginService.runCode(code, inputs)
+    closePluginDialog() {
+        if (this.pluginDialogRef) {
+            this.pluginDialogRef.close();
+        }
+    }
+
+    public runPlugin(plugin: Plugin) {
+        this.closePluginDialog();
+        let pluginExecutionService = new PluginExecutionService(this.pluginService, this.utopiaApi, this.zone,
+            this.dialogService, this.toaster);
+        let runId = UUIdV4();
+        this.runningPlugins.set(runId, pluginExecutionService);
+        this.runningPluginsKeys.add(runId);
+        pluginExecutionService.runPlugin(plugin, runId)
             .subscribe(() => {
             }, error => {
                 console.error(error);
-                this.toaster.error('Plugin execution failed: ' + error);
+                this.onPluginRunEnded(runId);
+                this.toaster.error('Plugin execution failed: ' + (error ?? 'Unknown error'));
             }, () => {
+                this.onPluginRunEnded(runId);
                 this.toaster.success('Plugin executed successfully');
             });
     }
 
-    private addPluginAction() {
-        let idx = this.appComponent.actions.indexOf(this.pluginAction);
-        if (idx < 0) {
-            this.appComponent.actions.push(this.pluginAction);
-        }
-    }
-
-    private removePluginAction() {
-        let ind = this.appComponent.actions.indexOf(this.pluginAction);
-        if (ind >= 0) {
-            this.appComponent.actions.splice(ind, 1);
-        }
-    }
-
-    private addFullScreenAction() {
-        let idx = this.appComponent.actions.indexOf(this.fullScreenAction);
-        if (idx < 0) {
-            this.appComponent.actions.push(this.fullScreenAction);
-        }
-    }
-
-    private removeFullScreenAction() {
-        let idx = this.appComponent.actions.indexOf(this.fullScreenAction);
-        if (idx >= 0) {
-            this.appComponent.actions.splice(idx, 1);
-        }
-    }
-
-
-    public freezeGame() {
-        this.bridge.unityInstance.SendMessage('GameManager', 'FreezeGame', '');
-    }
-
-    public unFreezeGame() {
-        this.bridge.unityInstance.SendMessage('GameManager', 'UnFreezeGame', '');
-    }
-
     private startGame() {
-        let buildUrl = '/assets/game/v0.10-rc3/Build';
+        let buildUrl = '/assets/game/0.14-rc1/Build';
+        let loaderUrl = buildUrl + '/web.loader.js';
         let config = {
             dataUrl: buildUrl + '/web.data',
             frameworkUrl: buildUrl + '/web.framework.js',
@@ -141,36 +125,29 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
             streamingAssetsUrl: 'StreamingAssets',
             companyName: 'Utopia 42',
             productName: 'Utopia 42',
-            productVersion: '0.10-rc3',
+            productVersion: '0.14-rc1',
             showBanner: (m, t) => this.showBanner(m, t),
         };
 
         let canvas = document.querySelector('#unity-canvas') as any;
-        // if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        //     container.className = "unity-mobile";
-        //     // Avoid draining fillrate performance on mobile devices,
-        //     // and default/override low DPI mode on mobile browsers.
-        //     config.devicePixelRatio = 1;
-        //     mobileWarning.style.display = "block";
-        //     setTimeout(() => {
-        //         mobileWarning.style.display = "none";
-        //     }, 5000);
-        // } else {
-        // canvas.style.width = "960px";
-        // canvas.style.height = "600px";
-        // }
-        // loadingBar.style.display = "block";
 
-        window.createUnityInstance(canvas, config, (progress: any) => {
-            this.progress = progress * 100;
-        }).then((unityInstance: any) => {
-            // loadingBar.style.display = "none";
-            this.bridge.unityInstance = unityInstance;
-            this.fullScreenAction.perform = () => unityInstance.SetFullscreen(1);
-            this.addFullScreenAction();
-        }).catch((message: any) => {
-            alert(message);
-        });
+        this.script = document.createElement('script');
+        this.script.src = loaderUrl;
+        this.script.onload = () => {
+            window.createUnityInstance(canvas, config, (progress: any) => {
+                this.progress = progress * 100;
+            }).then((unityInstance: any) => {
+                this.bridge.unityInstance = unityInstance;
+            }).catch((message: any) => {
+                alert(message);
+            });
+        };
+        document.body.appendChild(this.script);
+
+        document.addEventListener('pointerlockchange', () => {
+            this.bridge.cursorStateChanged(document.pointerLockElement == this.gameCanvas.nativeElement);
+        }, false);
+
     }
 
     showBanner(msg, type) {
@@ -183,10 +160,50 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
         }
     }
 
-    ngOnDestroy(): void {
-        this.removeFullScreenAction();
-        this.removePluginAction();
-        window.removeEventListener('message', this.sandBoxListener);
+    async requestClose() {
+        this.runningPluginsKeys.forEach((pluginRunId) => {
+            let pluginExecutionService = this.runningPlugins.get(pluginRunId);
+            if (pluginExecutionService) {
+                pluginExecutionService.terminateFrame();
+                this.onPluginRunEnded(pluginRunId);
+            }
+        });
+        if (this.bridge.unityInstance != null) {
+            await this.bridge.unityInstance.Quit();
+        }
+    }
+
+    ngOnDestroy() {
         this.subscription.unsubscribe();
+        this.bridge.game = null;
+        if (this.script != null) {
+            document.body.removeChild(this.script);
+        }
+    }
+
+    terminatePlugin(pluginRunId: string) {
+        let pluginExecutionService = this.runningPlugins.get(pluginRunId);
+        if (pluginExecutionService) {
+            pluginExecutionService.openTerminateConfirmationDialog()
+                .afterClosed().subscribe(result => {
+                if (result) {
+                    this.onPluginRunEnded(pluginRunId);
+                }
+            });
+        }
+    }
+
+    private onPluginRunEnded(pluginRunId: string) {
+        this.runningPlugins.delete(pluginRunId);
+        this.runningPluginsKeys.delete(pluginRunId);
+    }
+
+    private runAutoStartPlugins() {
+        this.pluginService.getAllAutostartPluginsForUser(new SearchCriteria(null, 100)).subscribe(plugins => {
+            for (let plugin of plugins) {
+                console.debug('Running autostart plugin: ' + plugin.name);
+                this.runPlugin(plugin);
+            }
+        });
     }
 }

@@ -41,14 +41,26 @@ import { OverlayModule } from '@angular/cdk/overlay';
 import { PluginEditorComponent } from './utopia-game/plugin/plugin-editor/plugin-editor.component';
 import { PluginSelectionComponent } from './utopia-game/plugin/plugin-selection/plugin-selection.component';
 import { MatListModule } from '@angular/material/list';
-import { FilterPluginsPipe } from './utopia-game/plugin/plugin-selection/filter-plugins.pipe';
 import { AuthInterceptor } from './auth.interceptor';
 import { GlobalErrorHandlerService } from './global-error-handler.service';
-import { PluginRunningOverlayComponent } from './utopia-game/plugin/plugin-running-overlay/plugin-running-overlay.component';
 import { SimpleDialogComponent } from './simple-dialog/simple-dialog.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { PositionFieldComponent } from './utopia-game/plugin/plugin-inputs-editor/position-field/position-field.component';
 import { LoadingComponent } from './loading/loading.component';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { SanitizePipe } from './utopia-game/plugin/plugin-inputs-editor/sanitize.pipe';
+import { PluginConfirmationDialog } from './utopia-game/plugin/plugin-confirmation-dialog/plugin-confirmation-dialog.component';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { PluginTableComponent } from './utopia-game/plugin/plugin-table/plugin-table.component';
+import { PluginStoreDialogComponent } from './utopia-game/plugin/plugin-store-dialog/plugin-store-dialog.component';
+import { ColorPickerModule } from 'ngx-color-picker';
+import { BlockTypeFieldComponent } from './utopia-game/plugin/plugin-inputs-editor/block-type-field/block-type-field.component';
+import { PluginSearchBarComponent } from './utopia-game/plugin/plugin-search-bar/plugin-search-bar.component';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MaterialFileInputModule } from 'ngx-material-file-input';
+import { FileFieldComponent } from './utopia-game/plugin/plugin-inputs-editor/file-field/file-field.component';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 @NgModule({
     declarations: [
@@ -69,11 +81,16 @@ import { LoadingComponent } from './loading/loading.component';
         FilterInputOptionsPipe,
         PluginEditorComponent,
         PluginSelectionComponent,
-        FilterPluginsPipe,
-        PluginRunningOverlayComponent,
         SimpleDialogComponent,
         PositionFieldComponent,
-        LoadingComponent
+        LoadingComponent,
+        SanitizePipe,
+        PluginConfirmationDialog,
+        PluginTableComponent,
+        PluginStoreDialogComponent,
+        BlockTypeFieldComponent,
+        PluginSearchBarComponent,
+        FileFieldComponent
     ],
     imports: [
         BrowserModule,
@@ -104,7 +121,14 @@ import { LoadingComponent } from './loading/loading.component';
         MatAutocompleteModule,
         OverlayModule,
         MatListModule,
-        MatMenuModule
+        MatMenuModule,
+        MatCheckboxModule,
+        MatChipsModule,
+        MatPaginatorModule,
+        ColorPickerModule,
+        MatTabsModule,
+        MaterialFileInputModule,
+        MatSlideToggleModule
     ],
     providers: [
         {

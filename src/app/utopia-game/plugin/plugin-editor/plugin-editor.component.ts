@@ -4,6 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { LoadingService } from '../../../loading/loading.service';
 import { PluginService } from '../plugin.service';
 import { ToastrService } from 'ngx-toastr';
+import { PluginState } from '../Plugin';
 
 @Component({
     selector: 'app-plugin-editor',
@@ -12,6 +13,7 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class PluginEditorComponent implements OnInit {
     form: FormGroup;
+    stateEnum = PluginState;
 
     constructor(readonly toaster: ToastrService, readonly loadingService: LoadingService,
                 readonly dialogRef: MatDialogRef<PluginEditorComponent>,
@@ -19,11 +21,12 @@ export class PluginEditorComponent implements OnInit {
                 readonly pluginService: PluginService) {
         this.form = new FormGroup({
             id: new FormControl(),
-            name: new FormControl(null, [Validators.required]),
-            description: new FormControl(null),
+            name: new FormControl(null, [Validators.required, Validators.maxLength(256)]),
+            description: new FormControl(null, [Validators.maxLength(256)]),
             walletId: new FormControl(null),
             scriptUrl: new FormControl(null, [Validators.required]),
-            descriptorUrl: new FormControl(null)
+            state: new FormControl(null, [Validators.required]),
+            autostart: new FormControl(false, [Validators.required]),
         });
         if (pluginId != null) {
             this.loadingService.prepare(

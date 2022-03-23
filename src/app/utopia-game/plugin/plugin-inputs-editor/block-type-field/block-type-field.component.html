@@ -1,0 +1,33 @@
+<div class="block-type-field" fxLayout="row" fxLayoutAlign="space-between center">
+    <mat-form-field fxFlex style="width: 100%">
+        <mat-label *ngIf="!isList" [innerHtml]="label | sanitize"></mat-label>
+        <mat-select [required]="required" [formControl]="formControl">
+            <mat-option *ngFor="let type of blockTypes" [value]="type">
+                <div fxLayout="row" fxLayoutAlign="space-between center">
+                    <div>{{type}}</div>
+                    <img *ngIf="type != 'air'" src="/assets/blockIcons/{{type}}.png" width="30" height="30"
+                         alt="block-icon"/>
+                </div>
+            </mat-option>
+            <mat-option [value]="COLOR_BLOCK">
+                <div fxLayout="row" fxLayoutAlign="space-between center">
+                    <div>Color Block</div>
+                    <img src="/assets/blockIcons/ColorPicker.png" width="30" height="30" alt="block-icon"/>
+                </div>
+            </mat-option>
+        </mat-select>
+        <mat-hint *ngIf="hint != null" [innerHtml]="hint | sanitize"></mat-hint>
+    </mat-form-field>
+    <button *ngIf="formControl.value == COLOR_BLOCK"
+            class="picker-icon"
+            mat-icon-button
+            cpPosition="auto"
+            [cpPositionOffset]="'50%'"
+            [cpEyeDropper]="true"
+            [cpPositionRelativeToArrow]="true"
+            [cpAlphaChannel]="'disabled'"
+            [(colorPicker)]="selectedColor"
+            (colorPickerChange)="updateValue()">
+        <mat-icon [style.color]="selectedColor">palette</mat-icon>
+    </button>
+</div>

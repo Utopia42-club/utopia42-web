@@ -1,0 +1,75 @@
+@use '@angular/material' as mat;
+
+.table-container {
+    overflow-y: auto;
+}
+
+table {
+    width: 100%;
+    max-height: 30em;
+    overflow-y: auto;
+}
+
+.mat-column-id {
+    padding-right: 0.5em;
+}
+
+.mat-column-name {
+    padding-right: 0.5em;
+}
+
+.mat-column-actions {
+    border-left: 1px solid var(--background-lighter-color);
+    text-align: center;
+}
+
+tr.row__detail {
+    height: 0;
+}
+
+tr.simple-row:not(.expanded-row):hover {
+    background: var(--background-lighter-color);
+}
+
+tr.simple-row:not(.expanded-row):active {
+}
+
+tr.detail-row {
+    height: 0;
+}
+
+.simple-row td {
+    border-bottom-width: 0;
+}
+
+.simple-row {
+    cursor: pointer;
+}
+
+.row__detail {
+    width: 100%;
+    overflow: hidden;
+}
+
+.row__detail__wallet {
+    font-weight: 400;
+}
+
+.row__detail__image {
+    aspect-ratio: 1 / 1;
+    width: 10em;
+    border-radius: 4px;
+}
+
+.description-cell {
+    max-width: 15em;
+    margin-bottom: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    word-break: break-all;
+}
+
+.row__detail__description {
+    word-wrap: anywhere;
+}

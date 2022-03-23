@@ -1,23 +1,9 @@
 <app-loading></app-loading>
 
 <div class="content dark-background">
-    <mat-toolbar color="primary" class="mat-elevation-z5" style="max-width: 100vw; height: 56px;">
+    <div style="max-width: 100vw; height: 50px;" class="toolbar"
+        *ngIf="!isGameOpen()" fxLayout="row" fxLayoutAlign="start center">
         <app-connection-status-indicator style="max-width: 90%;"></app-connection-status-indicator>
-        <span style="flex: 1 1 auto;"></span>
-        <ng-container *ngFor="let action of actions.slice().reverse()">
-            <button *ngIf="action.menu" mat-icon-button (click)="action.perform({menuTrigger:trigger});"
-                    cdkOverlayOrigin
-                    [id]=" 'action_' + actions.indexOf(action) "
-                    [matTooltip]="action.label" [matMenuTriggerFor]="action.menu" #trigger="matMenuTrigger">
-                <mat-icon>{{action.icon}}</mat-icon>
-            </button>
-            <button *ngIf="!action.menu" mat-icon-button (click)="action.perform({})"
-                    cdkOverlayOrigin
-                    [id]=" 'action_' + actions.indexOf(action) "
-                    [matTooltip]="action.label">
-                <mat-icon>{{action.icon}}</mat-icon>
-            </button>
-        </ng-container>
-    </mat-toolbar>
+    </div>
     <router-outlet></router-outlet>
 </div>

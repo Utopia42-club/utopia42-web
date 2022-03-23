@@ -1,0 +1,20 @@
+<div class="plugin-search-bar"
+     fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="0.3em">
+    <mat-form-field fxFlex="20">
+        <mat-select [formControl]="typeControl">
+            <mat-option [value]="'generalSearch'">All</mat-option>
+            <mat-option [value]="'id'">Id</mat-option>
+            <mat-option [value]="'walletId'">Wallet Id</mat-option>
+            <mat-option [value]="'name'">Name</mat-option>
+            <mat-option [value]="'description'">Description</mat-option>
+        </mat-select>
+    </mat-form-field>
+    <mat-form-field fxFlex class="search-field" *ngIf="!isNumberType()">
+        <mat-label>Search</mat-label>
+        <input matInput [formControl]="stringFilter" type="text"/>
+    </mat-form-field>
+    <mat-form-field fxFlex class="search-field" *ngIf="isNumberType()">
+        <mat-label>Search</mat-label>
+        <input matInput [formControl]="numberFilter" type="number"/>
+    </mat-form-field>
+</div>

@@ -1,36 +1,41 @@
-<div class="page-content" fxLayout="row wrap" fxLayoutGap="1rem">
-    <mat-card class="primary" matRipple fxLayout="column" (click)="startGame()">
-        <mat-card-content fxLayout="row" fxLayoutAlign="center center">
-            <mat-icon>play_circle</mat-icon>
-        </mat-card-content>
-        <mat-card-actions>
-            <h2> Play On Browser</h2>
-        </mat-card-actions>
-    </mat-card>
-    <mat-card class="orange" matRipple fxLayout="column" (click)="startGameAt()">
-        <mat-card-content fxLayout="row" fxLayoutAlign="center center">
-            <mat-icon>edit_location</mat-icon>
-        </mat-card-content>
-        <mat-card-actions>
-            <h2>Open Game At</h2>
-        </mat-card-actions>
-    </mat-card>
-    <a [href]="windowsUrl" style="text-decoration: none;">
-        <mat-card class="indigo" matRipple fxLayout="column">
+<div fxLayout="column" fxLayoutAlign="space-between center" class="page-content">
+    <div class="main-menu" fxFlex>
+        <mat-card class="primary" matRipple fxLayout="column" (click)="startGame()">
             <mat-card-content fxLayout="row" fxLayoutAlign="center center">
-                <mat-icon>desktop_windows</mat-icon>
+                <mat-icon>play_circle</mat-icon>
             </mat-card-content>
             <mat-card-actions>
-                <h2>Play On Windows</h2>
+                <h2>Play On Browser</h2>
             </mat-card-actions>
         </mat-card>
-    </a>
-    <mat-card class="pink" matRipple fxLayout="column" (click)="portLands()">
-        <mat-card-content fxLayout="row" fxLayoutAlign="center center">
-            <mat-icon>import_export</mat-icon>
-        </mat-card-content>
-        <mat-card-actions>
-            <h2>Port Your Lands</h2>
-        </mat-card-actions>
-    </mat-card>
+        <mat-card class="orange" matRipple fxLayout="column" (click)="startGameAt()">
+            <mat-card-content fxLayout="row" fxLayoutAlign="center center">
+                <mat-icon>edit_location</mat-icon>
+            </mat-card-content>
+            <mat-card-actions>
+                <h2>Open Game At</h2>
+            </mat-card-actions>
+        </mat-card>
+        <a [href]="windowsUrl" style="text-decoration: none;">
+            <mat-card class="indigo" matRipple fxLayout="column">
+                <mat-card-content fxLayout="row" fxLayoutAlign="center center">
+                    <mat-icon>desktop_windows</mat-icon>
+                </mat-card-content>
+                <mat-card-actions>
+                    <h2>Play On Windows</h2>
+                </mat-card-actions>
+            </mat-card>
+        </a>
+        <mat-card class="pink" matRipple fxLayout="column" (click)="portLands()">
+            <mat-card-content fxLayout="row" fxLayoutAlign="center center">
+                <mat-icon>import_export</mat-icon>
+            </mat-card-content>
+            <mat-card-actions>
+                <h2>Port Your Lands</h2>
+            </mat-card-actions>
+        </mat-card>
+    </div>
+    <div class="footer" fxLayout="row" fxLayoutAlign="end center">
+        <img src="assets/images/logoWithName.png" class="logo" alt="utopia42-logo">
+    </div>
 </div>
