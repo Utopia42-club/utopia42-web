@@ -7,7 +7,7 @@ import { Land } from '../../ehtereum/models';
 import { Web3Service } from '../../ehtereum/web3.service';
 import { PluginInputsEditor } from './plugin-inputs-editor/plugin-inputs-editor.component';
 import { MetaBlock } from './models';
-import { PluginInputFormDescriptor } from './pluginInput';
+import { PluginInputFormDescriptor } from './plugin-input';
 import { Plugin } from './Plugin';
 import { MatDialog } from '@angular/material/dialog';
 import { PluginService } from './plugin.service';

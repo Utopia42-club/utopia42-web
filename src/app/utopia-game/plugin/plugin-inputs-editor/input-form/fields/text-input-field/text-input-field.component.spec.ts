@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { FileFieldComponent } from './file-field.component';
+import { TextInputFieldComponent } from './text-input-field.component';
 
-describe('BlockTypeFieldComponent', () => {
-  let component: FileFieldComponent;
-  let fixture: ComponentFixture<FileFieldComponent>;
+describe('TextInputFieldComponent', () => {
+  let component: TextInputFieldComponent;
+  let fixture: ComponentFixture<TextInputFieldComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ FileFieldComponent ]
+      declarations: [ TextInputFieldComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(FileFieldComponent);
+    fixture = TestBed.createComponent(TextInputFieldComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1,0 +1,17 @@
+<mat-form-field *ngIf="input.options == null" class="input-field">
+    <mat-label *ngIf="!input.isList" [innerHtml]="(input.label ?? input.name) | sanitize"></mat-label>
+    <input matInput [required]="input.required" [formControl]="control" type="number"/>
+    <mat-hint *ngIf="input.hint != null" [innerHtml]="input.hint | sanitize"></mat-hint>
+</mat-form-field>
+<mat-form-field *ngIf="input.options != null" class="input-field">
+    <mat-label *ngIf="!input.isList" [innerHtml]="(input.label ?? input.name) | sanitize"></mat-label>
+    <input matInput [required]="input.required" [formControl]="control" type="number"
+           [matAutocomplete]="auto"/>
+    <mat-hint *ngIf="input.hint != null" [innerHtml]="input.hint | sanitize"></mat-hint>
+    <mat-autocomplete #auto="matAutocomplete">
+        <mat-option *ngFor="let option of input.options | filterInputOptions : control.value"
+                    [value]="option.value">
+            <span>{{option.key}}</span>
+        </mat-option>
+    </mat-autocomplete>
+</mat-form-field>

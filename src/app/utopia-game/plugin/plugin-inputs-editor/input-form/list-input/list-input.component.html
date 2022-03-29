@@ -1,0 +1,21 @@
+<div class="root" fxLayout="column" fxLayoutAlign="space-between center">
+    <div fxLayout="column" style="width: 100%;height: 100%; overflow-y: auto">
+        <p [innerHtml]="((input.label ?? input.name) + (input.required ? '*' :'')) | sanitize"
+           class="list-field-label">
+        </p>
+        <div *ngFor="let formControl of control.controls; let i = index">
+            <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="0.4em">
+                <app-input-field [control]="$any(formControl)" [input]="input" [inputsForm]="inputsForm"></app-input-field>
+                <button mat-icon-button color="warn" class="delete-link-button"
+                        (click)="removeListItem(input, formControl)">
+                    <mat-icon>delete</mat-icon>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div style="width: 100%" fxLayout="row" fxLayoutAlign="end center">
+        <button mat-stroked-button style="width: 100%" (click)="addListItem(input)">
+            <mat-icon>add</mat-icon>
+        </button>
+    </div>
+</div>

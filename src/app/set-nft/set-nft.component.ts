@@ -27,7 +27,6 @@ export class SetNftComponent implements OnInit, OnDestroy
                 private readonly toaster: ToastrService)
     {
         this.setNftRequestData = data.request.body;
-        console.log(this.setNftRequestData);
         if (this.setNftRequestData.nft)
             this.heading = 'Converting land to nft';
         else

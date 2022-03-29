@@ -1,0 +1,9 @@
+<mat-form-field class="input-field">
+    <mat-label *ngIf="!input.isList" [innerHtml]="(input.label ?? input.name) | sanitize"></mat-label>
+    <mat-select [required]="input.required" [formControl]="control">
+        <mat-option *ngFor="let option of input.options ?? []" [value]="option.value">
+            {{option.key}}
+        </mat-option>
+    </mat-select>
+    <mat-hint *ngIf="input.hint != null" [innerHtml]="input.hint | sanitize"></mat-hint>
+</mat-form-field>

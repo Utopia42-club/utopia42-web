@@ -1,0 +1,27 @@
+<ng-container [ngSwitch]="type">
+    <ng-container *ngSwitchCase="'number'">
+        <app-number-input-field [input]="input" [control]="formControl"></app-number-input-field>
+    </ng-container>
+    <ng-container *ngSwitchCase="'text'">
+        <app-text-input-field [input]="input" [control]="formControl"></app-text-input-field>
+    </ng-container>
+    <ng-container *ngSwitchCase="'selection'">
+        <app-selection-input-field [input]="input" [control]="formControl"></app-selection-input-field>
+    </ng-container>
+    <ng-container *ngSwitchCase="'position'">
+        <app-position-input-field [inputsForm]="inputsForm" [input]="input"
+                                  [control]="formControl"></app-position-input-field>
+    </ng-container>
+    <ng-container *ngSwitchCase="'land'">
+        <app-land-input-field [input]="input" [control]="formControl"></app-land-input-field>
+    </ng-container>
+    <ng-container *ngSwitchCase="'blockType'">
+        <app-block-type-input-field [input]="input" [control]="formControl"></app-block-type-input-field>
+    </ng-container>
+    <ng-container *ngSwitchCase="'file'">
+        <app-file-input-field [input]="input" [control]="formControl"></app-file-input-field>
+    </ng-container>
+    <ng-container *ngSwitchCase="'nested'">
+        <app-input-form [descriptor]="descriptor" [inputsForm]="formGroup"></app-input-form>
+    </ng-container>
+</ng-container>

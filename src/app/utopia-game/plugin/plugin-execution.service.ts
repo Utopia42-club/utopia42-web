@@ -1,12 +1,12 @@
-import { NgZone } from '@angular/core';
-import { Observable, Subscription } from 'rxjs';
-import { UtopiaApiService } from './utopia-api.service';
-import { catchError, switchMap, tap } from 'rxjs/operators';
-import { SimpleDialogAction, SimpleDialogComponent, SimpleDialogData } from '../../simple-dialog/simple-dialog.component';
-import { ToastrService } from 'ngx-toastr';
-import { Plugin } from './Plugin';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { PluginService } from './plugin.service';
+import {NgZone} from '@angular/core';
+import {Observable, Subscription} from 'rxjs';
+import {UtopiaApiService} from './utopia-api.service';
+import {catchError, switchMap, tap} from 'rxjs/operators';
+import {SimpleDialogAction, SimpleDialogComponent, SimpleDialogData} from '../../simple-dialog/simple-dialog.component';
+import {ToastrService} from 'ngx-toastr';
+import {Plugin} from './Plugin';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {PluginService} from './plugin.service';
 
 export class PluginExecutionService {
     private secureEvalIframe: HTMLIFrameElement;

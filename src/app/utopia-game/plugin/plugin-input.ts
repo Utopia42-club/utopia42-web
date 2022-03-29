@@ -9,13 +9,15 @@ export class PluginInputFormDescriptor {
     gridDescriptor?: GridDescriptor;
 }
 
+export type PluginInputType = 'text' | 'number' | 'selection' | 'position' | 'land' | 'blockType' | 'file' | PluginInputFormDescriptor;
+
 export class PluginInput {
     name: string;
     label?: string;
     hint: string;
     required: boolean;
     isList: boolean = false;
-    type: 'text' | 'number' | 'selection' | 'position' | 'land' | 'blockType' | 'file';
+    type: PluginInputType;
     options?: { key: string, value: any }[];
     defaultValue?: any;
 }

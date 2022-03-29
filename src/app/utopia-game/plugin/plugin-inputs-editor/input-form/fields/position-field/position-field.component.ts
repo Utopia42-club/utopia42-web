@@ -1,8 +1,15 @@
-import { ChangeDetectorRef, Component, forwardRef, Input, OnDestroy, OnInit } from '@angular/core';
-import { ControlValueAccessor, FormControl, FormGroup, NG_VALIDATORS, NG_VALUE_ACCESSOR, Validators } from '@angular/forms';
-import { Position } from '../../../position';
-import { Subscription } from 'rxjs';
-import { Marker } from '../../utopia-api.service';
+import {ChangeDetectorRef, Component, forwardRef, Input, OnDestroy, OnInit} from '@angular/core';
+import {
+    ControlValueAccessor,
+    FormControl,
+    FormGroup,
+    NG_VALIDATORS,
+    NG_VALUE_ACCESSOR,
+    Validators
+} from '@angular/forms';
+import {Position} from '../../../../../position';
+import {Subscription} from 'rxjs';
+import {Marker} from '../../../../utopia-api.service';
 
 @Component({
     selector: 'app-position-field',
@@ -68,7 +75,7 @@ export class PositionFieldComponent implements OnInit, OnDestroy, ControlValueAc
     setDisabledState(isDisabled: boolean): void {
     }
 
-    validate({ value }: FormControl) {
+    validate({value}: FormControl) {
         return !this.form.valid && {
             invalid: true
         };

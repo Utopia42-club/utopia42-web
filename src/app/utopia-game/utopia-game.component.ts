@@ -1,20 +1,29 @@
-import { ChangeDetectorRef, Component, InjectionToken, NgZone, OnDestroy, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
-import { AppComponent } from '../app.component';
-import { State, UtopiaBridgeService } from './utopia-bridge.service';
-import { ToastrService } from 'ngx-toastr';
-import { ActivatedRoute } from '@angular/router';
-import { UtopiaApiService } from './plugin/utopia-api.service';
-import { PluginExecutionService } from './plugin/plugin-execution.service';
-import { LoadingService } from '../loading/loading.service';
-import { Subscription } from 'rxjs';
-import { Web3Service } from '../ehtereum/web3.service';
-import { Plugin } from './plugin/Plugin';
-import { PluginService } from './plugin/plugin.service';
-import { Overlay } from '@angular/cdk/overlay';
-import { v4 as UUIdV4 } from 'uuid';
-import { PluginSelectionComponent } from './plugin/plugin-selection/plugin-selection.component';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { SearchCriteria } from './plugin/SearchCriteria';
+import {
+    ChangeDetectorRef,
+    Component,
+    InjectionToken,
+    NgZone,
+    OnDestroy,
+    OnInit,
+    ViewChild,
+    ViewContainerRef
+} from '@angular/core';
+import {AppComponent} from '../app.component';
+import {State, UtopiaBridgeService} from './utopia-bridge.service';
+import {ToastrService} from 'ngx-toastr';
+import {ActivatedRoute} from '@angular/router';
+import {UtopiaApiService} from './plugin/utopia-api.service';
+import {PluginExecutionService} from './plugin/plugin-execution.service';
+import {LoadingService} from '../loading/loading.service';
+import {Subscription} from 'rxjs';
+import {Web3Service} from '../ehtereum/web3.service';
+import {Plugin} from './plugin/Plugin';
+import {PluginService} from './plugin/plugin.service';
+import {Overlay} from '@angular/cdk/overlay';
+import {v4 as UUIdV4} from 'uuid';
+import {PluginSelectionComponent} from './plugin/plugin-selection/plugin-selection.component';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {SearchCriteria} from './plugin/SearchCriteria';
 
 export const GAME_TOKEN = new InjectionToken<UtopiaGameComponent>('GAME_TOKEN');
 
@@ -27,12 +36,12 @@ export const GAME_TOKEN = new InjectionToken<UtopiaGameComponent>('GAME_TOKEN');
 export class UtopiaGameComponent implements OnInit, OnDestroy {
     progress = 0;
 
-    @ViewChild('gameCanvas', { static: true }) gameCanvas;
+    @ViewChild('gameCanvas', {static: true}) gameCanvas;
 
     runningPlugins = new Map<string, PluginExecutionService>();
     runningPluginsKeys = new Set<string>();
 
-    private subscription = new Subscription();
+    private readonly subscription = new Subscription();
     private pluginDialogRef: MatDialogRef<PluginSelectionComponent>;
     private script: HTMLScriptElement;
 
@@ -49,13 +58,13 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.appComponent.getContractSafe(null, null).subscribe(() => this.startGame());
-        this.route.queryParams.subscribe(params => {
+        this.subscription.add(this.appComponent.getContractSafe(null, null).subscribe(() => this.startGame()));
+        this.subscription.add(this.route.queryParams.subscribe(params => {
             const position = params.position;
             if (position != null) {
                 this.bridge.setStartingPosition(position);
             }
-        });
+        }));
         let playSubscription = this.bridge.gameState$().subscribe(state => {
             if (state == State.PLAYING) {
                 this.runAutoStartPlugins();
@@ -66,8 +75,9 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
     }
 
     openPluginDialog(mode: 'menu' | 'running') {
-        if(this.pluginDialogRef != null)
+        if (this.pluginDialogRef != null)
             return;
+
         this.bridge.freezeGame();
         this.pluginDialogRef = this.dialogService.open(PluginSelectionComponent, {
             data: {
@@ -103,20 +113,22 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
         let runId = UUIdV4();
         this.runningPlugins.set(runId, pluginExecutionService);
         this.runningPluginsKeys.add(runId);
-        pluginExecutionService.runPlugin(plugin, runId)
-            .subscribe(() => {
-            }, error => {
-                console.error(error);
-                this.onPluginRunEnded(runId);
-                this.toaster.error('Plugin execution failed: ' + (error ?? 'Unknown error'));
-            }, () => {
-                this.onPluginRunEnded(runId);
-                this.toaster.success('Plugin executed successfully');
-            });
+        this.subscription.add(
+            pluginExecutionService.runPlugin(plugin, runId)
+                .subscribe(() => {
+                }, error => {
+                    console.error(error);
+                    this.onPluginRunEnded(runId);
+                    this.toaster.error('Plugin execution failed: ' + (error ?? 'Unknown error'));
+                }, () => {
+                    this.onPluginRunEnded(runId);
+                    this.toaster.success('Plugin executed successfully');
+                })
+        );
     }
 
     private startGame() {
-        let buildUrl = '/assets/game/0.14-rc1/Build';
+        let buildUrl = '/assets/game/0.15-rc1/Build';
         let loaderUrl = buildUrl + '/web.loader.js';
         let config = {
             dataUrl: buildUrl + '/web.data',
@@ -125,7 +137,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
             streamingAssetsUrl: 'StreamingAssets',
             companyName: 'Utopia 42',
             productName: 'Utopia 42',
-            productVersion: '0.14-rc1',
+            productVersion: '0.15-rc1',
             showBanner: (m, t) => this.showBanner(m, t),
         };
 

@@ -1,7 +1,7 @@
 @use '@angular/material' as mat;
 // regular style toast
 @import '~ngx-toastr/toastr';
-@import "~prismjs/themes/prism-coy.css";
+@import "~prismjs/themes/prism-dark.css";
 
 $pink-palette: mat.define-palette(mat.$pink-palette);
 $indigo-palette: mat.define-palette(mat.$indigo-palette);
@@ -60,4 +60,3 @@ body {
 .full-width {
     width: 100%;
 }
-

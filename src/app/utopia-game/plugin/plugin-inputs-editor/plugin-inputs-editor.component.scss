@@ -2,16 +2,6 @@
     height: min-content;
 }
 
-.inputs {
-    width: 100%;
-    gap: 0.6em;
-    padding: 0.5em;
-}
-
-.input-field {
-    width: 100%;
-}
-
 .loading-inputs {
     width: 100%;
     height: 100%;
@@ -34,25 +24,4 @@
     font-size: 1.1em;
     font-weight: 400;
     color: var(--background-contrast-color);
-}
-
-.terms {
-    width: 100%;
-}
-
-.footer {
-    width: 100%;
-}
-
-.list-field {
-    border: 1px solid var(--background-contrast-color);
-    border-radius: 4px;
-    padding: 0.5em;
-}
-
-.list-field__label {
-    font-size: 1em;
-    font-weight: 400;
-    color: var(--background-contrast-color);
-    margin: 0;
 }

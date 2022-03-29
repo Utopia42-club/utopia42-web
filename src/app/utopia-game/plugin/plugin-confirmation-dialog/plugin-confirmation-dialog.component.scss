@@ -4,29 +4,6 @@
     height: min-content;
 }
 
-.inputs {
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6em;
-}
-
-.inputs > * {
-    flex-grow: 1;
-}
-
-.input-field {
-    width: 100%;
-}
-
-.loading-inputs {
-    width: 100%;
-    height: 100%;
-    font-size: 2em;
-    font-weight: 500;
-    color: var(--background-contrast-color);
-}
-
 .actions {
     width: 100%;
 }
@@ -34,12 +11,6 @@
 .title {
     font-size: 1.4em;
     font-weight: 500;
-    color: var(--background-contrast-color);
-}
-
-.subtitle {
-    font-size: 1.1em;
-    font-weight: 400;
     color: var(--background-contrast-color);
 }
 
@@ -54,9 +25,7 @@
 .code {
     width: 100%;
     padding: 0.5em;
-    background-color: whitesmoke;
     white-space: pre-wrap;
     max-height: 20em;
     overflow-y: auto;
-    color: black;
 }
