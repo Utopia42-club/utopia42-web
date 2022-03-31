@@ -15,7 +15,7 @@ export class TextInputFieldComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        console.log(this.control);
+        // console.log(this.control);
     }
 
 }

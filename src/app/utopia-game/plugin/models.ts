@@ -87,6 +87,10 @@ interface VideoFaceProps {
     previewTime?: number;
 }
 
-interface NftFaceProps extends ImageFaceProps {
-    marketUrl: string;
+interface NftFaceProps {
+    collection: string;
+    tokenId: number;
+    width?: number;
+    height?: number;
+    detectCollision?: boolean;
 }
