@@ -60,3 +60,23 @@ body {
 .full-width {
     width: 100%;
 }
+
+//**************************//
+//       scrollbar          //
+//**************************//
+*{
+    scrollbar-width: thin;
+    scrollbar-color: var(--background-darker-color) #6f86a8;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--background-darker-color);
+    border: 1px solid var(--background-lighter-color);
+    border-radius: 0.5em;
+}
+::-webkit-scrollbar-corner {
+    background: #6f86a8;
+}
+::-webkit-scrollbar {
+    background: #6f86a8;
+    width: 0.5em;
+}

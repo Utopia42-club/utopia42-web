@@ -1,10 +1,10 @@
 <mat-form-field *ngIf="input.options == null" class="input-field">
-    <mat-label *ngIf="!input.isList" [innerHtml]="(input.label ?? input.name) | sanitize"></mat-label>
+    <mat-label [innerHtml]="(input.label ?? input.name) | sanitize"></mat-label>
     <input matInput [required]="input.required" [formControl]="control" type="text"/>
     <mat-hint *ngIf="input.hint != null" [innerHtml]="input.hint | sanitize"></mat-hint>
 </mat-form-field>
 <mat-form-field *ngIf="input.options != null" class="input-field">
-    <mat-label *ngIf="!input.isList" [innerHtml]="(input.label ?? input.name) | sanitize"></mat-label>
+    <mat-label [innerHtml]="(input.label ?? input.name) | sanitize"></mat-label>
     <input matInput [required]="input.required" [formControl]="control" type="text"
            [matAutocomplete]="auto"/>
     <mat-hint *ngIf="input.hint != null" [innerHtml]="input.hint | sanitize"></mat-hint>

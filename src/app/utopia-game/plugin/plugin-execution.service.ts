@@ -26,6 +26,7 @@ export class PluginExecutionService {
     runPlugin(plugin: Plugin, runId: string): Observable<PluginRunResult> {
         this.runId = runId;
         this.runningPlugin = plugin;
+
         return this.pluginService.getFile(plugin.scriptUrl)
             .pipe(
                 switchMap(code =>

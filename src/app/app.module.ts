@@ -92,6 +92,7 @@ import {
 } from "./utopia-game/plugin/plugin-inputs-editor/input-form/fields/number-input-field/number-input-field.component";
 import {InputFormComponent} from "./utopia-game/plugin/plugin-inputs-editor/input-form/input-form.component";
 import {ListInputComponent} from "./utopia-game/plugin/plugin-inputs-editor/input-form/list-input/list-input.component";
+import { MasterSlaveInputComponent } from './utopia-game/plugin/plugin-inputs-editor/input-form/master-slave-input/master-slave-input.component';
 
 @NgModule({
     declarations: [
@@ -130,7 +131,8 @@ import {ListInputComponent} from "./utopia-game/plugin/plugin-inputs-editor/inpu
         NumberInputFieldComponent,
         InputFormComponent,
         ListInputComponent,
-        InputFieldComponent
+        InputFieldComponent,
+        MasterSlaveInputComponent
     ],
     imports: [
         BrowserModule,

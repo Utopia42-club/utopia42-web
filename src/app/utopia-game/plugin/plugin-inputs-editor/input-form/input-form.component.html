@@ -6,8 +6,8 @@
         <app-input-field *ngIf="!input.isList" [input]="input" [control]="control(input.name)"
                          [inputsForm]="inputsForm"></app-input-field>
         <ng-container *ngIf="input.isList">
-            <app-list-input [input]="input" [inputsForm]="inputsForm" [control]="formArray(input.name)">
-            </app-list-input>
+            <app-master-slave-input [input]="input" [inputsForm]="inputsForm" [control]="formArray(input.name)">
+            </app-master-slave-input>
         </ng-container>
     </div>
 </form>

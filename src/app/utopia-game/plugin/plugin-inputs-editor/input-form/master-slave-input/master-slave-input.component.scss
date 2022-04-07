@@ -1,0 +1,91 @@
+.root {
+    border: 1px solid var(--background-contrast-color);
+    border-radius: 4px;
+    width: 100%;
+    height: 100%;
+    position: relative;
+
+    .table-container {
+        position: absolute;
+        width: calc(100% - 1px);
+        max-height: 100%;
+        overflow: auto;
+    }
+
+    .master {
+        width: 100%;
+        filter: none;
+        transition: filter 300ms;
+
+        &.dim {
+            filter: blur(1px);
+            transition: filter 300ms;
+        }
+
+        .index-cell {
+            position: relative;
+
+            .hover-actions {
+                display: none;
+            }
+        }
+
+        tr:hover {
+            .hover-actions {
+                display: flex;
+                align-items: center;
+                position: absolute;
+                left: 0;
+                bottom: 0;
+                top: 0;
+                background: var(--background-color);
+
+                button {
+                    width: min-content;
+                    height: min-content;
+                    line-height: normal;
+                }
+            }
+        }
+    }
+
+    .add-fab {
+        position: absolute;
+        bottom: 0.5em;
+        right: 0.5em;
+    }
+
+    .overlay {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+    }
+
+    .slave {
+        background: var(--background-color);
+        z-index: 2;
+        padding: 0.5em 1em;
+        border-left: 1px solid var(--background-contrast-color);
+        max-width: 100%;
+
+        .actions {
+            button {
+                min-width: 0;
+                line-height: unset;
+                padding-top: 2px;
+            }
+        }
+    }
+}
+
+
+.list-field-label {
+    font-size: 1em;
+    font-weight: 400;
+    color: var(--background-contrast-color);
+    margin: 0;
+    background: var(--background-color);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}

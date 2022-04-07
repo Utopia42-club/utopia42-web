@@ -1,5 +1,5 @@
 <mat-form-field class="input-field">
-    <mat-label *ngIf="!input.isList" [innerHtml]="(input.label ?? input.name) | sanitize"></mat-label>
+    <mat-label [innerHtml]="(input.label ?? input.name) | sanitize"></mat-label>
     <mat-select [required]="input.required" [formControl]="control">
         <mat-option *ngFor="let option of service.landOptions$ | async;let ind=index" [value]="option">
                     <span *ngIf="option.properties != null && option.properties.name != null; else elseLand">

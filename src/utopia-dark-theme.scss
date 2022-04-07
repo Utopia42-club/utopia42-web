@@ -120,6 +120,7 @@ $dark-theme: mat.define-dark-theme((
 :root {
     --background-lighter-color: #51637e;
     --background-color: #34495e;
+    --background-darker-color: #202d39;
     --background-contrast-color: #e0e0e0;
     --primary-color: #{mat.get-color-from-palette($dark-primary, default)};
     --primary-contrast-color: #{mat.get-color-from-palette($dark-primary, default-contrast)};
