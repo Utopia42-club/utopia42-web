@@ -93,6 +93,9 @@ import {
 import {InputFormComponent} from "./utopia-game/plugin/plugin-inputs-editor/input-form/input-form.component";
 import {ListInputComponent} from "./utopia-game/plugin/plugin-inputs-editor/input-form/list-input/list-input.component";
 import { MasterSlaveInputComponent } from './utopia-game/plugin/plugin-inputs-editor/input-form/master-slave-input/master-slave-input.component';
+import {
+    FileFieldComponent
+} from "./utopia-game/plugin/plugin-inputs-editor/input-form/fields/file-field/file-field.component";
 
 @NgModule({
     declarations: [
@@ -132,7 +135,8 @@ import { MasterSlaveInputComponent } from './utopia-game/plugin/plugin-inputs-ed
         InputFormComponent,
         ListInputComponent,
         InputFieldComponent,
-        MasterSlaveInputComponent
+        MasterSlaveInputComponent,
+        FileFieldComponent
     ],
     imports: [
         BrowserModule,
