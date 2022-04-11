@@ -1,16 +1,16 @@
-import { Injectable, ViewContainerRef } from '@angular/core';
-import { UtopiaBridgeService } from '../utopia-bridge.service';
-import { concatMap, map, switchMap, toArray } from 'rxjs/operators';
-import { Observable, of, timer } from 'rxjs';
-import { Position } from '../position';
-import { Land } from '../../ehtereum/models';
-import { Web3Service } from '../../ehtereum/web3.service';
-import { PluginInputsEditor } from './plugin-inputs-editor/plugin-inputs-editor.component';
-import { MetaBlock } from './models';
-import { PluginInputFormDescriptor } from './plugin-input';
-import { Plugin } from './Plugin';
-import { MatDialog } from '@angular/material/dialog';
-import { PluginService } from './plugin.service';
+import {Injectable, ViewContainerRef} from '@angular/core';
+import {UtopiaBridgeService} from '../utopia-bridge.service';
+import {concatMap, map, switchMap, toArray} from 'rxjs/operators';
+import {Observable, of, timer} from 'rxjs';
+import {Position} from '../position';
+import {Land} from '../../ehtereum/models';
+import {Web3Service} from '../../ehtereum/web3.service';
+import {PluginInputsEditor} from './plugin-inputs-editor/plugin-inputs-editor.component';
+import {MetaBlock} from './models';
+import {PluginInputFormDescriptor} from './plugin-input';
+import {Plugin} from './Plugin';
+import {MatDialog} from '@angular/material/dialog';
+import {PluginService} from './plugin.service';
 
 @Injectable()
 export class UtopiaApiService {
@@ -25,11 +25,7 @@ export class UtopiaApiService {
             type: {
                 blockType: type,
             },
-            position: {
-                x,
-                y,
-                z,
-            },
+            position: {x, y, z,},
         }]).pipe(map((dict) => Object.values(dict)[0]));
     }
 
@@ -41,7 +37,7 @@ export class UtopiaApiService {
         return of(...slices).pipe(
             concatMap(slice => {
                     const modifiedSlice: any[] = slice.map((block: any) => {
-                        const modifiedBlock: any = { ...block };
+                        const modifiedBlock: any = {...block};
                         if (block.type.metaBlock?.properties) {
                             modifiedBlock.type.metaBlock.properties = JSON.stringify(block.type.metaBlock.properties);
                         } else if (block.type.metaBlock) {
@@ -57,7 +53,7 @@ export class UtopiaApiService {
             ),
             toArray(),
             map(array => array.reduce((a, b) => {
-                return { ...a, ...b };
+                return {...a, ...b};
             }, {})));
     }
 
@@ -76,7 +72,7 @@ export class UtopiaApiService {
             ),
             toArray(),
             map(array => array.reduce((a, b) => {
-                return { ...a, ...b };
+                return {...a, ...b};
             }, {})));
     }
 
@@ -90,6 +86,10 @@ export class UtopiaApiService {
 
     public getPlayerPosition(): Observable<Position> {
         return this.bridge.call('UtopiaApi', 'GetPlayerPosition', null);
+    }
+
+    public getBlockTypeAt(position: Position): Observable<string> {
+        return this.bridge.call('UtopiaApi', 'GetBlockTypeAt', JSON.stringify(position));
     }
 
     public getPlayerLands(walletId: string): Observable<Land[]> {
