@@ -71,7 +71,7 @@ export class PluginExecutionService {
     }
 
     private doRunPlugin(code: string): Observable<PluginRunResult> {
-        return this.pluginService.getFile('../../assets/sandbox.html')
+        return this.pluginService.getFile('assets/sandbox-0.1.html')
             .pipe(
                 switchMap(iframeSrc => {
                     return new Observable<PluginRunResult>(subs => {

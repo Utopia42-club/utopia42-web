@@ -1,10 +1,11 @@
-import { ToastrService } from 'ngx-toastr';
-import { from, Observable, Subscriber } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import {ToastrService} from 'ngx-toastr';
+import {from, Observable, Subscriber} from 'rxjs';
+import {map, switchMap} from 'rxjs/operators';
 import Web3 from 'web3';
-import { Contract } from 'web3-eth-contract';
-import { LoadingService } from '../loading/loading.service';
-import { Land, PricedLand } from './models';
+import {Contract} from 'web3-eth-contract';
+import {LoadingService} from '../loading/loading.service';
+import {Land, PricedLand} from './models';
+import {fromPromise} from "rxjs/internal-compatibility";
 
 export class UtopiaContract {
     constructor(readonly ethContract: Contract,
@@ -39,22 +40,11 @@ export class UtopiaContract {
                 if (Number(Web3.utils.fromWei(amount)) > Number(Web3.utils.fromWei(balance))) {
                     throw new Error('Insufficient balance (account balance < land price)');
                 }
-                return this.assignLandEstimateGas(wallet, land, lastLandCheckedId, signature, amount as string);
-            }),
-            switchMap(gasAmount => {
-                return new Observable(s =>
-                    this.ethContract.methods.assignLandConflictFree(land.startCoordinate.x, land.endCoordinate.x, land.startCoordinate.z, land.endCoordinate.z, land.ipfsKey || '', lastLandCheckedId, signature)
-                        .send({ from: wallet, value: amount, gasLimit: (3 * Number(gasAmount)).toString() }, this.listener(s))
-                );
-            })
-        );
-    }
 
-    public assignLandEstimateGas(wallet: string, land: PricedLand, lastLandCheckedId: number, signature: string, amount: string): Observable<string> {
-        return new Observable(s =>
-            this.ethContract.methods
-                .assignLandConflictFree(land.startCoordinate.x, land.endCoordinate.x, land.startCoordinate.z, land.endCoordinate.z, land.ipfsKey || '', lastLandCheckedId, signature)
-                .estimateGas({ from: wallet, value: amount }, this.listener(s))
+                return this.sendWithIncreasedGas(
+                    this.ethContract.methods.assignLandConflictFree(land.startCoordinate.x, land.endCoordinate.x, land.startCoordinate.z, land.endCoordinate.z, land.ipfsKey || '', lastLandCheckedId, signature),
+                    {from: wallet, value: amount});
+            }),
         );
     }
 
@@ -63,18 +53,12 @@ export class UtopiaContract {
             wallet = this.defaultWallet;
         }
         return this.loadingService.prepare(
-            new Observable(s => {
-                this.ethContract.methods.updateLand(ipfsKey, landId).send({ from: wallet })
-                    .on('confirmation', (confirmationNumber: number, receipt: any) => {
-                        if (confirmationNumber == 1) {
-                            this.toaster.info(`Land ${landId} saved.`);
-                        }
-                    })
-                    .on('error', (e: Error) => s.error(e))
-                    .on('transactionHash', (hash: string) => {
-                        s.next(hash);
-                        s.complete();
-                    });
+            this.sendWithIncreasedGas(this.ethContract.methods.updateLand(ipfsKey, landId), {
+                from: wallet
+            }, confirmationNumber => {
+                if (confirmationNumber == 1) {
+                    this.toaster.info(`Land ${landId} saved.`);
+                }
             })
         );
     }
@@ -84,8 +68,8 @@ export class UtopiaContract {
             wallet = this.defaultWallet;
         }
         return this.loadingService.prepare(
-            new Observable(s => {
-                this.ethContract.methods.transferLand(landId, to).send({ from: wallet }, this.listener(s));
+            this.sendWithIncreasedGas(this.ethContract.methods.transferLand(landId, to), {
+                from: wallet
             })
         );
     }
@@ -95,12 +79,10 @@ export class UtopiaContract {
             wallet = this.defaultWallet;
         }
         return this.loadingService.prepare(
-            new Observable(s => {
-                if (nft) {
-                    this.ethContract.methods.landToNFT(landId).send({ from: wallet }, this.listener(s));
-                } else {
-                    this.ethContract.methods.NFTToLand(landId).send({ from: wallet }, this.listener(s));
-                }
+            this.sendWithIncreasedGas(nft ?
+                this.ethContract.methods.landToNFT(landId) :
+                this.ethContract.methods.NFTToLand(landId), {
+                from: wallet
             })
         );
     }
@@ -130,6 +112,26 @@ export class UtopiaContract {
                 ))
             )
         );
+    }
+
+
+    private sendWithIncreasedGas(request: any, options: any, onConfirmation?: (confirmationNumber: number) => void): Observable<any> {
+        return fromPromise(this.web3.eth.getGasPrice())
+            .pipe(switchMap(gasPrice => {
+                return new Observable(s => {
+                    request.send({
+                        ...options,
+                        gasPrice: Math.ceil(Number(gasPrice) * 1.5).toString()
+                    }).on('confirmation', (confirmationNumber: number, receipt: any) => {
+                        if (onConfirmation != null)
+                            onConfirmation(confirmationNumber);
+                    }).on('error', (e: Error) => s.error(e))
+                        .on('transactionHash', (hash: string) => {
+                            s.next(hash);
+                            s.complete();
+                        })
+                });
+            }));
     }
 
     private listener(subscriber: Subscriber<any>) {

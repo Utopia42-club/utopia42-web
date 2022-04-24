@@ -1,20 +1,19 @@
-import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { of, Subscription } from 'rxjs';
-import { catchError, concatMap, map, takeLast, tap } from 'rxjs/operators';
-import { ExceptionDialogContentComponent } from '../exception-dialog-content/exception-dialog-content.component';
-import { LoadingService } from '../loading/loading.service';
-import { SetNftRequestBodyType } from '../utopia-game/utopia-bridge.service';
-import { SetNftData } from './set-nft-data';
-import { ToastrService } from 'ngx-toastr';
+import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {of, Subscription} from 'rxjs';
+import {catchError, concatMap, map, takeLast, tap} from 'rxjs/operators';
+import {ExceptionDialogContentComponent} from '../exception-dialog-content/exception-dialog-content.component';
+import {LoadingService} from '../loading/loading.service';
+import {SetNftRequestBodyType} from '../utopia-game/utopia-bridge.service';
+import {SetNftData} from './set-nft-data';
+import {ToastrService} from 'ngx-toastr';
 
 @Component({
     selector: 'app-set-nft',
     templateUrl: './set-nft.component.html',
     styleUrls: ['./set-nft.component.scss']
 })
-export class SetNftComponent implements OnInit, OnDestroy
-{
+export class SetNftComponent implements OnInit, OnDestroy {
     private subscription = new Subscription();
     readonly setNftRequestData: SetNftRequestBodyType;
     destinationAddress: string;
@@ -24,8 +23,7 @@ export class SetNftComponent implements OnInit, OnDestroy
                 private dialogRef: MatDialogRef<any>,
                 private dialog: MatDialog,
                 private readonly loadingService: LoadingService,
-                private readonly toaster: ToastrService)
-    {
+                private readonly toaster: ToastrService) {
         this.setNftRequestData = data.request.body;
         if (this.setNftRequestData.nft)
             this.heading = 'Converting land to nft';
@@ -33,24 +31,18 @@ export class SetNftComponent implements OnInit, OnDestroy
             this.heading = 'Converting nft to land';
     }
 
-    ngOnInit(): void
-    {
+    ngOnInit(): void {
     }
 
-    ngOnDestroy(): void
-    {
+    ngOnDestroy(): void {
         this.subscription.unsubscribe();
     }
 
-    cancel(): void
-    {
+    cancel(): void {
         this.dialogRef.close();
     }
 
-    toggleNft(): void
-    {
-        const status = [false];
-
+    toggleNft(): void {
         this.subscription.add(
             this.loadingService.prepare(
                 of(this.setNftRequestData)
@@ -59,16 +51,14 @@ export class SetNftComponent implements OnInit, OnDestroy
                             return this.data.contract
                                 .setNft(requestData.landId, this.data.request.connection.wallet, requestData.nft)
                                 .pipe(map(v => {
-                                    status[0] = true;
                                     return true;
                                 }));
                         }), catchError(e => {
-                            console.log(e);
-                            this.dialog.open(ExceptionDialogContentComponent, { data: { title: "Land/NFT conversion failed!" } });
+                            this.dialog.open(ExceptionDialogContentComponent, {data: {title: "Land/NFT conversion failed!"}});
                             return of(false);
                         }), takeLast(1), tap(v => {
                             if (v) {
-                                this.toaster.info(`Conversion successfully done.`);
+                                this.toaster.info(`Conversion successfully requested.`);
                                 this.dialogRef.close();
                             }
                         })
