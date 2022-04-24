@@ -1,15 +1,15 @@
-import { Injectable, NgZone } from '@angular/core';
-import { BehaviorSubject, Observable, of, ReplaySubject, Subject } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { AppComponent } from '../app.component';
-import { ConnectionDetail } from '../ehtereum/connection-detail';
-import { Land } from '../ehtereum/models';
-import { Web3Service } from '../ehtereum/web3.service';
-import { BridgeMessage, Response, WebToUnityRequest } from './bridge-message';
-import { Clipboard } from '@angular/cdk/clipboard';
+import {Injectable, NgZone} from '@angular/core';
+import {BehaviorSubject, Observable, of, ReplaySubject, Subject} from 'rxjs';
+import {map} from 'rxjs/operators';
+import {AppComponent} from '../app.component';
+import {ConnectionDetail} from '../ehtereum/connection-detail';
+import {Land} from '../ehtereum/models';
+import {Web3Service} from '../ehtereum/web3.service';
+import {BridgeMessage, Response, WebToUnityRequest} from './bridge-message';
+import {Clipboard} from '@angular/cdk/clipboard';
 import * as uuid from 'uuid';
-import { Position } from './position';
-import { UtopiaGameComponent } from './utopia-game.component';
+import {Position} from './position';
+import {UtopiaGameComponent} from './utopia-game.component';
 
 @Injectable()
 export class UtopiaBridgeService {
@@ -88,7 +88,7 @@ export class UtopiaBridgeService {
             const y = parseFloat(parameters[1]);
             const z = parseFloat(parameters[2]);
             if (x != undefined && y != undefined && z != undefined) {
-                this.position = { x: x, y: y, z: z };
+                this.position = {x: x, y: y, z: z};
                 return;
             }
         }
@@ -150,7 +150,7 @@ export class UtopiaBridgeService {
     public unFreezeGame() {
         this.unityInstance.SendMessage('GameManager', 'UnFreezeGame', '');
     }
-    
+
     public cursorStateChanged(locked: boolean) {
         if (this.gameState.getValue() != State.PLAYING) return;
         if (locked)
