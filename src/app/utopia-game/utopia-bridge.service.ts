@@ -1,15 +1,15 @@
-import {Injectable, NgZone} from '@angular/core';
-import {BehaviorSubject, Observable, of, ReplaySubject, Subject} from 'rxjs';
-import {map} from 'rxjs/operators';
-import {AppComponent} from '../app.component';
-import {ConnectionDetail} from '../ehtereum/connection-detail';
-import {Land} from '../ehtereum/models';
-import {Web3Service} from '../ehtereum/web3.service';
-import {BridgeMessage, Response, WebToUnityRequest} from './bridge-message';
-import {Clipboard} from '@angular/cdk/clipboard';
+import { Injectable, NgZone } from '@angular/core';
+import { BehaviorSubject, Observable, of, ReplaySubject, Subject } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { AppComponent } from '../app.component';
+import { ConnectionDetail } from '../ehtereum/connection-detail';
+import { Land } from '../ehtereum/models';
+import { Web3Service } from '../ehtereum/web3.service';
+import { BridgeMessage, Response, WebToUnityRequest } from './bridge-message';
+import { Clipboard } from '@angular/cdk/clipboard';
 import * as uuid from 'uuid';
-import {Position} from './position';
-import {UtopiaGameComponent} from './utopia-game.component';
+import { Position } from './position';
+import { UtopiaGameComponent } from './utopia-game.component';
 
 @Injectable()
 export class UtopiaBridgeService {
@@ -26,6 +26,10 @@ export class UtopiaBridgeService {
 
     public reportGameState(payload: ReportGameStateRequest): void {
         this.gameState.next(State[payload.body]);
+    }
+
+    public reportPlayerState(payload: ReportPlayerStateRequest): void {
+        this.game.reportPlayerState(payload.body);
     }
 
     public buy(payload: BuyLandsRequest): void {
@@ -88,7 +92,7 @@ export class UtopiaBridgeService {
             const y = parseFloat(parameters[1]);
             const z = parseFloat(parameters[2]);
             if (x != undefined && y != undefined && z != undefined) {
-                this.position = {x: x, y: y, z: z};
+                this.position = { x: x, y: y, z: z };
                 return;
             }
         }
@@ -151,12 +155,19 @@ export class UtopiaBridgeService {
         this.unityInstance.SendMessage('GameManager', 'UnFreezeGame', '');
     }
 
+    public reportOtherPlayersState(state: ReportPlayerStateRequestBodyType) {
+        this.unityInstance.SendMessage('Players', 'ReportOtherPlayersState', JSON.stringify(state));
+    }
+
     public cursorStateChanged(locked: boolean) {
-        if (this.gameState.getValue() != State.PLAYING) return;
-        if (locked)
+        if (this.gameState.getValue() != State.PLAYING) {
+            return;
+        }
+        if (locked) {
             this.unityInstance.SendMessage('GameManager', 'LockCursor', '');
-        else
+        } else {
             this.unityInstance.SendMessage('GameManager', 'UnlockCursor', '');
+        }
 
     }
 }
@@ -172,6 +183,15 @@ export interface SetNftRequestBodyType {
     nft: boolean;
 }
 
+export interface ReportPlayerStateRequestBodyType {
+    walletId: string;
+    position: Position;
+    forward: Position;
+    sprint: boolean;
+    floating: boolean;
+    jump: boolean;
+}
+
 export type SetNftRequest = BridgeMessage<SetNftRequestBodyType>;
 
 export type TransferLandRequest = BridgeMessage<number>;
@@ -179,6 +199,8 @@ export type TransferLandRequest = BridgeMessage<number>;
 export type EditProfileRequest = BridgeMessage<string>; // FIXME: string --change to--> undefined (wallet id can be retrieved from connection)
 
 export type ReportGameStateRequest = BridgeMessage<string>;
+
+export type ReportPlayerStateRequest = BridgeMessage<ReportPlayerStateRequestBodyType>;
 
 export type OpenPluginDialogRequest = BridgeMessage<'menu' | 'running'>;
 
