@@ -13,24 +13,21 @@ export class PlayerStateService {
     public messages = new Subject();
     private requestClose = false;
 
-    constructor(readonly authService: AuthService) {
-        authService.getAuthToken().subscribe(token => {
-            this.connect(token);
-        });
+    constructor() {
     }
 
     connect(token: string) {
         console.log('Connecting to ' + this.endpoint);
         this.ws = new WebSocket(this.endpoint);
-        this.ws.onopen = e => this.ws.send(token);
+        this.ws.onopen = e => this.ws.send('@authToken:' + token);
         this.ws.onmessage = event => {
             this.messages.next(event.data);
         };
         this.ws.onclose = event => {
             console.error(event);
-            if (!this.requestClose) {
-                this.connect(token);
-            }
+            // if (!this.requestClose) {
+            //     this.connect(token);
+            // }
         };
         this.ws.onerror = event => {
             console.error(event);

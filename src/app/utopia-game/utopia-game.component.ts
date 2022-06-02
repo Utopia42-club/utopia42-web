@@ -16,6 +16,7 @@ import { PluginSelectionComponent } from './plugin/plugin-selection/plugin-selec
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { SearchCriteria } from './plugin/SearchCriteria';
 import { PlayerStateService } from './player-state.service';
+import { AuthService } from '../auth.service';
 
 export const GAME_TOKEN = new InjectionToken<UtopiaGameComponent>('GAME_TOKEN');
 
@@ -43,7 +44,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
                 readonly utopiaApi: UtopiaApiService, readonly zone: NgZone,
                 readonly loadingService: LoadingService, readonly web3Service: Web3Service,
                 readonly pluginService: PluginService, readonly dialogService: MatDialog, readonly overlay: Overlay,
-                readonly vcr: ViewContainerRef, readonly cdr: ChangeDetectorRef,
+                readonly vcr: ViewContainerRef, readonly cdr: ChangeDetectorRef, readonly authService: AuthService,
                 readonly playerStateService: PlayerStateService) {
         window.bridge = bridge;
 
@@ -65,8 +66,26 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
             }
         });
         this.subscription.add(playSubscription);
+
+        this.authService.getAuthToken().subscribe(token => {
+            this.playerStateService.connect(token);
+        });
+
         this.subscription.add(this.playerStateService.messages.subscribe(message => {
-            this.bridge.reportOtherPlayersState(JSON.parse(message as any));
+            let msg = message as string;
+            if (msg.startsWith('@error')) {
+                if (msg.startsWith('@error:Unauthorized')) {
+                    this.playerStateService.disconnect();
+                    this.authService.getAuthToken(false).subscribe(token => {
+                        this.playerStateService.connect(token);
+                    });
+                } else {
+                    throw new Error(msg.slice(7, msg.length));
+                }
+            } else {
+                let msg = JSON.parse(message as any);
+                this.bridge.reportOtherPlayersState(JSON.parse(msg.data));
+            }
         }));
     }
 

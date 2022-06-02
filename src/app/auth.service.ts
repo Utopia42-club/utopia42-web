@@ -39,10 +39,12 @@ export class AuthService {
         );
     }
 
-    public getAuthToken(): Observable<string> {
-        const authToken = localStorage.getItem(AUTH_STORAGE_KEY);
-        if (authToken != null) {
-            return of(authToken);
+    public getAuthToken(fromCache: boolean = true): Observable<string> {
+        if (fromCache) {
+            const authToken = localStorage.getItem(AUTH_STORAGE_KEY);
+            if (authToken != null) {
+                return of(authToken);
+            }
         }
         let provider;
         return this.web3Service.connect()
