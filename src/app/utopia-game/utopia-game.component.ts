@@ -1,22 +1,31 @@
-import { ChangeDetectorRef, Component, InjectionToken, NgZone, OnDestroy, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
-import { AppComponent } from '../app.component';
-import { ReportPlayerStateRequestBodyType, State, UtopiaBridgeService } from './utopia-bridge.service';
-import { ToastrService } from 'ngx-toastr';
-import { ActivatedRoute } from '@angular/router';
-import { UtopiaApiService } from './plugin/utopia-api.service';
-import { PluginExecutionService } from './plugin/plugin-execution.service';
-import { LoadingService } from '../loading/loading.service';
-import { Subscription } from 'rxjs';
-import { Web3Service } from '../ehtereum/web3.service';
-import { Plugin } from './plugin/Plugin';
-import { PluginService } from './plugin/plugin.service';
-import { Overlay } from '@angular/cdk/overlay';
-import { v4 as UUIdV4 } from 'uuid';
-import { PluginSelectionComponent } from './plugin/plugin-selection/plugin-selection.component';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { SearchCriteria } from './plugin/SearchCriteria';
-import { PlayerStateService } from './player-state.service';
-import { AuthService } from '../auth.service';
+import {
+    ChangeDetectorRef,
+    Component,
+    InjectionToken,
+    NgZone,
+    OnDestroy,
+    OnInit,
+    ViewChild,
+    ViewContainerRef
+} from '@angular/core';
+import {AppComponent} from '../app.component';
+import {ReportPlayerStateRequestBodyType, State, UtopiaBridgeService} from './utopia-bridge.service';
+import {ToastrService} from 'ngx-toastr';
+import {ActivatedRoute} from '@angular/router';
+import {UtopiaApiService} from './plugin/utopia-api.service';
+import {PluginExecutionService} from './plugin/plugin-execution.service';
+import {LoadingService} from '../loading/loading.service';
+import {Subscription} from 'rxjs';
+import {Web3Service} from '../ehtereum/web3.service';
+import {Plugin} from './plugin/Plugin';
+import {PluginService} from './plugin/plugin.service';
+import {Overlay} from '@angular/cdk/overlay';
+import {v4 as UUIdV4} from 'uuid';
+import {PluginSelectionComponent} from './plugin/plugin-selection/plugin-selection.component';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {SearchCriteria} from './plugin/SearchCriteria';
+import {PlayerStateService} from './player-state.service';
+import {AuthService} from '../auth.service';
 
 export const GAME_TOKEN = new InjectionToken<UtopiaGameComponent>('GAME_TOKEN');
 
@@ -29,7 +38,7 @@ export const GAME_TOKEN = new InjectionToken<UtopiaGameComponent>('GAME_TOKEN');
 export class UtopiaGameComponent implements OnInit, OnDestroy {
     progress = 0;
 
-    @ViewChild('gameCanvas', { static: true }) gameCanvas;
+    @ViewChild('gameCanvas', {static: true}) gameCanvas;
 
     runningPlugins = new Map<string, PluginExecutionService>();
     runningPluginsKeys = new Set<string>();
@@ -44,7 +53,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
                 readonly utopiaApi: UtopiaApiService, readonly zone: NgZone,
                 readonly loadingService: LoadingService, readonly web3Service: Web3Service,
                 readonly pluginService: PluginService, readonly dialogService: MatDialog, readonly overlay: Overlay,
-                readonly vcr: ViewContainerRef, readonly cdr: ChangeDetectorRef, readonly authService: AuthService,
+                readonly vcr: ViewContainerRef, readonly cdr: ChangeDetectorRef,
                 readonly playerStateService: PlayerStateService) {
         window.bridge = bridge;
 
@@ -67,25 +76,10 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
         });
         this.subscription.add(playSubscription);
 
-        this.authService.getAuthToken().subscribe(token => {
-            this.playerStateService.connect(token);
-        });
+        this.playerStateService.connect();
 
         this.subscription.add(this.playerStateService.messages.subscribe(message => {
-            let msg = message as string;
-            if (msg.startsWith('@error')) {
-                if (msg.startsWith('@error:Unauthorized')) {
-                    this.playerStateService.disconnect();
-                    this.authService.getAuthToken(false).subscribe(token => {
-                        this.playerStateService.connect(token);
-                    });
-                } else {
-                    throw new Error(msg.slice(7, msg.length));
-                }
-            } else {
-                let msg = JSON.parse(message as any);
-                this.bridge.reportOtherPlayersState(JSON.parse(msg.data));
-            }
+            this.bridge.reportOtherPlayersState(JSON.parse(message.data));
         }));
     }
 

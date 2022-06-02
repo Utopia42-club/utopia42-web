@@ -156,7 +156,7 @@ export class UtopiaBridgeService {
     }
 
     public reportOtherPlayersState(state: ReportPlayerStateRequestBodyType) {
-        this.unityInstance.SendMessage('Players', 'ReportOtherPlayersState', JSON.stringify(state));
+        this.unityInstance.SendMessage('Players', 'ReportOtherPlayersStateFromWeb', JSON.stringify(state));
     }
 
     public cursorStateChanged(locked: boolean) {

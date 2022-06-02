@@ -1,10 +1,10 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable, of, throwError } from 'rxjs';
-import { Configurations } from './configurations';
-import { concatMap, map, switchMap, tap } from 'rxjs/operators';
-import { Web3Service } from './ehtereum/web3.service';
-import { UtopiaError } from './UtopiaError';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {Observable, of, throwError} from 'rxjs';
+import {Configurations} from './configurations';
+import {concatMap, map, switchMap, tap} from 'rxjs/operators';
+import {Web3Service} from './ehtereum/web3.service';
+import {UtopiaError} from './UtopiaError';
 
 export const AUTH_STORAGE_KEY = 'AUTH_STORAGE_KEY';
 export const TOKEN_HEADER_KEY = 'X-Auth-Token';
@@ -22,7 +22,7 @@ export class AuthService {
         return this.httpClient.post<any>(
             this.endpoint + `/auth/nonce/${chainId}`,
             walletId,
-            { headers: new HttpHeaders().set('Content-Type', 'application/json') }
+            {headers: new HttpHeaders().set('Content-Type', 'application/json')}
         );
     }
 
@@ -39,12 +39,14 @@ export class AuthService {
         );
     }
 
-    public getAuthToken(fromCache: boolean = true): Observable<string> {
-        if (fromCache) {
-            const authToken = localStorage.getItem(AUTH_STORAGE_KEY);
-            if (authToken != null) {
-                return of(authToken);
-            }
+    public RemoveCachedAuthToken() {
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+    }
+
+    public getAuthToken(): Observable<string> {
+        const authToken = localStorage.getItem(AUTH_STORAGE_KEY);
+        if (authToken != null) {
+            return of(authToken);
         }
         let provider;
         return this.web3Service.connect()
@@ -79,7 +81,7 @@ export class AuthService {
                             concatMap((signature) => {
                                 return this.login(
                                     provider.selectedAddress,
-                                    <string> signature
+                                    <string>signature
                                 );
                             }),
 
