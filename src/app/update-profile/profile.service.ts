@@ -1,23 +1,23 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Profile } from './update-profile.component';
-import { Configurations } from '../configurations';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {Observable} from 'rxjs';
+import {Profile} from './update-profile.component';
+import {Configurations} from '../configurations';
 
 @Injectable({
     providedIn: 'root',
 })
 export class ProfileService {
-    readonly endpoint = Configurations.SERVER_URL;
+    readonly endpoint = Configurations.SERVER_URL + "/profile";
 
     constructor(private httpClient: HttpClient) {
     }
 
     public setProfile(profile: Profile): Observable<any> {
         return this.httpClient.post<any>(
-            this.endpoint + `/profile/set`,
+            this.endpoint + `/set`,
             JSON.stringify(profile),
-            { headers: new HttpHeaders().set('Content-Type', 'application/json') }
+            {headers: new HttpHeaders().set('Content-Type', 'application/json')}
         );
     }
 
@@ -26,24 +26,28 @@ export class ProfileService {
         formData.set('wallet', walletId);
         formData.set('avatar', imageFile);
         return this.httpClient.post<any>(
-            this.endpoint + `/profile/set/avatar`,
+            this.endpoint + `/set/avatar`,
             formData
         );
     }
 
     public getAvatar(imageUrl: string): Observable<any> {
         return this.httpClient.get<any>(
-            this.endpoint + `/profile/avatar/${imageUrl}`,
-            { responseType: 'blob' as 'json' }
+            this.endpoint + `/avatar/${imageUrl}`,
+            {responseType: 'blob' as 'json'}
         );
     }
 
     public getProfile(walletId: string): Observable<Profile> {
         return this.httpClient.post<any>(
-            this.endpoint + `/profile`,
+            this.endpoint,
             walletId,
-            { headers: new HttpHeaders().set('Content-Type', 'application/json') }
+            {headers: new HttpHeaders().set('Content-Type', 'application/json')}
         );
+    }
+
+    public getCurrentProfile(): Observable<Profile> {
+        return this.httpClient.get<any>(this.endpoint + `/current`,);
     }
 }
 

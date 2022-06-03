@@ -16,6 +16,7 @@ export class AuthInterceptor implements HttpInterceptor {
         if (!request.url.startsWith(Configurations.SERVER_URL)
             || request.url.endsWith('networks.json')
             || request.url.includes('/auth')
+            || request.url.includes('/profile/current')
             || request.url.includes('/login')) {
             return next.handle(request);
         }

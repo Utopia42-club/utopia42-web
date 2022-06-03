@@ -21,7 +21,6 @@ export class PlayerStateService {
         console.log('Connecting to ' + this.endpoint);
         this.state = ConnectionState.CONNECTING;
         this.authService.getAuthToken(true).subscribe(token => {
-            console.log("Got Token: " + token);
             this.doConnect(token);
         });
     }
@@ -72,7 +71,7 @@ export class PlayerStateService {
     }
 
     public reportPlayerState(playerState: any) {
-        if (this.ws != null)
+        if (this.state == ConnectionState.CONNECTED)
             this.ws.send(playerState);
     }
 }

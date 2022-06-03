@@ -1,10 +1,11 @@
-import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
 import {Injectable} from '@angular/core';
-import {Observable, of, throwError} from 'rxjs';
+import {Observable, of, Subject, throwError} from 'rxjs';
 import {Configurations} from './configurations';
-import {concatMap, map, switchMap, tap} from 'rxjs/operators';
+import {catchError, concatMap, map, switchMap, tap} from 'rxjs/operators';
 import {Web3Service} from './ehtereum/web3.service';
 import {UtopiaError} from './UtopiaError';
+import {ProfileService} from "./update-profile/profile.service";
 
 export const AUTH_STORAGE_KEY = 'AUTH_STORAGE_KEY';
 export const TOKEN_HEADER_KEY = 'X-Auth-Token';
@@ -14,8 +15,11 @@ export const TOKEN_HEADER_KEY = 'X-Auth-Token';
 })
 export class AuthService {
     readonly endpoint = Configurations.SERVER_URL;
+    private tokenObservable: Observable<string>;
+    private gettingToken = false;
 
-    constructor(private httpClient: HttpClient, readonly web3Service: Web3Service) {
+    constructor(private httpClient: HttpClient, readonly web3Service: Web3Service,
+                readonly profileService: ProfileService) {
     }
 
     public requestNonce(chainId: string, walletId: string): Observable<any> {
@@ -44,12 +48,33 @@ export class AuthService {
     }
 
     public getAuthToken(forceValid: boolean = false): Observable<string> {
+        if (this.gettingToken)
+            return this.tokenObservable;
         const authToken = localStorage.getItem(AUTH_STORAGE_KEY);
         if (authToken != null) {
-            //TODO if forceValid is true, check if token is valid
-            return of(authToken);
+            if (forceValid) {
+                this.gettingToken = true;
+                this.tokenObservable = this.profileService.getCurrentProfile()
+                    .pipe(
+                        map((profile) => {
+                            this.gettingToken = false;
+                            return authToken;
+                        }),
+                        catchError((err) => {
+                            if (err instanceof HttpErrorResponse && err.status === 401) {
+                                return this.doGetAuthToken();
+                            }
+                        }),
+                    );
+                return this.tokenObservable;
+            } else {
+                this.tokenObservable = of(authToken);
+                return this.tokenObservable;
+            }
         }
-        return this.doGetAuthToken();
+        this.gettingToken = true;
+        this.tokenObservable = this.doGetAuthToken();
+        return this.tokenObservable;
     }
 
     private doGetAuthToken(): Observable<string> {
@@ -96,6 +121,7 @@ export class AuthService {
 
                             tap((token) => {
                                 localStorage.setItem(AUTH_STORAGE_KEY, token);
+                                this.gettingToken = false;
                             })
                         );
                 }
