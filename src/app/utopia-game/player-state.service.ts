@@ -18,9 +18,9 @@ export class PlayerStateService {
     }
 
     connect() {
-        console.log('Connecting to ' + this.endpoint);
         this.state = ConnectionState.CONNECTING;
         this.authService.getAuthToken(true).subscribe(token => {
+            console.log('Connecting to ' + this.endpoint);
             this.doConnect(token);
         });
     }
@@ -28,6 +28,7 @@ export class PlayerStateService {
     private doConnect(token: string) {
         this.ws = new WebSocket(this.endpoint);
         this.ws.onopen = e => {
+            console.log('Connected to ' + this.endpoint);
             this.state = ConnectionState.CONNECTED;
             this.ws.send('@authToken:' + token);
         }

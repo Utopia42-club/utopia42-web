@@ -47,6 +47,10 @@ export class AuthService {
         localStorage.removeItem(AUTH_STORAGE_KEY);
     }
 
+    public getCachedToken() {
+        return localStorage.getItem(AUTH_STORAGE_KEY);
+    }
+
     public getAuthToken(forceValid: boolean = false): Observable<string> {
         if (this.gettingToken)
             return this.tokenObservable;
@@ -57,6 +61,7 @@ export class AuthService {
                 this.tokenObservable = this.profileService.getCurrentProfile()
                     .pipe(
                         map((profile) => {
+                            console.log(profile);
                             this.gettingToken = false;
                             return authToken;
                         }),
@@ -127,6 +132,7 @@ export class AuthService {
                 }
             }));
     }
+
 }
 
 

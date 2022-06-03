@@ -47,7 +47,7 @@ export class ProfileService {
     }
 
     public getCurrentProfile(): Observable<Profile> {
-        return this.httpClient.get<any>(this.endpoint + `/current`,);
+        return this.httpClient.get<any>(this.endpoint + `/current`);
     }
 }
 
