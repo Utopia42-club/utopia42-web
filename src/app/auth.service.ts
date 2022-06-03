@@ -43,11 +43,16 @@ export class AuthService {
         localStorage.removeItem(AUTH_STORAGE_KEY);
     }
 
-    public getAuthToken(): Observable<string> {
+    public getAuthToken(forceValid: boolean = false): Observable<string> {
         const authToken = localStorage.getItem(AUTH_STORAGE_KEY);
         if (authToken != null) {
+            //TODO if forceValid is true, check if token is valid
             return of(authToken);
         }
+        return this.doGetAuthToken();
+    }
+
+    private doGetAuthToken(): Observable<string> {
         let provider;
         return this.web3Service.connect()
             .pipe(switchMap(value => {
