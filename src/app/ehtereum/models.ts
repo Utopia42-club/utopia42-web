@@ -20,6 +20,12 @@ export interface SerializableVector3Int {
     z: number;
 }
 
+export interface SerializableVector3 {
+    x: number;
+    y: number;
+    z: number;
+}
+
 export interface LandProperties {
     color: string;
     name: string;

@@ -6,7 +6,7 @@ import {Position} from '../position';
 import {Land} from '../../ehtereum/models';
 import {Web3Service} from '../../ehtereum/web3.service';
 import {PluginInputsEditor} from './plugin-inputs-editor/plugin-inputs-editor.component';
-import {MetaBlock} from './models';
+import {Block, MetaBlock} from './models';
 import {PluginInputFormDescriptor} from './plugin-input';
 import {Plugin} from './Plugin';
 import {MatDialog} from '@angular/material/dialog';
@@ -22,14 +22,28 @@ export class UtopiaApiService {
 
     public placeBlock(type: string, x: number, y: number, z: number): Observable<boolean> {
         return this.placeBlocks([{
-            type: {
-                blockType: type,
-            },
+            name: type,
             position: {x, y, z,},
         }]).pipe(map((dict) => Object.values(dict)[0]));
     }
 
-    public placeBlocks(blocks: MetaBlock[]): Observable<Map<Position, boolean>> {
+    public placeBlocks(blocks: Block[]): Observable<Map<Position, boolean>> {
+        const slices = [];
+        while (blocks.length > 0) {
+            slices.push(blocks.splice(0, 500));
+        }
+        return of(...slices).pipe(
+            concatMap(slice => this.bridge.call('UtopiaApi', 'PlaceBlocks', JSON.stringify(slice))
+                        .pipe(
+                            switchMap(res => timer(1).pipe(map(() => res)))
+                        )),
+            toArray(),
+            map(array => array.reduce((a, b) => {
+                return {...a, ...b};
+            }, {})));
+    }
+
+    public placeMetaBlocks(blocks: MetaBlock[]): Observable<Map<Position, boolean>> {
         const slices = [];
         while (blocks.length > 0) {
             slices.push(blocks.splice(0, 500));
@@ -38,10 +52,10 @@ export class UtopiaApiService {
             concatMap(slice => {
                     const modifiedSlice: any[] = slice.map((block: any) => {
                         const modifiedBlock: any = {...block};
-                        if (block.type.metaBlock?.properties) {
-                            modifiedBlock.type.metaBlock.properties = JSON.stringify(block.type.metaBlock.properties);
-                        } else if (block.type.metaBlock) {
-                            modifiedBlock.type.metaBlock.properties = '';
+                        if (block.properties) {
+                            modifiedBlock.properties = JSON.stringify(block.properties);
+                        } else {
+                            modifiedBlock.properties = '';
                         }
                         return modifiedBlock;
                     });
@@ -57,28 +71,16 @@ export class UtopiaApiService {
             }, {})));
     }
 
-    public previewBlocks(blocks: MetaBlock[]): Observable<null> {
+    public previewBlocks(blocks: Block[]): Observable<null> {
         const slices = [];
         while (blocks.length > 0) {
             slices.push(blocks.splice(0, 500));
         }
         return of(...slices).pipe(
-            concatMap(slice => {
-                    const modifiedSlice: any[] = slice.map((block: any) => {
-                        const modifiedBlock: any = {...block};
-                        if (block.type.metaBlock?.properties) {
-                            modifiedBlock.type.metaBlock.properties = JSON.stringify(block.type.metaBlock.properties);
-                        } else if (block.type.metaBlock) {
-                            modifiedBlock.type.metaBlock.properties = '';
-                        }
-                        return modifiedBlock;
-                    });
-                    return this.bridge.call('UtopiaApi', 'PreviewMetaBlocks', JSON.stringify(modifiedSlice))
+            concatMap(slice => this.bridge.call('UtopiaApi', 'PreviewMetaBlocks', JSON.stringify(slice))
                         .pipe(
                             switchMap(() => timer(1).pipe(map(() => {})))
-                        );
-                }
-            ),
+                        )),
             toArray(),
             map(() => null)
         );
