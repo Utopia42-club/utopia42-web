@@ -6,6 +6,7 @@ import {catchError, concatMap, map, switchMap, tap} from 'rxjs/operators';
 import {Web3Service} from './ehtereum/web3.service';
 import {UtopiaError} from './UtopiaError';
 import {ProfileService} from "./update-profile/profile.service";
+import {emitKeypressEvents} from "readline";
 
 export const AUTH_STORAGE_KEY = 'AUTH_STORAGE_KEY';
 export const TOKEN_HEADER_KEY = 'X-Auth-Token';
@@ -61,14 +62,20 @@ export class AuthService {
                 this.tokenObservable = this.profileService.getCurrentProfile()
                     .pipe(
                         map((profile) => {
-                            console.log(profile);
                             this.gettingToken = false;
                             return authToken;
                         }),
                         catchError((err) => {
-                            if (err instanceof HttpErrorResponse && err.status === 401) {
-                                return this.doGetAuthToken();
-                            }
+                            this.gettingToken = false;
+                            if (err instanceof HttpErrorResponse) {
+                                console.log(err.status);
+                                if (err.status === 401)
+                                    return this.doGetAuthToken();
+                                else if (err.status !== 404)
+                                    return throwError(err);
+                                return of(authToken);
+                            } else
+                                return throwError(err);
                         }),
                     );
                 return this.tokenObservable;
