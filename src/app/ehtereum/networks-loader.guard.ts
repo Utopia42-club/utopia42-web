@@ -10,6 +10,8 @@ export function NetsInitializer(http: HttpClient, dialog: MatDialog)
 {
     return () => http.get<NetworkConfig[]>(Configurations.NETS_URL)
         .pipe(tap(nets => {
+            // Network.register(80001, "0xDfDDbd9d7Cfc48Ab8b4BbA8ec7E00A7B098544f4", "Polygon Testnet", true, { provider: "https://matic-mumbai.chainstacklabs.com" });
+            // return; // test only
             if (nets != null) {
                 for (let net of nets) {
                     Network.register(net.id, net.contractAddress, net.name, true, { provider: net.provider });
