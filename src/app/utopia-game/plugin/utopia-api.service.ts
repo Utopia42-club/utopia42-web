@@ -77,7 +77,7 @@ export class UtopiaApiService {
             slices.push(blocks.splice(0, 500));
         }
         return of(...slices).pipe(
-            concatMap(slice => this.bridge.call('UtopiaApi', 'PreviewMetaBlocks', JSON.stringify(slice))
+            concatMap(slice => this.bridge.call('UtopiaApi', 'PreviewBlocks', JSON.stringify(slice))
                         .pipe(
                             switchMap(() => timer(1).pipe(map(() => {})))
                         )),
