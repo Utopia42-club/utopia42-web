@@ -205,16 +205,12 @@ export type ReportPlayerStateRequest = BridgeMessage<ReportPlayerStateRequestBod
 export type OpenPluginDialogRequest = BridgeMessage<'menu' | 'running'>;
 
 export enum State {
-    LOADING = 'LOADING',
-    SETTINGS = 'SETTINGS',
-    PLAYING = 'PLAYING',
-    MAP = 'MAP',
-    BROWSER_CONNECTION = 'BROWSER_CONNECTION',
-    INVENTORY = 'INVENTORY',
-    HELP = 'HELP',
-    DIALOG = 'DIALOG',
-    PROFILE_DIALOG = 'PROFILE_DIALOG',
-    MOVING_OBJECT = 'MOVING_OBJECT',
-    FREEZE = 'FREEZE'
+    LOADING = "LOADING",
+    PLAYING = "PLAYING",
+    MENU = "MENU",
+    LOGIN = "LOGIN",
+    DIALOG = "DIALOG",
+    PROFILE_DIALOG = "PROFILE_DIALOG",
+    FREEZE = "FREEZE"
 }
 
