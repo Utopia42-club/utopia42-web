@@ -118,10 +118,10 @@ $dark-theme: mat.define-dark-theme((
 }
 
 :root {
-    --background-lighter-color: #51637e;
-    --background-color: #34495e;
-    --background-darker-color: #202d39;
-    --background-contrast-color: #e0e0e0;
+    --background-lighter-color: #2A3C4DFF;
+    --background-color: #182430;
+    --background-darker-color: #182430B2;
+    --background-contrast-color: #F0F0F0;
     --primary-color: #{mat.get-color-from-palette($dark-primary, default)};
     --primary-contrast-color: #{mat.get-color-from-palette($dark-primary, default-contrast)};
     --accent-color: #{mat.get-color-from-palette($dark-accent, default)};

@@ -1,15 +1,16 @@
-import { Injectable, NgZone } from '@angular/core';
-import { BehaviorSubject, Observable, of, ReplaySubject, Subject } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { AppComponent } from '../app.component';
-import { ConnectionDetail } from '../ehtereum/connection-detail';
-import { Land } from '../ehtereum/models';
-import { Web3Service } from '../ehtereum/web3.service';
-import { BridgeMessage, Response, WebToUnityRequest } from './bridge-message';
-import { Clipboard } from '@angular/cdk/clipboard';
+import {Injectable, NgZone} from '@angular/core';
+import {BehaviorSubject, Observable, of, ReplaySubject, Subject} from 'rxjs';
+import {map} from 'rxjs/operators';
+import {AppComponent} from '../app.component';
+import {ConnectionDetail} from '../ehtereum/connection-detail';
+import {Land} from '../ehtereum/models';
+import {Web3Service} from '../ehtereum/web3.service';
+import {BridgeMessage, Response, WebToUnityRequest} from './bridge-message';
+import {Clipboard} from '@angular/cdk/clipboard';
 import * as uuid from 'uuid';
-import { Position } from './position';
-import { UtopiaGameComponent } from './utopia-game.component';
+import {Position} from './position';
+import {UtopiaGameComponent} from './utopia-game.component';
+import {AuthService} from "../auth.service";
 
 @Injectable()
 export class UtopiaBridgeService {
@@ -21,7 +22,7 @@ export class UtopiaBridgeService {
     private responseObservable = new Map<string, Subject<any>>(); // key: CallId, value: Observable
 
     constructor(private web3service: Web3Service, private app: AppComponent, private clipboard: Clipboard,
-                readonly zone: NgZone) {
+                readonly zone: NgZone, readonly authService: AuthService) {
     }
 
     public reportGameState(payload: ReportGameStateRequest): void {
@@ -62,6 +63,10 @@ export class UtopiaBridgeService {
         }
     }
 
+    public getAuthToken(payload: BridgeMessage<boolean>): Observable<string> {
+        return this.authService.getAuthToken(payload.body);
+    }
+
     public connectMetamask(payload: BridgeMessage<string>): Observable<ConnectionDetail> {
         // return this.web3service.connect()
         return this.web3service.isConnected().pipe(
@@ -92,7 +97,7 @@ export class UtopiaBridgeService {
             const y = parseFloat(parameters[1]);
             const z = parseFloat(parameters[2]);
             if (x != undefined && y != undefined && z != undefined) {
-                this.position = { x: x, y: y, z: z };
+                this.position = {x: x, y: y, z: z};
                 return;
             }
         }

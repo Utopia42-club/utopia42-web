@@ -1,6 +1,6 @@
 import {
     ChangeDetectorRef,
-    Component,
+    Component, HostListener,
     InjectionToken,
     NgZone,
     OnDestroy,
@@ -58,6 +58,11 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
         window.bridge = bridge;
 
         bridge.game = this;
+    }
+
+    @HostListener('window:beforeunload', ['$event'])
+    handleClose(event) {
+        event.returnValue = false;
     }
 
     ngOnInit(): void {
