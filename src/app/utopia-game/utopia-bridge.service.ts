@@ -214,7 +214,6 @@ export enum State {
     PLAYING = "PLAYING",
     MENU = "MENU",
     LOGIN = "LOGIN",
-    DIALOG = "DIALOG",
     FREEZE = "FREEZE"
 }
 
