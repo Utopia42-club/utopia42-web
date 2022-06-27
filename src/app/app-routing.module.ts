@@ -6,7 +6,7 @@ import { UtopiaGameComponent } from './utopia-game/utopia-game.component';
 const routes: Routes = [
     { path: 'home', component: HomeComponent },
     { path: 'game', component: UtopiaGameComponent },
-    { path: '**', redirectTo: 'home' }
+    { path: '**', redirectTo: 'game' }
 ];
 
 @NgModule({
