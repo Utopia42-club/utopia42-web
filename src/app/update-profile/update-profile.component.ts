@@ -43,6 +43,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
             walletId: new FormControl(this.walletId),
             name: new FormControl(null, [Validators.required]),
             bio: new FormControl(null, [Validators.maxLength(255)]),
+            avatarUrl: new FormControl(null, [Validators.maxLength(255)]),
             links: new FormArray([
                 this.createLinkFormGroup({
                     media: Media.INSTAGRAM,
@@ -194,6 +195,7 @@ export interface Profile {
     bio?: string;
     links: Link[];
     imageUrl?: string;
+    avatarUrl?: string;
 }
 
 interface Link {

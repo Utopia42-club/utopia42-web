@@ -24,6 +24,10 @@
                        (change)="onImageChange(fileInput.files[0])"/>
             </div>
         </div>
+        <mat-form-field class="field">
+            <mat-label>Avatar Url</mat-label>
+            <input matInput formControlName="avatarUrl"/>
+        </mat-form-field>
         <div fxLayout="column" fxLayoutAlign="center center" style="width: 100%">
             <div *ngFor="let linkControl of asFormArray(form.get('links')).controls; let i = index"
                  [formGroup]="asFormGroup(linkControl)"
