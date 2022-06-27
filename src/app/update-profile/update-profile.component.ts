@@ -31,6 +31,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
         Media.OTHER,
     ];
     form: FormGroup;
+    private urlPattern = 'https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)';
 
     constructor(@Inject(MAT_DIALOG_DATA) public data: EditProfileData, private dialogRef: MatDialogRef<any>,
                 private dialog: MatDialog,
@@ -43,7 +44,9 @@ export class EditProfileComponent implements OnInit, OnDestroy {
             walletId: new FormControl(this.walletId),
             name: new FormControl(null, [Validators.required]),
             bio: new FormControl(null, [Validators.maxLength(255)]),
-            avatarUrl: new FormControl(null, [Validators.maxLength(255)]),
+            avatarUrl: new FormControl(null, [Validators.maxLength(255),
+                Validators.pattern(this.urlPattern)
+            ]),
             links: new FormArray([
                 this.createLinkFormGroup({
                     media: Media.INSTAGRAM,
@@ -72,19 +75,6 @@ export class EditProfileComponent implements OnInit, OnDestroy {
                 link: null,
             })
         );
-    }
-
-    isValidUrl(urlString: string): boolean {
-        urlString = urlString.trim();
-        if (urlString.length === 0) {
-            return false;
-        }
-        try {
-            let pattern = new RegExp('https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)');
-            return pattern.test(urlString);
-        } catch (TypeError) {
-            return false;
-        }
     }
 
     onImageChange(file: File): void {
@@ -140,9 +130,11 @@ export class EditProfileComponent implements OnInit, OnDestroy {
                             return of(undefined);
                         }),
                     )
-            ).subscribe(() => {}, error => {
-                if(error.status != 404)
+            ).subscribe(() => {
+            }, error => {
+                if (error.status != 404) {
                     throw error;
+                }
             })
         );
     }
@@ -152,7 +144,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
             media: new FormControl(link.media, [Validators.required]),
             link: new FormControl(link.link, [
                 Validators.required,
-                Validators.pattern('https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)')
+                Validators.pattern(this.urlPattern)
             ]),
         });
     }
