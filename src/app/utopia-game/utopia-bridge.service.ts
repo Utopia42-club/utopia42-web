@@ -215,7 +215,6 @@ export enum State {
     MENU = "MENU",
     LOGIN = "LOGIN",
     DIALOG = "DIALOG",
-    PROFILE_DIALOG = "PROFILE_DIALOG",
     FREEZE = "FREEZE"
 }
 
