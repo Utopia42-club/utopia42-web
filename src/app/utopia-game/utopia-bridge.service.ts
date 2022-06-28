@@ -1,6 +1,6 @@
 import {Injectable, NgZone} from '@angular/core';
 import {BehaviorSubject, Observable, of, ReplaySubject, Subject} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {map, switchMap} from 'rxjs/operators';
 import {AppComponent} from '../app.component';
 import {ConnectionDetail} from '../ehtereum/connection-detail';
 import {Land} from '../ehtereum/models';
@@ -68,18 +68,22 @@ export class UtopiaBridgeService {
     }
 
     public connectMetamask(payload: BridgeMessage<string>): Observable<ConnectionDetail> {
-        // return this.web3service.connect()
-        return this.web3service.isConnected().pipe(
-            map((v) => {
-                if (!v) {
-                    return null;
-                }
-                return {
-                    network: this.web3service.networkId(),
-                    wallet: this.web3service.wallet(),
-                };
-            })
-        );
+        return this.app.getContractSafe(null, null)
+            .pipe(
+                switchMap(value => {
+                    if (value != null)
+                        return this.web3service.isConnected()
+                    return of(null);
+                }),
+                map((v) => {
+                    if (!v)
+                        return null;
+                    return {
+                        network: this.web3service.networkId(),
+                        wallet: this.web3service.wallet(),
+                    };
+                })
+            )
     }
 
     public copyToClipboard(payload: BridgeMessage<string>): void {

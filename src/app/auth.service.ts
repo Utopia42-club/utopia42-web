@@ -68,10 +68,10 @@ export class AuthService {
                         catchError((err) => {
                             this.gettingToken = false;
                             if (err instanceof HttpErrorResponse) {
-                                console.log(err.status);
-                                if (err.status === 401)
+                                if (err.status === 401) {
+                                    this.gettingToken = true;
                                     return this.doGetAuthToken();
-                                else if (err.status !== 404)
+                                } else if (err.status !== 404)
                                     return throwError(err);
                                 return of(authToken);
                             } else
@@ -94,7 +94,7 @@ export class AuthService {
         return this.web3Service.connect()
             .pipe(switchMap(value => {
                 if (!value) {
-                    return throwError(new UtopiaError('Connection to MetaMask failed'));
+                    return of(null);
                 } else {
                     return this.web3Service.provider()
                         .pipe(

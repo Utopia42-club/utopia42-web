@@ -51,7 +51,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
     constructor(private bridge: UtopiaBridgeService, private appComponent: AppComponent,
                 private readonly toaster: ToastrService, private readonly route: ActivatedRoute,
                 readonly utopiaApi: UtopiaApiService, readonly zone: NgZone,
-                readonly loadingService: LoadingService, readonly web3Service: Web3Service,
+                readonly loadingService: LoadingService, readonly authService: AuthService,
                 readonly pluginService: PluginService, readonly dialogService: MatDialog, readonly overlay: Overlay,
                 readonly vcr: ViewContainerRef, readonly cdr: ChangeDetectorRef,
                 readonly playerStateService: PlayerStateService) {
@@ -66,7 +66,6 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.subscription.add(this.appComponent.getContractSafe(null, null).subscribe(() => this.startGame()));
         this.subscription.add(this.route.queryParams.subscribe(params => {
             const position = params.position;
             if (position != null) {
@@ -76,23 +75,33 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
         let playSubscription = this.bridge.gameState$().subscribe(state => {
             if (state == State.PLAYING) {
                 this.runAutoStartPlugins();
+                this.playerStateService.connect();
                 playSubscription.unsubscribe();
             }
         });
         this.subscription.add(playSubscription);
 
-        this.playerStateService.connect();
-
         this.subscription.add(this.playerStateService.messages.subscribe(message => {
             this.bridge.reportOtherPlayersState(JSON.parse(message.data));
         }));
+        this.startGame();
     }
 
     openPluginDialog(mode: 'menu' | 'running') {
-        if (this.pluginDialogRef != null) {
+        if (this.pluginDialogRef != null)
             return;
-        }
 
+        this.authService.getAuthToken()
+            .subscribe(token => {
+                if (token != null) {
+                    this.doOpenPluginDialog(mode);
+                } else {
+                    this.toaster.error('You should log in with metamask in order to use plugins');
+                }
+            });
+    }
+
+    private doOpenPluginDialog(mode: 'menu' | 'running') {
         this.bridge.freezeGame();
         this.pluginDialogRef = this.dialogService.open(PluginSelectionComponent, {
             data: {
@@ -227,12 +236,15 @@ export class UtopiaGameComponent implements OnInit, OnDestroy {
     }
 
     private runAutoStartPlugins() {
-        this.pluginService.getAllAutostartPluginsForUser(new SearchCriteria(null, 100)).subscribe(plugins => {
-            for (let plugin of plugins) {
-                console.debug('Running autostart plugin: ' + plugin.name);
-                this.runPlugin(plugin);
-            }
-        });
+        this.pluginService.getAllAutostartPluginsForUser(new SearchCriteria(null, 100))
+            .subscribe(plugins => {
+                for (let plugin of plugins) {
+                    console.debug('Running autostart plugin: ' + plugin.name);
+                    this.runPlugin(plugin);
+                }
+            }, error => {
+
+            });
     }
 
     reportPlayerState(body: ReportPlayerStateRequestBodyType) {

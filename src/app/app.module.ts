@@ -21,7 +21,6 @@ import {BuyLandsComponent} from './buy-lands/buy-lands.component';
 import {ConnectionStatusIndicatorComponent} from './connection-status-indicator/connection-status-indicator.component';
 import {ExceptionDialogContentComponent} from './exception-dialog-content/exception-dialog-content.component';
 import {HomeComponent} from './home/home.component';
-import {MetaMaskConnectingComponent} from './meta-mask-connecting/meta-mask-connecting.component';
 import {PortLandsComponent} from './port-lands/port-lands.component';
 import {SaveLandsComponent} from './save-lands/save-lands.component';
 import {UtopiaGameComponent} from './utopia-game/utopia-game.component';
@@ -92,7 +91,9 @@ import {
 } from "./utopia-game/plugin/plugin-inputs-editor/input-form/fields/number-input-field/number-input-field.component";
 import {InputFormComponent} from "./utopia-game/plugin/plugin-inputs-editor/input-form/input-form.component";
 import {ListInputComponent} from "./utopia-game/plugin/plugin-inputs-editor/input-form/list-input/list-input.component";
-import { MasterSlaveInputComponent } from './utopia-game/plugin/plugin-inputs-editor/input-form/master-slave-input/master-slave-input.component';
+import {
+    MasterSlaveInputComponent
+} from './utopia-game/plugin/plugin-inputs-editor/input-form/master-slave-input/master-slave-input.component';
 import {
     FileFieldComponent
 } from "./utopia-game/plugin/plugin-inputs-editor/input-form/fields/file-field/file-field.component";
@@ -101,7 +102,6 @@ import {
     declarations: [
         AppComponent,
         HomeComponent,
-        MetaMaskConnectingComponent,
         SaveLandsComponent,
         ExceptionDialogContentComponent,
         PortLandsComponent,

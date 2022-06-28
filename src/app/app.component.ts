@@ -1,21 +1,20 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, of } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
-import { BuyLandsData } from './buy-lands/buy-lands-data';
-import { BuyLandsComponent } from './buy-lands/buy-lands.component';
-import { ConnectionDetail } from './ehtereum/connection-detail';
-import { UtopiaContract } from './ehtereum/utopia-contract';
-import { Web3Service } from './ehtereum/web3.service';
-import { MetaMaskConnectingComponent } from './meta-mask-connecting/meta-mask-connecting.component';
-import { SaveLandsData } from './save-lands/save-lands-data';
-import { SaveLandsComponent } from './save-lands/save-lands.component';
-import { TransferLandData } from './transfer-land/transfer-land-data';
-import { TransferLandComponent } from './transfer-land/transfer-land.component';
-import { SetNftComponent } from './set-nft/set-nft.component';
-import { EditProfileData } from './update-profile/update-profile-data';
-import { SetNftData } from './set-nft/set-nft-data';
-import { EditProfileComponent } from './update-profile/update-profile.component';
+import {AfterViewInit, Component, OnInit} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {Observable, of} from 'rxjs';
+import {map, switchMap} from 'rxjs/operators';
+import {BuyLandsData} from './buy-lands/buy-lands-data';
+import {BuyLandsComponent} from './buy-lands/buy-lands.component';
+import {ConnectionDetail} from './ehtereum/connection-detail';
+import {UtopiaContract} from './ehtereum/utopia-contract';
+import {Web3Service} from './ehtereum/web3.service';
+import {SaveLandsData} from './save-lands/save-lands-data';
+import {SaveLandsComponent} from './save-lands/save-lands.component';
+import {TransferLandData} from './transfer-land/transfer-land-data';
+import {TransferLandComponent} from './transfer-land/transfer-land.component';
+import {SetNftComponent} from './set-nft/set-nft.component';
+import {EditProfileData} from './update-profile/update-profile-data';
+import {SetNftData} from './set-nft/set-nft-data';
+import {EditProfileComponent} from './update-profile/update-profile.component';
 import {
     BuyLandsRequest,
     EditProfileRequest,
@@ -24,9 +23,9 @@ import {
     SetNftRequest,
     TransferLandRequest
 } from './utopia-game/utopia-bridge.service';
-import { HttpClient } from '@angular/common/http';
-import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
-import { MatDialog } from '@angular/material/dialog';
+import {HttpClient} from '@angular/common/http';
+import {MatMenu, MatMenuTrigger} from '@angular/material/menu';
+import {MatDialog} from '@angular/material/dialog';
 
 @Component({
     selector: 'app-root',
@@ -54,8 +53,8 @@ export class AppComponent implements OnInit, AfterViewInit {
                                 .map(l => {
                                     let coords = l.split('_').map(v => Number(v));
                                     return {
-                                        startCoordinate: { x: coords[0], y: 0, z: coords[1] },
-                                        endCoordinate: { x: coords[2], y: 0, z: coords[3] }
+                                        startCoordinate: {x: coords[0], y: 0, z: coords[1]},
+                                        endCoordinate: {x: coords[2], y: 0, z: coords[3]}
                                     };
                                 })
                         });
@@ -108,7 +107,7 @@ export class AppComponent implements OnInit, AfterViewInit {
             .subscribe(contract => {
                 if (contract != null) {
                     this.dialog.open(BuyLandsComponent, {
-                        data: { request, contract } as BuyLandsData,
+                        data: {request, contract} as BuyLandsData,
                         disableClose: true
                     });
                 }
@@ -120,7 +119,7 @@ export class AppComponent implements OnInit, AfterViewInit {
             .subscribe(contract => {
                 if (contract != null) {
                     this.dialog.open(SaveLandsComponent, {
-                        data: { request, contract } as SaveLandsData,
+                        data: {request, contract} as SaveLandsData,
                         disableClose: true
                     });
                 }
@@ -132,7 +131,7 @@ export class AppComponent implements OnInit, AfterViewInit {
             .subscribe(contract => {
                 if (contract != null) {
                     this.dialog.open(TransferLandComponent, {
-                        data: { request, contract } as TransferLandData,
+                        data: {request, contract} as TransferLandData,
                         disableClose: true
                     });
                 }
@@ -144,7 +143,7 @@ export class AppComponent implements OnInit, AfterViewInit {
             .subscribe(contract => {
                 if (contract != null) {
                     this.dialog.open(SetNftComponent, {
-                        data: { request, contract } as SetNftData,
+                        data: {request, contract} as SetNftData,
                         disableClose: true
                     });
                 }
@@ -156,7 +155,7 @@ export class AppComponent implements OnInit, AfterViewInit {
             .subscribe(contract => {
                 if (contract != null) {
                     this.dialog.open(EditProfileComponent, {
-                        data: { request, contract } as EditProfileData,
+                        data: {request, contract} as EditProfileData,
                         disableClose: true
                     });
                 }
@@ -182,11 +181,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
     private connect(network: number, wallet: string): Observable<boolean> {
-        let ref = this.dialog.open(MetaMaskConnectingComponent, {
-            disableClose: true,
-            data: { wallet, network } as ConnectionDetail
-        });
-        return ref.componentInstance.result$;
+        return this.service.connect(network, wallet);
     }
 
     isGameOpen() {

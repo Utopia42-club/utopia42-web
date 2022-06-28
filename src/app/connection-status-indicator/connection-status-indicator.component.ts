@@ -15,7 +15,7 @@ export class ConnectionStatusIndicatorComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.checkSupport();
+        // this.checkSupport();
     }
 
     networkName(): string {

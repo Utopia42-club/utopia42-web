@@ -31,10 +31,12 @@ export class AuthInterceptor implements HttpInterceptor {
             });
             return next.handle(req);
         }
-
         return this.authService.getAuthToken()
             .pipe(
                 map(authToken => {
+                    if (authToken == null) {
+                        throw new Error("Authentication Failed");
+                    }
                     return request.clone({
                         headers: request.headers.set(TOKEN_HEADER_KEY, authToken)
                     });
