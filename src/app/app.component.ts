@@ -156,7 +156,10 @@ export class AppComponent implements OnInit, AfterViewInit {
                 if (contract != null) {
                     this.dialog.open(EditProfileComponent, {
                         data: {request, contract} as EditProfileData,
-                        disableClose: true
+                        disableClose: true,
+                        width: "100%",
+                        height: "100%",
+                        maxWidth: "100%"
                     });
                 }
             });
