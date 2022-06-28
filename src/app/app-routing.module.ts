@@ -4,7 +4,7 @@ import { HomeComponent } from './home/home.component';
 import { UtopiaGameComponent } from './utopia-game/utopia-game.component';
 
 const routes: Routes = [
-    { path: 'home', component: HomeComponent },
+    { path: 'rpc', component: HomeComponent },
     { path: 'game', component: UtopiaGameComponent },
     { path: '**', redirectTo: 'game' }
 ];

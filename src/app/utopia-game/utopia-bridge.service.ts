@@ -67,8 +67,8 @@ export class UtopiaBridgeService {
         return this.authService.getAuthToken(payload.body);
     }
 
-    public connectMetamask(payload: BridgeMessage<string>): Observable<ConnectionDetail> {
-        return this.app.getContractSafe(null, null)
+    public connectMetamask(payload: BridgeMessage<number>): Observable<ConnectionDetail> {
+        return this.app.getContractSafe(payload.body, null)
             .pipe(
                 switchMap(value => {
                     if (value != null)

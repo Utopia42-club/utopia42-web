@@ -2,7 +2,7 @@ import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {Observable, of, Subject, throwError} from 'rxjs';
 import {Configurations} from './configurations';
-import {catchError, concatMap, map, switchMap, tap} from 'rxjs/operators';
+import {catchError, concatMap, map, shareReplay, switchMap, tap} from 'rxjs/operators';
 import {Web3Service} from './ehtereum/web3.service';
 import {UtopiaError} from './UtopiaError';
 import {ProfileService} from "./update-profile/profile.service";
@@ -71,12 +71,13 @@ export class AuthService {
                                 if (err.status === 401) {
                                     this.gettingToken = true;
                                     return this.doGetAuthToken();
-                                } else if (err.status !== 404)
-                                    return throwError(err);
-                                return of(authToken);
+                                } else if (err.status == 404)
+                                    return of(authToken);
+                                return throwError(err);
                             } else
                                 return throwError(err);
                         }),
+                        shareReplay(1)
                     );
                 return this.tokenObservable;
             } else {

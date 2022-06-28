@@ -19,7 +19,7 @@ export class PlayerStateService {
 
     connect() {
         this.state = ConnectionState.CONNECTING;
-        this.authService.getAuthToken().subscribe(token => {
+        this.authService.getAuthToken(true).subscribe(token => {
             if (token != null) {
                 console.log('Connecting to ' + this.endpoint);
                 this.doConnect(token);

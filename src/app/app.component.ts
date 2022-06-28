@@ -26,6 +26,7 @@ import {
 import {HttpClient} from '@angular/common/http';
 import {MatMenu, MatMenuTrigger} from '@angular/material/menu';
 import {MatDialog} from '@angular/material/dialog';
+import {MetaMaskConnectingComponent} from "./meta-mask-connecting/meta-mask-connecting.component";
 
 @Component({
     selector: 'app-root',
@@ -99,7 +100,9 @@ export class AppComponent implements OnInit, AfterViewInit {
         if (this.isGameOpen()) {
             await window.bridge.game.requestClose();
         }
-        this.router.navigate(['home']);
+        this.router.navigateByUrl('/rpc', {skipLocationChange: true}).then(() => {
+            this.router.navigate(['game']);
+        });
     }
 
     public buyLands(request: BuyLandsRequest): void {
@@ -184,7 +187,11 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
     private connect(network: number, wallet: string): Observable<boolean> {
-        return this.service.connect(network, wallet);
+        let ref = this.dialog.open(MetaMaskConnectingComponent, {
+            disableClose: true,
+            data: {wallet, network} as ConnectionDetail
+        });
+        return ref.componentInstance.result$;
     }
 
     isGameOpen() {

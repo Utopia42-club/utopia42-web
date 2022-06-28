@@ -97,6 +97,7 @@ import {
 import {
     FileFieldComponent
 } from "./utopia-game/plugin/plugin-inputs-editor/input-form/fields/file-field/file-field.component";
+import {MetaMaskConnectingComponent} from "./meta-mask-connecting/meta-mask-connecting.component";
 
 @NgModule({
     declarations: [
@@ -136,7 +137,8 @@ import {
         ListInputComponent,
         InputFieldComponent,
         MasterSlaveInputComponent,
-        FileFieldComponent
+        FileFieldComponent,
+        MetaMaskConnectingComponent
     ],
     imports: [
         BrowserModule,
