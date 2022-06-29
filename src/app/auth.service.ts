@@ -1,12 +1,10 @@
 import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
 import {Injectable} from '@angular/core';
-import {Observable, of, Subject, throwError} from 'rxjs';
+import {Observable, of, throwError} from 'rxjs';
 import {Configurations} from './configurations';
 import {catchError, concatMap, map, shareReplay, switchMap, tap} from 'rxjs/operators';
 import {Web3Service} from './ehtereum/web3.service';
-import {UtopiaError} from './UtopiaError';
 import {ProfileService} from "./update-profile/profile.service";
-import {emitKeypressEvents} from "readline";
 
 export const AUTH_STORAGE_KEY = 'AUTH_STORAGE_KEY';
 export const TOKEN_HEADER_KEY = 'X-Auth-Token';

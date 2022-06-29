@@ -7,4 +7,6 @@ export class Configurations {
     public static readonly WINDOWS_URL = Configurations.SERVER_URL + '/static/windows.zip';
 
     public static readonly PLUGINS_REPO_PREFIX = 'https://raw.githubusercontent.com/Utopia42-club/plugins/';
+
+    public static readonly AVATAR_DESIGNER_URL = "https://utopia42club.readyplayer.me/avatar";
 }

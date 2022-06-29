@@ -29,11 +29,16 @@
                 </div>
             </div>
 
-            <mat-form-field class="field avatar-url">
-                <mat-label>Avatar Url</mat-label>
-                <input matInput formControlName="avatarUrl"/>
-                <mat-error *ngIf="!asFormGroup(form).controls.avatarUrl.valid">Not a valid url</mat-error>
-            </mat-form-field>
+            <div style="width: 100%" fxLayout="row" fxLayoutGap="0.6em" fxLayoutAlign="start center">
+                <mat-form-field class="field avatar-url">
+                    <mat-label>Avatar Url</mat-label>
+                    <input matInput formControlName="avatarUrl"/>
+                    <mat-error *ngIf="!asFormGroup(form).controls.avatarUrl.valid">Not a valid url</mat-error>
+                </mat-form-field>
+                <button mat-raised-button color="primary" (click)="openAvatarDesigner()">
+                    Open Avatar Designer
+                </button>
+            </div>
 
             <div fxLayout="column" fxLayoutAlign="center center" class="social-links">
                 <div *ngFor="let linkControl of asFormArray(form.get('links')).controls; let i = index"

@@ -1,15 +1,16 @@
-import { ExceptionDialogContentComponent } from '../exception-dialog-content/exception-dialog-content.component';
-import { concatMap } from 'rxjs/operators';
-import { ProfileService } from './profile.service';
-import { Web3Service } from '../ehtereum/web3.service';
-import { EditProfileData } from './update-profile-data';
-import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef, } from '@angular/material/dialog';
-import { of, Subscription } from 'rxjs';
-import { LoadingService } from '../loading/loading.service';
-import { ToastrService } from 'ngx-toastr';
-import { AuthService } from '../auth.service';
-import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
+import {ExceptionDialogContentComponent} from '../exception-dialog-content/exception-dialog-content.component';
+import {concatMap} from 'rxjs/operators';
+import {ProfileService} from './profile.service';
+import {Web3Service} from '../ehtereum/web3.service';
+import {EditProfileData} from './update-profile-data';
+import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialog, MatDialogRef,} from '@angular/material/dialog';
+import {of, Subscription} from 'rxjs';
+import {LoadingService} from '../loading/loading.service';
+import {ToastrService} from 'ngx-toastr';
+import {AuthService} from '../auth.service';
+import {FormArray, FormControl, FormGroup, Validators} from '@angular/forms';
+import {Configurations} from "../configurations";
 
 @Component({
     selector: 'app-update-profile',
@@ -180,6 +181,10 @@ export class EditProfileComponent implements OnInit, OnDestroy {
     asFormGroup(form: any): FormGroup {
         return form as FormGroup;
     }
+
+    openAvatarDesigner() {
+        window.open(Configurations.AVATAR_DESIGNER_URL);
+    }
 }
 
 export interface Profile {
@@ -204,3 +209,4 @@ enum Media {
     INSTAGRAM = 'INSTAGRAM',
     OTHER = 'OTHER',
 }
+
