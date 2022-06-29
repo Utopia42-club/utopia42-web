@@ -12,12 +12,10 @@ import {SaveLandsComponent} from './save-lands/save-lands.component';
 import {TransferLandData} from './transfer-land/transfer-land-data';
 import {TransferLandComponent} from './transfer-land/transfer-land.component';
 import {SetNftComponent} from './set-nft/set-nft.component';
-import {EditProfileData} from './update-profile/update-profile-data';
 import {SetNftData} from './set-nft/set-nft-data';
 import {EditProfileComponent} from './update-profile/update-profile.component';
 import {
     BuyLandsRequest,
-    EditProfileRequest,
     SaveLandsRequest,
     SaveLandsRequestBodyType,
     SetNftRequest,
@@ -27,6 +25,7 @@ import {HttpClient} from '@angular/common/http';
 import {MatMenu, MatMenuTrigger} from '@angular/material/menu';
 import {MatDialog} from '@angular/material/dialog';
 import {MetaMaskConnectingComponent} from "./meta-mask-connecting/meta-mask-connecting.component";
+import {BridgeMessage} from "./utopia-game/bridge-message";
 
 @Component({
     selector: 'app-root',
@@ -153,12 +152,15 @@ export class AppComponent implements OnInit, AfterViewInit {
             });
     }
 
-    public editProfile(request: EditProfileRequest): void {
+    public editProfile(request: BridgeMessage<undefined>): void {
         this.getContractSafe(request.connection.network, request.connection.wallet)
             .subscribe(contract => {
                 if (contract != null) {
                     this.dialog.open(EditProfileComponent, {
-                        data: {request, contract} as EditProfileData,
+                        data: {
+                            walletId: request.connection.wallet
+                            , contract
+                        },
                         disableClose: true,
                         width: "100%",
                         height: "100%",

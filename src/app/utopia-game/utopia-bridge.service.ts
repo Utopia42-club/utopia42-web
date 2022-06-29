@@ -45,7 +45,7 @@ export class UtopiaBridgeService {
         this.app.transferLand(payload);
     }
 
-    public editProfile(payload: EditProfileRequest): void {
+    public editProfile(payload: BridgeMessage<undefined>): void {
         this.app.editProfile(payload);
     }
 
@@ -204,8 +204,6 @@ export interface ReportPlayerStateRequestBodyType {
 export type SetNftRequest = BridgeMessage<SetNftRequestBodyType>;
 
 export type TransferLandRequest = BridgeMessage<number>;
-
-export type EditProfileRequest = BridgeMessage<string>; // FIXME: string --change to--> undefined (wallet id can be retrieved from connection)
 
 export type ReportGameStateRequest = BridgeMessage<string>;
 

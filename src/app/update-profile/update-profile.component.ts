@@ -33,12 +33,13 @@ export class EditProfileComponent implements OnInit, OnDestroy {
     form: FormGroup;
     private urlPattern = 'https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)';
 
-    constructor(@Inject(MAT_DIALOG_DATA) public data: EditProfileData, private dialogRef: MatDialogRef<any>,
+    constructor(@Inject(MAT_DIALOG_DATA) public data: any, private dialogRef: MatDialogRef<any>,
                 private dialog: MatDialog,
                 private readonly web3Service: Web3Service, private readonly profileService: ProfileService,
                 private readonly authService: AuthService, private readonly loadingService: LoadingService,
                 private readonly toaster: ToastrService) {
-        this.walletId = data.request.connection.wallet;
+
+        this.walletId = data.walletId;
 
         this.form = new FormGroup({
             walletId: new FormControl(this.walletId),
