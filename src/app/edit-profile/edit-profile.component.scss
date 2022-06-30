@@ -44,11 +44,11 @@
     visibility: hidden;
 }
 
-.file-input-label:hover {
+.profile:hover .file-input-label {
     background-color: rgba(0, 0, 0, 0.71);
 }
 
-.file-input-label:hover .label {
+.profile:hover .file-input-label .label {
     visibility: visible;
 }
 
@@ -60,4 +60,16 @@
 .avatar-url {
     max-width: 500px;
     width: 100%;
+}
+
+.delete-profile-button {
+    position: absolute;
+    top: 0;
+    left: 0;
+    visibility: hidden;
+    z-index: 2;
+}
+
+.profile:hover .delete-profile-button {
+    visibility: visible;
 }

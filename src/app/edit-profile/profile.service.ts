@@ -1,7 +1,7 @@
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
-import {Profile} from './update-profile.component';
+import {Profile} from './edit-profile.component';
 import {Configurations} from '../configurations';
 
 @Injectable({

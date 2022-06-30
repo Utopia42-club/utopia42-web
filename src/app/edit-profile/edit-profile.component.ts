@@ -2,26 +2,34 @@ import {ExceptionDialogContentComponent} from '../exception-dialog-content/excep
 import {concatMap} from 'rxjs/operators';
 import {ProfileService} from './profile.service';
 import {Web3Service} from '../ehtereum/web3.service';
-import {EditProfileData} from './update-profile-data';
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef,} from '@angular/material/dialog';
 import {of, Subscription} from 'rxjs';
 import {LoadingService} from '../loading/loading.service';
 import {ToastrService} from 'ngx-toastr';
 import {AuthService} from '../auth.service';
-import {FormArray, FormControl, FormGroup, Validators} from '@angular/forms';
+import {FormArray, FormControl, FormGroup, FormGroupDirective, NgForm, Validators} from '@angular/forms';
 import {Configurations} from "../configurations";
+import {ErrorStateMatcher} from "@angular/material/core";
+
+export class EagerStateMatcher implements ErrorStateMatcher {
+    isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
+        const isSubmitted = form && form.submitted;
+        return !!(control && control.invalid && (control.dirty || control.touched || isSubmitted));
+    }
+}
 
 @Component({
-    selector: 'app-update-profile',
-    templateUrl: './update-profile.component.html',
-    styleUrls: ['./update-profile.component.scss'],
+    selector: 'app-edit-profile',
+    templateUrl: './edit-profile.component.html',
+    styleUrls: ['./edit-profile.component.scss'],
 })
 export class EditProfileComponent implements OnInit, OnDestroy {
     private subscription = new Subscription();
     private imageFile: File;
     readonly walletId: string;
-    imageSrc: string | ArrayBuffer = 'assets/images/unknown.jpg';
+    readonly unknownImage = 'assets/images/unknown.jpg';
+    imageSrc: string | ArrayBuffer = this.unknownImage;
 
     linkMedias: Media[] = [
         Media.INSTAGRAM,
@@ -33,6 +41,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
     ];
     form: FormGroup;
     private urlPattern = 'https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)';
+    matcher = new EagerStateMatcher();
 
     constructor(@Inject(MAT_DIALOG_DATA) public data: any, private dialogRef: MatDialogRef<any>,
                 private dialog: MatDialog,
@@ -45,7 +54,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
         this.form = new FormGroup({
             walletId: new FormControl(this.walletId),
             name: new FormControl(null, [Validators.required]),
-            bio: new FormControl(null, [Validators.maxLength(255)]),
+            bio: new FormControl(null, [Validators.maxLength(2048)]),
             avatarUrl: new FormControl(null, [Validators.maxLength(255),
                 Validators.pattern(this.urlPattern)
             ]),
@@ -97,6 +106,9 @@ export class EditProfileComponent implements OnInit, OnDestroy {
                 this.imageSrc = reader.result;
                 this.imageFile = file;
             };
+        } else {
+            this.imageFile = null;
+            this.imageSrc = this.unknownImage;
         }
     }
 
@@ -158,12 +170,12 @@ export class EditProfileComponent implements OnInit, OnDestroy {
                 this.profileService.setProfile(profile)
                     .pipe(
                         concatMap((_) => {
-                            if (this.imageFile) {
+                            //FIXME
+                            if (this.imageFile != null)
                                 return this.profileService.setProfileImage(
                                     this.imageFile,
                                     this.walletId,
                                 );
-                            }
                             return of(true);
                         }),
                     )
@@ -184,6 +196,10 @@ export class EditProfileComponent implements OnInit, OnDestroy {
 
     openAvatarDesigner() {
         window.open(Configurations.AVATAR_DESIGNER_URL);
+    }
+
+    deletePicture() {
+        this.onImageChange(null);
     }
 }
 

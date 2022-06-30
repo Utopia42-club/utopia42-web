@@ -4,7 +4,7 @@ import {Observable, of, throwError} from 'rxjs';
 import {Configurations} from './configurations';
 import {catchError, concatMap, map, shareReplay, switchMap, tap} from 'rxjs/operators';
 import {Web3Service} from './ehtereum/web3.service';
-import {ProfileService} from "./update-profile/profile.service";
+import {ProfileService} from "./edit-profile/profile.service";
 
 export const AUTH_STORAGE_KEY = 'AUTH_STORAGE_KEY';
 export const TOKEN_HEADER_KEY = 'X-Auth-Token';
