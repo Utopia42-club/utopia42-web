@@ -1,10 +1,10 @@
-import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
-import {Injectable} from '@angular/core';
-import {Observable, of, throwError} from 'rxjs';
-import {Configurations} from './configurations';
-import {catchError, concatMap, map, shareReplay, switchMap, tap} from 'rxjs/operators';
-import {Web3Service} from './ehtereum/web3.service';
-import {ProfileService} from "./edit-profile/profile.service";
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable, of, throwError } from 'rxjs';
+import { Configurations } from './configurations';
+import { catchError, concatMap, map, shareReplay, switchMap, tap } from 'rxjs/operators';
+import { Web3Service } from './ehtereum/web3.service';
+import { ProfileService } from "./edit-profile/profile.service";
 
 export const AUTH_STORAGE_KEY = 'AUTH_STORAGE_KEY';
 export const TOKEN_HEADER_KEY = 'X-Auth-Token';
@@ -12,24 +12,37 @@ export const TOKEN_HEADER_KEY = 'X-Auth-Token';
 @Injectable({
     providedIn: 'root',
 })
-export class AuthService {
+export class AuthService
+{
     readonly endpoint = Configurations.SERVER_URL;
+    private currentGameSession: { walletId: string, isGuest: boolean };
     private tokenObservable: Observable<string>;
     private gettingToken = false;
 
     constructor(private httpClient: HttpClient, readonly web3Service: Web3Service,
-                readonly profileService: ProfileService) {
+                readonly profileService: ProfileService)
+    {
     }
 
-    public requestNonce(chainId: string, walletId: string): Observable<any> {
+    public updateSession(session: { walletId: string, isGuest: boolean }):void{
+        this.currentGameSession = session;
+    }
+
+    public isGuestSession():boolean{
+        return this.currentGameSession?.isGuest ?? true;
+    }
+
+    public requestNonce(chainId: string, walletId: string): Observable<any>
+    {
         return this.httpClient.post<any>(
             this.endpoint + `/auth/nonce/${chainId}`,
             walletId,
-            {headers: new HttpHeaders().set('Content-Type', 'application/json')}
+            { headers: new HttpHeaders().set('Content-Type', 'application/json') }
         );
     }
 
-    public login(walletId: string, signature: string): Observable<any> {
+    public login(walletId: string, signature: string): Observable<any>
+    {
         const formData = new FormData();
         formData.set('walletId', walletId);
         formData.set('signature', signature);
@@ -42,15 +55,18 @@ export class AuthService {
         );
     }
 
-    public RemoveCachedAuthToken() {
+    public RemoveCachedAuthToken()
+    {
         localStorage.removeItem(AUTH_STORAGE_KEY);
     }
 
-    public getCachedToken() {
+    public getCachedToken()
+    {
         return localStorage.getItem(AUTH_STORAGE_KEY);
     }
 
-    public getAuthToken(forceValid: boolean = false): Observable<string> {
+    public getAuthToken(forceValid: boolean = false): Observable<string>
+    {
         if (this.gettingToken)
             return this.tokenObservable;
         const authToken = localStorage.getItem(AUTH_STORAGE_KEY);
@@ -88,7 +104,8 @@ export class AuthService {
         return this.tokenObservable;
     }
 
-    private doGetAuthToken(): Observable<string> {
+    private doGetAuthToken(): Observable<string>
+    {
         let provider;
         return this.web3Service.connect()
             .pipe(switchMap(value => {

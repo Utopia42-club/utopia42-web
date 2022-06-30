@@ -1,12 +1,13 @@
-import {Injectable} from '@angular/core';
-import {Configurations} from '../configurations';
-import {Subject} from 'rxjs';
-import {AuthService} from "../auth.service";
+import { Injectable } from '@angular/core';
+import { Configurations } from '../configurations';
+import { Subject } from 'rxjs';
+import { AuthService } from "../auth.service";
 
 @Injectable({
     providedIn: 'root',
 })
-export class PlayerStateService {
+export class PlayerStateService
+{
     readonly endpoint = Configurations.WS_SERVER_URL + '/position';
 
     ws: WebSocket;
@@ -14,29 +15,39 @@ export class PlayerStateService {
     private requestClose = false;
     private state: ConnectionState = ConnectionState.DISCONNECTED;
 
-    constructor(readonly authService: AuthService) {
+    constructor(readonly authService: AuthService)
+    {
     }
 
-    connect() {
+    connect()
+    {
         if (this.ws != null)
             return; // or throw error?
         this.state = ConnectionState.CONNECTING;
-        this.authService.getAuthToken(true).subscribe(token => {
-            if (token != null) {
-                console.log('Connecting to ' + this.endpoint);
-                this.doConnect(token);
-            }
-        });
+        if (!this.authService.isGuestSession())
+            this.authService.getAuthToken(true).subscribe(token => {
+                if (token != null) {
+                    console.log('Connecting to ' + this.endpoint);
+                    this.doConnect(token);
+                }
+            });
+        else this.doConnect(null);
     }
 
-    private doConnect(token: string) {
-        this.ws = new WebSocket(this.endpoint);
+    private doConnect(token: string)
+    {
+        var ws = this.ws = new WebSocket(this.endpoint);
         this.ws.onopen = e => {
+            if (this.ws != ws) return;
+
             console.log('Connected to ' + this.endpoint);
             this.state = ConnectionState.CONNECTED;
-            this.ws.send('@authToken:' + token);
+            if (!this.authService.isGuestSession())
+                this.ws.send('@authToken:' + token);
         }
         this.ws.onmessage = event => {
+            if (this.ws != ws) return;
+
             let msg = event.data as string;
             if (msg.startsWith('@error')) {
                 if (msg.startsWith('@error:Unauthorized')) {
@@ -52,6 +63,8 @@ export class PlayerStateService {
             }
         };
         this.ws.onclose = event => {
+            if (this.ws != ws) return;
+
             this.ws = null;
             if (this.state != ConnectionState.CONNECTING) {
                 this.state = ConnectionState.DISCONNECTED;
@@ -61,12 +74,16 @@ export class PlayerStateService {
             }
         };
         this.ws.onerror = event => {
+            if (this.ws != ws) return;
+
+            this.ws.close();
             this.ws = null;
             console.error(event);
         };
     }
 
-    disconnect() {
+    disconnect()
+    {
         if (this.ws != null) {
             this.requestClose = true;
             this.ws.close();
@@ -75,13 +92,15 @@ export class PlayerStateService {
         }
     }
 
-    public reportPlayerState(playerState: any) {
-        if (this.state == ConnectionState.CONNECTED)
+    public reportPlayerState(playerState: any)
+    {
+        if (!this.authService.isGuestSession() && this.state == ConnectionState.CONNECTED)
             this.ws.send(playerState);
     }
 }
 
-export enum ConnectionState {
+export enum ConnectionState
+{
     CONNECTING = "CONNECTING",
     CONNECTED = "CONNECTED",
     DISCONNECTED = "DISCONNECTED"

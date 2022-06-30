@@ -1,78 +1,94 @@
-import {Injectable, NgZone} from '@angular/core';
-import {BehaviorSubject, Observable, of, ReplaySubject, Subject} from 'rxjs';
-import {map, switchMap} from 'rxjs/operators';
-import {AppComponent} from '../app.component';
-import {ConnectionDetail} from '../ehtereum/connection-detail';
-import {Land} from '../ehtereum/models';
-import {Web3Service} from '../ehtereum/web3.service';
-import {BridgeMessage, Response, WebToUnityRequest} from './bridge-message';
-import {Clipboard} from '@angular/cdk/clipboard';
+import { Injectable, NgZone } from '@angular/core';
+import { BehaviorSubject, Observable, of, ReplaySubject, Subject } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
+import { AppComponent } from '../app.component';
+import { ConnectionDetail } from '../ehtereum/connection-detail';
+import { Land } from '../ehtereum/models';
+import { Web3Service } from '../ehtereum/web3.service';
+import { BridgeMessage, Response, WebToUnityRequest } from './bridge-message';
+import { Clipboard } from '@angular/cdk/clipboard';
 import * as uuid from 'uuid';
-import {Position} from './position';
-import {UtopiaGameComponent} from './utopia-game.component';
-import {AuthService} from "../auth.service";
+import { Position } from './position';
+import { UtopiaGameComponent } from './utopia-game.component';
+import { AuthService } from "../auth.service";
 
 @Injectable()
-export class UtopiaBridgeService {
+export class UtopiaBridgeService
+{
     public unityInstance;
     public game: UtopiaGameComponent;
     private position?: Position;
-    private gameState = new BehaviorSubject<State>(null);
-    private loggedInUser = new BehaviorSubject<ReportLoggedInUserRequestBodyType>(null);
+    private readonly gameState = new BehaviorSubject<State>(null);
+    public readonly gameState$ = this.gameState.asObservable();
+    private readonly loggedInUser = new BehaviorSubject<ReportLoggedInUserRequestBodyType>(null);
+    public readonly loggedInUser$ = this.loggedInUser.asObservable();
 
     private responseObservable = new Map<string, Subject<any>>(); // key: CallId, value: Observable
 
     constructor(private web3service: Web3Service, private app: AppComponent, private clipboard: Clipboard,
-                readonly zone: NgZone, readonly authService: AuthService) {
+                readonly zone: NgZone, readonly authService: AuthService)
+    {
     }
 
-    public reportGameState(payload: ReportGameStateRequest): void {
+    public reportGameState(payload: ReportGameStateRequest): void
+    {
         this.gameState.next(State[payload.body]);
     }
 
-    public reportPlayerState(payload: ReportPlayerStateRequest): void {
+    public reportPlayerState(payload: ReportPlayerStateRequest): void
+    {
         this.game.reportPlayerState(payload.body);
     }
 
-    public reportLoggedInUser(payload: ReportLoggedInUserRequest): void {
+    public reportLoggedInUser(payload: ReportLoggedInUserRequest): void
+    {
         this.loggedInUser.next(payload.body);
     }
 
-    public buy(payload: BuyLandsRequest): void {
+    public buy(payload: BuyLandsRequest): void
+    {
         this.app.buyLands(payload);
     }
 
-    public save(payload: SaveLandsRequest): void {
+    public save(payload: SaveLandsRequest): void
+    {
         this.app.saveLands(payload);
     }
 
-    public transfer(payload: TransferLandRequest): void {
+    public transfer(payload: TransferLandRequest): void
+    {
         this.app.transferLand(payload);
     }
 
-    public editProfile(payload: BridgeMessage<undefined>): void {
+    public editProfile(payload: BridgeMessage<undefined>): void
+    {
         this.app.editProfile(payload);
     }
 
-    public setNft(request: SetNftRequest): void {
+    public setNft(request: SetNftRequest): void
+    {
         this.app.setNft(request);
     }
 
-    public moveToHome(payload: BridgeMessage<undefined>): void {
+    public moveToHome(payload: BridgeMessage<undefined>): void
+    {
         this.app.moveToHome();
     }
 
-    public openPluginsDialog(payload: OpenPluginDialogRequest): void {
+    public openPluginsDialog(payload: OpenPluginDialogRequest): void
+    {
         if (this.gameState.getValue() == State.PLAYING) {
             this.game?.openPluginDialog(payload.body);
         }
     }
 
-    public getAuthToken(payload: BridgeMessage<boolean>): Observable<string> {
+    public getAuthToken(payload: BridgeMessage<boolean>): Observable<string>
+    {
         return this.authService.getAuthToken(payload.body);
     }
 
-    public connectMetamask(payload: BridgeMessage<number>): Observable<ConnectionDetail> {
+    public connectMetamask(payload: BridgeMessage<number>): Observable<ConnectionDetail>
+    {
         return this.app.getContractSafe(payload.body, null)
             .pipe(
                 switchMap(value => {
@@ -91,33 +107,33 @@ export class UtopiaBridgeService {
             )
     }
 
-    public copyToClipboard(payload: BridgeMessage<string>): void {
+    public copyToClipboard(payload: BridgeMessage<string>): void
+    {
         this.clipboard.copy(payload.body);
     }
 
-    public getStartingPosition(payload: BridgeMessage<string>): Observable<Position> {
+    public getStartingPosition(payload: BridgeMessage<string>): Observable<Position>
+    {
         return of(this.position);
     }
 
-    public setStartingPosition(position: string) {
+    public setStartingPosition(position: string)
+    {
         const parameters = position.split('_');
         if (parameters.length == 3) {
             const x = parseFloat(parameters[0]);
             const y = parseFloat(parameters[1]);
             const z = parseFloat(parameters[2]);
             if (x != undefined && y != undefined && z != undefined) {
-                this.position = {x: x, y: y, z: z};
+                this.position = { x: x, y: y, z: z };
                 return;
             }
         }
         this.position = null;
     }
 
-    public gameState$(): Observable<State> {
-        return this.gameState.asObservable();
-    }
-
-    public call(objectName: string, methodName: string, parameter: string): Observable<any> {
+    public call(objectName: string, methodName: string, parameter: string): Observable<any>
+    {
         let id = uuid.v4();
         let subject = new ReplaySubject(1);
         this.responseObservable.set(id, subject);
@@ -142,7 +158,8 @@ export class UtopiaBridgeService {
         }).pipe(map(res => JSON.parse(res)));
     }
 
-    public respond(res: BridgeMessage<string>): void {
+    public respond(res: BridgeMessage<string>): void
+    {
         let response: Response = JSON.parse(res.body);
         let subject = this.responseObservable.get(response.id);
         if (subject) {
@@ -161,19 +178,23 @@ export class UtopiaBridgeService {
         }
     }
 
-    public freezeGame() {
+    public freezeGame()
+    {
         this.unityInstance.SendMessage('GameManager', 'FreezeGame', '');
     }
 
-    public unFreezeGame() {
+    public unFreezeGame()
+    {
         this.unityInstance.SendMessage('GameManager', 'UnFreezeGame', '');
     }
 
-    public reportOtherPlayersState(state: ReportPlayerStateRequestBodyType) {
+    public reportOtherPlayersState(state: ReportPlayerStateRequestBodyType)
+    {
         this.unityInstance.SendMessage('Players', 'ReportOtherPlayersStateFromWeb', JSON.stringify(state));
     }
 
-    public cursorStateChanged(locked: boolean) {
+    public cursorStateChanged(locked: boolean)
+    {
         if (this.gameState.getValue() != State.PLAYING) {
             return;
         }
@@ -192,12 +213,14 @@ export type BuyLandsRequest = BridgeMessage<Land[]>;
 export type SaveLandsRequestBodyType = { [key: number]: string };
 export type SaveLandsRequest = BridgeMessage<SaveLandsRequestBodyType>;
 
-export interface SetNftRequestBodyType {
+export interface SetNftRequestBodyType
+{
     landId: number;
     nft: boolean;
 }
 
-export interface ReportPlayerStateRequestBodyType {
+export interface ReportPlayerStateRequestBodyType
+{
     walletId: string;
     position: Position;
     forward: Position;
@@ -206,7 +229,8 @@ export interface ReportPlayerStateRequestBodyType {
     jump: boolean;
 }
 
-export interface ReportLoggedInUserRequestBodyType {
+export interface ReportLoggedInUserRequestBodyType
+{
     walletId: string;
     isGuest: boolean;
 }
@@ -223,7 +247,8 @@ export type ReportPlayerStateRequest = BridgeMessage<ReportPlayerStateRequestBod
 
 export type OpenPluginDialogRequest = BridgeMessage<'menu' | 'running'>;
 
-export enum State {
+export enum State
+{
     LOADING = "LOADING",
     PLAYING = "PLAYING",
     MENU = "MENU",
