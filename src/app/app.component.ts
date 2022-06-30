@@ -13,7 +13,7 @@ import {TransferLandData} from './transfer-land/transfer-land-data';
 import {TransferLandComponent} from './transfer-land/transfer-land.component';
 import {SetNftComponent} from './set-nft/set-nft.component';
 import {SetNftData} from './set-nft/set-nft-data';
-import {EditProfileComponent} from './update-profile/update-profile.component';
+import {EditProfileComponent} from './edit-profile/edit-profile.component';
 import {
     BuyLandsRequest,
     SaveLandsRequest,

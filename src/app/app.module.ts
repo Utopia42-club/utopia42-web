@@ -1,4 +1,4 @@
-import {EditProfileComponent} from './update-profile/update-profile.component';
+import {EditProfileComponent} from './edit-profile/edit-profile.component';
 import {APP_INITIALIZER, CUSTOM_ELEMENTS_SCHEMA, ErrorHandler, NgModule} from '@angular/core';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {MatButtonModule} from '@angular/material/button';

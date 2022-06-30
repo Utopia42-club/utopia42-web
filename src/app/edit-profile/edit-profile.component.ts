@@ -2,7 +2,6 @@ import {ExceptionDialogContentComponent} from '../exception-dialog-content/excep
 import {concatMap} from 'rxjs/operators';
 import {ProfileService} from './profile.service';
 import {Web3Service} from '../ehtereum/web3.service';
-import {EditProfileData} from './update-profile-data';
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef,} from '@angular/material/dialog';
 import {of, Subscription} from 'rxjs';
@@ -13,15 +12,16 @@ import {FormArray, FormControl, FormGroup, Validators} from '@angular/forms';
 import {Configurations} from "../configurations";
 
 @Component({
-    selector: 'app-update-profile',
-    templateUrl: './update-profile.component.html',
-    styleUrls: ['./update-profile.component.scss'],
+    selector: 'app-edit-profile',
+    templateUrl: './edit-profile.component.html',
+    styleUrls: ['./edit-profile.component.scss'],
 })
 export class EditProfileComponent implements OnInit, OnDestroy {
     private subscription = new Subscription();
     private imageFile: File;
     readonly walletId: string;
-    imageSrc: string | ArrayBuffer = 'assets/images/unknown.jpg';
+    readonly unknownImage = 'assets/images/unknown.jpg';
+    imageSrc: string | ArrayBuffer = this.unknownImage;
 
     linkMedias: Media[] = [
         Media.INSTAGRAM,
@@ -97,6 +97,9 @@ export class EditProfileComponent implements OnInit, OnDestroy {
                 this.imageSrc = reader.result;
                 this.imageFile = file;
             };
+        } else {
+            this.imageFile = null;
+            this.imageSrc = this.unknownImage;
         }
     }
 
@@ -158,13 +161,10 @@ export class EditProfileComponent implements OnInit, OnDestroy {
                 this.profileService.setProfile(profile)
                     .pipe(
                         concatMap((_) => {
-                            if (this.imageFile) {
-                                return this.profileService.setAvatar(
-                                    this.imageFile,
-                                    this.walletId,
-                                );
-                            }
-                            return of(true);
+                            return this.profileService.setAvatar(
+                                this.imageFile,
+                                this.walletId,
+                            );
                         }),
                     )
             ).subscribe(value => {
@@ -184,6 +184,10 @@ export class EditProfileComponent implements OnInit, OnDestroy {
 
     openAvatarDesigner() {
         window.open(Configurations.AVATAR_DESIGNER_URL);
+    }
+
+    deletePicture() {
+        this.onImageChange(null);
     }
 }
 
