@@ -156,6 +156,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         this.getContractSafe(request.connection.network, request.connection.wallet)
             .subscribe(contract => {
                 if (contract != null) {
+                    window.bridge.freezeGame();
                     this.dialog.open(EditProfileComponent, {
                         data: {
                             walletId: request.connection.wallet
@@ -165,6 +166,8 @@ export class AppComponent implements OnInit, AfterViewInit {
                         width: "100%",
                         height: "100%",
                         maxWidth: "100%"
+                    }).afterClosed().subscribe(value => {
+                        window.bridge.unFreezeGame();
                     });
                 }
             });
