@@ -18,6 +18,7 @@ export class UtopiaBridgeService {
     public game: UtopiaGameComponent;
     private position?: Position;
     private gameState = new BehaviorSubject<State>(null);
+    private loggedInUser = new BehaviorSubject<ReportLoggedInUserRequestBodyType>(null);
 
     private responseObservable = new Map<string, Subject<any>>(); // key: CallId, value: Observable
 
@@ -31,6 +32,10 @@ export class UtopiaBridgeService {
 
     public reportPlayerState(payload: ReportPlayerStateRequest): void {
         this.game.reportPlayerState(payload.body);
+    }
+
+    public reportLoggedInUser(payload: ReportLoggedInUserRequest): void {
+        this.loggedInUser.next(payload.body);
     }
 
     public buy(payload: BuyLandsRequest): void {
@@ -201,11 +206,18 @@ export interface ReportPlayerStateRequestBodyType {
     jump: boolean;
 }
 
+export interface ReportLoggedInUserRequestBodyType {
+    walletId: string;
+    isGuest: boolean;
+}
+
 export type SetNftRequest = BridgeMessage<SetNftRequestBodyType>;
 
 export type TransferLandRequest = BridgeMessage<number>;
 
 export type ReportGameStateRequest = BridgeMessage<string>;
+
+export type ReportLoggedInUserRequest = BridgeMessage<ReportLoggedInUserRequestBodyType>;
 
 export type ReportPlayerStateRequest = BridgeMessage<ReportPlayerStateRequestBodyType>;
 
