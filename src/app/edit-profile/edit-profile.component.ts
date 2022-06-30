@@ -8,8 +8,16 @@ import {of, Subscription} from 'rxjs';
 import {LoadingService} from '../loading/loading.service';
 import {ToastrService} from 'ngx-toastr';
 import {AuthService} from '../auth.service';
-import {FormArray, FormControl, FormGroup, Validators} from '@angular/forms';
+import {FormArray, FormControl, FormGroup, FormGroupDirective, NgForm, Validators} from '@angular/forms';
 import {Configurations} from "../configurations";
+import {ErrorStateMatcher} from "@angular/material/core";
+
+export class EagerStateMatcher implements ErrorStateMatcher {
+    isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
+        const isSubmitted = form && form.submitted;
+        return !!(control && control.invalid && (control.dirty || control.touched || isSubmitted));
+    }
+}
 
 @Component({
     selector: 'app-edit-profile',
@@ -33,6 +41,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
     ];
     form: FormGroup;
     private urlPattern = 'https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)';
+    matcher = new EagerStateMatcher();
 
     constructor(@Inject(MAT_DIALOG_DATA) public data: any, private dialogRef: MatDialogRef<any>,
                 private dialog: MatDialog,
@@ -45,7 +54,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
         this.form = new FormGroup({
             walletId: new FormControl(this.walletId),
             name: new FormControl(null, [Validators.required]),
-            bio: new FormControl(null, [Validators.maxLength(255)]),
+            bio: new FormControl(null, [Validators.maxLength(2048)]),
             avatarUrl: new FormControl(null, [Validators.maxLength(255),
                 Validators.pattern(this.urlPattern)
             ]),
@@ -161,10 +170,13 @@ export class EditProfileComponent implements OnInit, OnDestroy {
                 this.profileService.setProfile(profile)
                     .pipe(
                         concatMap((_) => {
-                            return this.profileService.setAvatar(
-                                this.imageFile,
-                                this.walletId,
-                            );
+                            //FIXME
+                            if (this.imageFile != null)
+                                return this.profileService.setAvatar(
+                                    this.imageFile,
+                                    this.walletId,
+                                );
+                            return of(true);
                         }),
                     )
             ).subscribe(value => {

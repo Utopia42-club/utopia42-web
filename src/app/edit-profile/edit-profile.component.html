@@ -14,10 +14,10 @@
                         </label>
                         <input id="file-upload" class="file-input" type="file" accept="image/*" #fileInput
                                (change)="onImageChange(fileInput.files[0])"/>
-<!--                        <button mat-icon-button color="warn" (click)="deletePicture()" class="delete-profile-button"-->
-<!--                                matTooltip="Delete image">-->
-<!--                            <mat-icon>delete</mat-icon>-->
-<!--                        </button>-->
+                        <!--                        <button mat-icon-button color="warn" (click)="deletePicture()" class="delete-profile-button"-->
+                        <!--                                matTooltip="Delete image">-->
+                        <!--                            <mat-icon>delete</mat-icon>-->
+                        <!--                        </button>-->
                     </div>
                     <mat-form-field class="field">
                         <mat-label>Name</mat-label>
@@ -28,7 +28,11 @@
                 <div fxFlex fxLayout="column" fxLayoutAlign="start center">
                     <mat-form-field class="field">
                         <mat-label>Bio</mat-label>
-                        <textarea matInput rows="3" formControlName="bio"></textarea>
+                        <textarea matInput rows="9" formControlName="bio" [errorStateMatcher]="matcher"></textarea>
+                        <mat-hint align="end">{{form.value?.bio?.length || 0}} / 2048</mat-hint>
+                        <mat-error *ngIf="form.controls.bio.invalid">
+                            The text entered exceeds the maximum length
+                        </mat-error>
                     </mat-form-field>
                 </div>
             </div>
