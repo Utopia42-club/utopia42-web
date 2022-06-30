@@ -18,6 +18,8 @@ export class PlayerStateService {
     }
 
     connect() {
+        if (this.ws != null)
+            return; // or throw error?
         this.state = ConnectionState.CONNECTING;
         this.authService.getAuthToken(true).subscribe(token => {
             if (token != null) {
