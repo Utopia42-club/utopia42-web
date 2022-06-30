@@ -115,7 +115,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
                                 );
                                 this.form.patchValue(profile);
                                 if (profile.imageUrl) {
-                                    return this.profileService.getAvatar(profile.imageUrl);
+                                    return this.profileService.getProfileImage(profile.imageUrl);
                                 }
                             }
                             return of(undefined);
@@ -159,7 +159,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
                     .pipe(
                         concatMap((_) => {
                             if (this.imageFile) {
-                                return this.profileService.setAvatar(
+                                return this.profileService.setProfileImage(
                                     this.imageFile,
                                     this.walletId,
                                 );

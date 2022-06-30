@@ -21,19 +21,28 @@ export class ProfileService {
         );
     }
 
-    public setAvatar(imageFile: File, walletId: string): Observable<any> {
+    public setProfileImage(imageFile: File, walletId: string): Observable<any> {
         const formData = new FormData();
         formData.set('wallet', walletId);
-        formData.set('avatar', imageFile);
+        formData.set('image', imageFile);
         return this.httpClient.post<any>(
-            this.endpoint + `/set/avatar`,
+            this.endpoint + `/set/image`,
             formData
         );
     }
 
-    public getAvatar(imageUrl: string): Observable<any> {
+    public unsetProfileImage(walletId: string): Observable<void> {
+        const formData = new FormData();
+        formData.set('wallet', walletId);
+        return this.httpClient.post<any>(
+            this.endpoint + `/set/image/remove`,
+            formData
+        );
+    }
+
+    public getProfileImage(imageUrl: string): Observable<any> {
         return this.httpClient.get<any>(
-            this.endpoint + `/avatar/${imageUrl}`,
+            this.endpoint + `/image/${imageUrl}`,
             {responseType: 'blob' as 'json'}
         );
     }
