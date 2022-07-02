@@ -8,9 +8,10 @@ import {
     HttpResponse
 } from '@angular/common/http';
 import {Observable, throwError} from 'rxjs';
-import {Configurations} from './configurations';
+import {Configurations} from '../configurations';
 import {catchError, concatMap, map, tap} from 'rxjs/operators';
-import {AUTH_STORAGE_KEY, AuthService, TOKEN_HEADER_KEY} from './auth.service';
+import {AuthService, TOKEN_HEADER_KEY} from './auth.service';
+import { AuthDetails } from "./auth-details";
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -27,7 +28,7 @@ export class AuthInterceptor implements HttpInterceptor {
             return next.handle(request);
         } else if (request.url.includes('/profile/current')) {
             let req = request.clone({
-                headers: request.headers.set(TOKEN_HEADER_KEY, this.authService.getCachedToken() ?? "Invalid Token")
+                headers:     request.headers.set(TOKEN_HEADER_KEY, AuthDetails.loadFromStorage()?.token ?? "Invalid Token")
             });
             return next.handle(req);
         }
@@ -43,17 +44,17 @@ export class AuthInterceptor implements HttpInterceptor {
                 }),
                 concatMap((authReq) => next.handle(authReq)
                     .pipe(
-                        tap(event => {
-                            if (event instanceof HttpResponse) {
-                                const token = event.headers.get(TOKEN_HEADER_KEY);
-                                if (token) {
-                                    localStorage.setItem(AUTH_STORAGE_KEY, token);
-                                }
-                            }
-                        }),
+                        // tap(event => {
+                        //     if (event instanceof HttpResponse) {
+                        //         const token = event.headers.get(TOKEN_HEADER_KEY);
+                        //         if (token) {
+                        //             this.authService.localStorage.setItem(AUTH_STORAGE_KEY, token);
+                        //         }
+                        //     }
+                        // }),
                         catchError(err => {
                             if (err instanceof HttpErrorResponse && err.status === 401) {
-                                localStorage.removeItem(AUTH_STORAGE_KEY);
+                                AuthDetails.removeFromStorage();
                                 return this.intercept(request, next);
                             } else {
                                 return throwError(err);

@@ -1,5 +1,5 @@
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Subject, Subscription, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ConnectionDetail } from '../ehtereum/connection-detail';
@@ -11,7 +11,8 @@ import { Web3Service } from '../ehtereum/web3.service';
     templateUrl: './meta-mask-connecting.component.html',
     styleUrls: ['./meta-mask-connecting.component.scss']
 })
-export class MetaMaskConnectingComponent implements OnInit, OnDestroy {
+export class MetaMaskConnectingComponent implements OnInit, OnDestroy
+{
     private connectionSubscription: Subscription;
     private stateSubscription = new Subscription();
     private resultSubject = new Subject<boolean>();
@@ -23,8 +24,9 @@ export class MetaMaskConnectingComponent implements OnInit, OnDestroy {
     message: string;
 
     constructor(@Inject(MAT_DIALOG_DATA) public data: ConnectionDetail,
-        private service: Web3Service,
-        private dialog: MatDialogRef<any>) {
+                private service: Web3Service,
+                private dialog: MatDialogRef<any>)
+    {
         this.targetNetwork = data.network;
         this.targetWallet = data.wallet;
         this.stateSubscription.add(service.connected$.subscribe(() => this.tryConnect()));
@@ -32,32 +34,42 @@ export class MetaMaskConnectingComponent implements OnInit, OnDestroy {
         this.stateSubscription.add(service.network$.subscribe(() => this.tryConnect()));
     }
 
-    ngOnInit(): void {
+    ngOnInit(): void
+    {
         this.tryConnect();
     }
 
-    ngOnDestroy(): void {
+    ngOnDestroy(): void
+    {
         this.stateSubscription.unsubscribe();
         this.connectionSubscription?.unsubscribe();
     }
 
-    networkName(): string {
+    networkName(): string
+    {
         return Networks.all.get(this.data.network)?.name ?? 'unknown';
     }
 
-    cancel(): void {
+    cancel(): void
+    {
         this.finish(false);
     }
 
-    private finish(result: boolean) {
+    private finish(result: boolean)
+    {
         this.resultSubject.next(result);
         this.dialog.close();
     }
 
-    tryConnect() {
+    tryConnect()
+    {
         this.connectionSubscription?.unsubscribe();
         this.connectionSubscription =
-            this.service.connect(this.targetNetwork, this.targetWallet)
+            this.service.connect({
+                networkId: this.targetNetwork,
+                wallet: this.targetWallet,
+                openDialogIfFailed: false
+            })
                 .pipe(catchError(e => {
                     this.connectionError();
                     return throwError(e);
@@ -76,19 +88,22 @@ export class MetaMaskConnectingComponent implements OnInit, OnDestroy {
                 });
     }
 
-    private connectionError(): void {
+    private connectionError(): void
+    {
         this.title = "Failed to connect Meta Mask";
         this.message = "";
         this.retry = () => this.tryConnect();
     }
 
-    private wrongWallet(): void {
+    private wrongWallet(): void
+    {
         this.title = "You are connected to the wrong wallet";
         this.message = `Please select ${this.targetWallet}`;
         this.retry = () => this.service.reconnect().subscribe(() => this.tryConnect());
     }
 
-    private wrongNetwork(): void {
+    private wrongNetwork(): void
+    {
         this.retry = () => this.tryConnect();
         if (this.networkName() == null) {
             this.title = "Unknown network id in url";

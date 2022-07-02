@@ -8,12 +8,16 @@ import { LoadingService } from '../loading/loading.service';
 import { UTOPIA_ABI } from './abi';
 import { Networks } from './network';
 import { UtopiaContract } from './utopia-contract';
+import { MetaMaskConnectingComponent } from "../meta-mask-connecting/meta-mask-connecting.component";
+import { ConnectionDetail } from "./connection-detail";
+import { MatDialog } from "@angular/material/dialog";
 
 
 @Injectable({
     providedIn: 'root'
 })
-export class Web3Service {
+export class Web3Service
+{
     private connectedAccounts: string[] = [];
     private web3ProviderCache = new Map<number, Web3>();
     private contractCache = new Map<number, UtopiaContract>();
@@ -26,10 +30,15 @@ export class Web3Service {
     readonly win = window as any;
     private metaMaskProvider = undefined;
 
-    constructor(private loadingService: LoadingService, private zone: NgZone, private readonly toaster: ToastrService) {
+    constructor(private loadingService: LoadingService,
+                private zone: NgZone,
+                private readonly toaster: ToastrService,
+                private dialog: MatDialog)
+    {
     }
 
-    private getWeb3(networkId: number): Web3 | null {
+    private getWeb3(networkId: number): Web3 | null
+    {
         // if ((networkId == null && this.win.web3 != null)) {
         //     return new Web3(this.win.web3.currentProvider);
         // }
@@ -45,7 +54,8 @@ export class Web3Service {
         return this.web3ProviderCache.get(networkId)!;
     }
 
-    public getSmartContract(networkId?: number): UtopiaContract {
+    public getSmartContract(networkId?: number): UtopiaContract
+    {
         if (networkId == null || this.networkId() == networkId) {
             networkId = this.metaMaskProvider != undefined ? this.networkId() : Networks.MainNet().id;
             if (!this.web3ProviderCache.has(networkId)) {
@@ -67,11 +77,13 @@ export class Web3Service {
         return this.contractCache.get(networkId!)!;
     }
 
-    public providerIfPresent(): any {
+    public providerIfPresent(): any
+    {
         return this.metaMaskProvider;
     }
 
-    public provider(): Observable<any> {
+    public provider(): Observable<any>
+    {
         if (this.metaMaskProvider !== undefined) {
             return of(this.metaMaskProvider);
         }
@@ -95,7 +107,8 @@ export class Web3Service {
         );
     }
 
-    private resetObservables() {
+    private resetObservables()
+    {
         setTimeout(() => {
             //FIXME
             //workaround for metamask wallet and networkId not available without interaction
@@ -107,23 +120,27 @@ export class Web3Service {
         }, 0.1);
     }
 
-    private isConnectedInstant(networkId?: number, wallet?: string): boolean {
+    private isConnectedInstant(networkId?: number, wallet?: string): boolean
+    {
         return this.metaMaskProvider != null && this.checkProvider(networkId, wallet);
     }
 
 
-    public isConnected(networkId?: number, wallet?: string): Observable<boolean> {
+    public isConnected(networkId?: number, wallet?: string): Observable<boolean>
+    {
         return this.loadingService.prepare(
             this.provider()
                 .pipe(map(p => this.isConnectedInstant(networkId, wallet)))
         );
     }
 
-    public wallets(): string[] {
+    public wallets(): string[]
+    {
         return this.connectedAccounts;
     }
 
-    public reconnect(): Observable<any> {
+    public reconnect(): Observable<any>
+    {
         return this.loadingService.prepare(
             this.provider()
                 .pipe(switchMap(provider =>
@@ -137,11 +154,24 @@ export class Web3Service {
         );
     }
 
-    public connect(networkId?: number, wallet?: string): Observable<boolean> {
+    public connect(options?: { networkId?: number, wallet?: string, openDialogIfFailed?: boolean }): Observable<boolean>
+    {
+        const connection = this.tryForConnection(options);
+        if (options?.openDialogIfFailed ?? false) {
+            return connection.pipe(switchMap(c => {
+                if (c) return of(true);
+                return this.openConnectionDialog({ network: options?.networkId, wallet: options?.wallet });
+            }));
+        }
+        return connection;
+    }
+
+    private tryForConnection(options?: { networkId?: number, wallet?: string }): Observable<boolean>
+    {
         if (this.metaMaskProvider === null) {
             return of(false);
         }
-        if (this.isConnectedInstant(networkId, wallet)) {
+        if (this.isConnectedInstant(options?.networkId, options?.wallet)) {
             return of(true);
         }
         //     return of(true);
@@ -158,7 +188,7 @@ export class Web3Service {
                                     this.connectedAccounts = d as any;
                                     this.connectedSubject.next(this.isConnectedInstant());
                                     return this.connectedAccounts.indexOf(provider.selectedAddress) == 0
-                                        && this.checkProvider(networkId, wallet);
+                                        && this.checkProvider(options?.networkId, options?.wallet);
                                 }),
                                 catchError(e => of(false))
                             );
@@ -167,13 +197,15 @@ export class Web3Service {
         );
     }
 
-    private checkProvider(networkId?: number, wallet?: string): boolean {
+    private checkProvider(networkId?: number, wallet?: string): boolean
+    {
         return !isNaN(this.networkId()) && this.wallet() != null &&
             (networkId == null || this.networkId() == networkId)
-            && (wallet == null || this.connectedAccounts.indexOf(wallet.toLowerCase()) >= 0);
+            && (wallet == null || this.metaMaskProvider.selectedAddress.toLowerCase() == wallet.toLowerCase());
     }
 
-    private from(f) {
+    private from(f)
+    {
         return new Observable(s => {
             return from(f).subscribe(
                 v => this.zone.run(() => s.next(v)),
@@ -183,11 +215,22 @@ export class Web3Service {
         });
     }
 
-    wallet(): string {
+    private openConnectionDialog(options: { network: number, wallet: string }): Observable<boolean>
+    {
+        let ref = this.dialog.open(MetaMaskConnectingComponent, {
+            disableClose: true,
+            data: options as ConnectionDetail
+        });
+        return ref.componentInstance.result$;
+    }
+
+    wallet(): string
+    {
         return this.walletSubject.getValue();
     }
 
-    networkId(): number {
+    networkId(): number
+    {
         return this.networkSubject.getValue();
     }
 }

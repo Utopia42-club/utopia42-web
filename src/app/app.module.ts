@@ -40,7 +40,7 @@ import {OverlayModule} from '@angular/cdk/overlay';
 import {PluginEditorComponent} from './utopia-game/plugin/plugin-editor/plugin-editor.component';
 import {PluginSelectionComponent} from './utopia-game/plugin/plugin-selection/plugin-selection.component';
 import {MatListModule} from '@angular/material/list';
-import {AuthInterceptor} from './auth.interceptor';
+import {AuthInterceptor} from './auth/auth.interceptor';
 import {GlobalErrorHandlerService} from './global-error-handler.service';
 import {SimpleDialogComponent} from './simple-dialog/simple-dialog.component';
 import {MatMenuModule} from '@angular/material/menu';

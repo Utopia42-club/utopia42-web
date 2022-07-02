@@ -10,7 +10,7 @@ import { Clipboard } from '@angular/cdk/clipboard';
 import * as uuid from 'uuid';
 import { Position } from './position';
 import { UtopiaGameComponent } from './utopia-game.component';
-import { AuthService } from "../auth.service";
+import { AuthService } from "../auth/auth.service";
 
 @Injectable()
 export class UtopiaBridgeService
@@ -231,8 +231,8 @@ export interface ReportPlayerStateRequestBodyType
 
 export interface ReportLoggedInUserRequestBodyType
 {
-    walletId: string;
-    isGuest: boolean;
+    WalletId: string;
+    IsGuest: boolean;
 }
 
 export type SetNftRequest = BridgeMessage<SetNftRequestBodyType>;

@@ -7,7 +7,7 @@ import {MAT_DIALOG_DATA, MatDialog, MatDialogRef,} from '@angular/material/dialo
 import {of, Subscription} from 'rxjs';
 import {LoadingService} from '../loading/loading.service';
 import {ToastrService} from 'ngx-toastr';
-import {AuthService} from '../auth.service';
+import {AuthService} from '../auth/auth.service';
 import {FormArray, FormControl, FormGroup, FormGroupDirective, NgForm, Validators} from '@angular/forms';
 import {Configurations} from "../configurations";
 import {ErrorStateMatcher} from "@angular/material/core";

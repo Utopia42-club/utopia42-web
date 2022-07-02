@@ -21,7 +21,7 @@ import { ActivatedRoute } from '@angular/router';
 import { UtopiaApiService } from './plugin/utopia-api.service';
 import { PluginExecutionService } from './plugin/plugin-execution.service';
 import { LoadingService } from '../loading/loading.service';
-import { combineLatest, Subscription } from 'rxjs';
+import { combineLatest, of, Subscription } from 'rxjs';
 import { Plugin } from './plugin/Plugin';
 import { PluginService } from './plugin/plugin.service';
 import { Overlay } from '@angular/cdk/overlay';
@@ -30,8 +30,8 @@ import { PluginSelectionComponent } from './plugin/plugin-selection/plugin-selec
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { SearchCriteria } from './plugin/SearchCriteria';
 import { PlayerStateService } from './player-state.service';
-import { AuthService } from '../auth.service';
-import { distinctUntilChanged, filter, map, take } from "rxjs/operators";
+import { AuthService } from '../auth/auth.service';
+import { distinctUntilChanged, filter, map, switchMap, take } from "rxjs/operators";
 
 export const GAME_TOKEN = new InjectionToken<UtopiaGameComponent>('GAME_TOKEN');
 
@@ -82,15 +82,19 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
                 this.bridge.setStartingPosition(position);
             }
         }));
-        var userSubscription = combineLatest([this.bridge.gameState$, this.bridge.loggedInUser$])
+        const userSubscription = combineLatest([this.bridge.gameState$, this.bridge.loggedInUser$])
             .pipe(filter(([s, u]: [State, ReportLoggedInUserRequestBodyType]) => s == State.PLAYING),
                 map(([s, u]) => u),
                 distinctUntilChanged((a, b) =>
-                    a.isGuest != b.isGuest || (!a.isGuest && a.walletId != b.walletId)
-                ), take(1)).subscribe((session) => {
-                this.authService.updateSession(session);
+                    a.IsGuest != b.IsGuest || (!a.IsGuest && a.WalletId != b.WalletId)
+                ), take(1), switchMap(session => {
+                    this.authService.updateSession({ walletId: session.WalletId, isGuest: session.IsGuest });
+                    if (!this.authService.isGuestSession())
+                        return this.authService.getAuthToken(true);
+                    return of(null);
+                })).subscribe((token) => {
                 this.playerStateService.connect();
-                if (!this.authService.isGuestSession())
+                if (token != null)
                     this.runAutoStartPlugins();
             });
         this.subscription.add(userSubscription);
@@ -103,7 +107,8 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
 
     openPluginDialog(mode: 'menu' | 'running')
     {
-        if (this.pluginDialogRef != null)
+        console.log("plugin request");
+        if (this.pluginDialogRef != null || this.authService.isGuestSession())
             return;
 
         this.authService.getAuthToken()
@@ -170,7 +175,8 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
         );
     }
 
-    private startGame() {
+    private startGame()
+    {
         let buildUrl = '/assets/game/0.20-rc28/Build';
         let loaderUrl = buildUrl + '/web.loader.js';
         let config = {
@@ -261,7 +267,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
 
     private runAutoStartPlugins()
     {
-        if(this.authService.isGuestSession()) return;
+        if (this.authService.isGuestSession()) return;
         this.pluginService.getAllAutostartPluginsForUser(new SearchCriteria(null, 100))
             .subscribe(plugins => {
                 for (let plugin of plugins) {

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Configurations } from '../configurations';
 import { Subject } from 'rxjs';
-import { AuthService } from "../auth.service";
+import { AuthService } from "../auth/auth.service";
 
 @Injectable({
     providedIn: 'root',
@@ -21,11 +21,13 @@ export class PlayerStateService
 
     connect()
     {
-        if (this.ws != null)
-            return; // or throw error?
+        if (this.ws != null) {
+            this.ws.close();
+            return;
+        }
         this.state = ConnectionState.CONNECTING;
         if (!this.authService.isGuestSession())
-            this.authService.getAuthToken(true).subscribe(token => {
+            this.authService.getAuthToken().subscribe(token => {
                 if (token != null) {
                     console.log('Connecting to ' + this.endpoint);
                     this.doConnect(token);
@@ -36,14 +38,18 @@ export class PlayerStateService
 
     private doConnect(token: string)
     {
+        console.log("Connecting socket...");
+
         var ws = this.ws = new WebSocket(this.endpoint);
         this.ws.onopen = e => {
             if (this.ws != ws) return;
 
             console.log('Connected to ' + this.endpoint);
             this.state = ConnectionState.CONNECTED;
-            if (!this.authService.isGuestSession())
+            if (!this.authService.isGuestSession()) {
+                console.log("Authenticating on socket...")
                 this.ws.send('@authToken:' + token);
+            }
         }
         this.ws.onmessage = event => {
             if (this.ws != ws) return;
@@ -52,7 +58,7 @@ export class PlayerStateService
             if (msg.startsWith('@error')) {
                 if (msg.startsWith('@error:Unauthorized')) {
                     this.disconnect();
-                    this.authService.RemoveCachedAuthToken();
+                    this.authService.removeCachedAuthToken();
                     this.connect();
                 } else {
                     throw new Error(msg.slice(7, msg.length));
@@ -64,6 +70,7 @@ export class PlayerStateService
         };
         this.ws.onclose = event => {
             if (this.ws != ws) return;
+            console.log("Socket was closed...");
 
             this.ws = null;
             if (this.state != ConnectionState.CONNECTING) {
