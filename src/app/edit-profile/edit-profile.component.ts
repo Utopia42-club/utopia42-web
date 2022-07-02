@@ -58,12 +58,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
             avatarUrl: new FormControl(null, [Validators.maxLength(255),
                 Validators.pattern(this.urlPattern)
             ]),
-            links: new FormArray([
-                this.createLinkFormGroup({
-                    media: Media.INSTAGRAM,
-                    link: null,
-                })
-            ]),
+            links: new FormArray([]),
         });
     }
 
