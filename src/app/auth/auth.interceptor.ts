@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 import {
     HttpErrorResponse,
     HttpEvent,
@@ -7,20 +7,23 @@ import {
     HttpRequest,
     HttpResponse
 } from '@angular/common/http';
-import {Observable, throwError} from 'rxjs';
-import {Configurations} from '../configurations';
-import {catchError, concatMap, map, tap} from 'rxjs/operators';
-import {AuthService, TOKEN_HEADER_KEY} from './auth.service';
+import { Observable, throwError } from 'rxjs';
+import { Configurations } from '../configurations';
+import { catchError, concatMap, map, tap } from 'rxjs/operators';
+import { AuthService, TOKEN_HEADER_KEY } from './auth.service';
 import { AuthDetails } from "./auth-details";
 
 @Injectable()
-export class AuthInterceptor implements HttpInterceptor {
+export class AuthInterceptor implements HttpInterceptor
+{
 
 
-    constructor(readonly authService: AuthService) {
+    constructor(readonly authService: AuthService)
+    {
     }
 
-    intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
+    intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>>
+    {
         if (!request.url.startsWith(Configurations.SERVER_URL)
             || request.url.endsWith('networks.json')
             || request.url.includes('/auth')
@@ -28,7 +31,7 @@ export class AuthInterceptor implements HttpInterceptor {
             return next.handle(request);
         } else if (request.url.includes('/profile/current')) {
             let req = request.clone({
-                headers:     request.headers.set(TOKEN_HEADER_KEY, AuthDetails.loadFromStorage()?.token ?? "Invalid Token")
+                headers: request.headers.set(TOKEN_HEADER_KEY, AuthDetails.loadFromStorage()?.token ?? "Invalid Token")
             });
             return next.handle(req);
         }
