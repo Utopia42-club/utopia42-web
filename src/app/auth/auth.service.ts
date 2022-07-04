@@ -124,7 +124,7 @@ export class AuthService
 
     private doGetAuthToken(): Observable<string>
     {
-        if (this.currentGameSession.isGuest === true)
+        if (this.currentGameSession?.isGuest === true)
             return throwError('Cannot perform authentication in guest mode');
         let provider;
         let walletId = this.currentGameSession?.walletId;
