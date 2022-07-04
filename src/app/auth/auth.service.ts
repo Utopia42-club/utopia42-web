@@ -101,7 +101,7 @@ export class AuthService
             }
         }
         this.loadingToken = true;
-        this.tokenObservable = this.doGetAuthToken();
+        this.tokenObservable = this.doGetAuthToken().pipe(shareReplay(1));
         return this.tokenObservable;
     }
 

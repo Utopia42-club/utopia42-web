@@ -6,7 +6,7 @@
             <div fxLayout="row" fxLayoutGap="1em" fxLayoutAlign="center start">
                 <div fxLayout="column" fxLayoutGap="0.6em" fxLayoutAlign="center center">
                     <div class="profile">
-                        <img class="profile-image" [src]="imageSrc"/>
+                        <img class="profile-image" [src]="imageSrc == null ? unknownImage : imageSrc"/>
                         <label for="file-upload" class="file-input-label">
                             <p class="label">
                                 Click to choose picture
@@ -14,10 +14,11 @@
                         </label>
                         <input id="file-upload" class="file-input" type="file" accept="image/*" #fileInput
                                (change)="onImageChange(fileInput.files[0])"/>
-                        <!--                        <button mat-icon-button color="warn" (click)="deletePicture()" class="delete-profile-button"-->
-                        <!--                                matTooltip="Delete image">-->
-                        <!--                            <mat-icon>delete</mat-icon>-->
-                        <!--                        </button>-->
+                        <button *ngIf="imageSrc != null" mat-icon-button color="warn" (click)="removeImage()"
+                                class="delete-profile-button"
+                                matTooltip="Remove image">
+                            <mat-icon>close</mat-icon>
+                        </button>
                     </div>
                     <mat-form-field class="field">
                         <mat-label>Name</mat-label>
@@ -82,7 +83,7 @@
         <button tabindex="-1" mat-raised-button color="accent" (click)="cancel()">
             Cancel
         </button>
-        <button [disabled]="!form.valid" mat-raised-button color="primary" (click)="update()">
+        <button [disabled]="!form.valid" mat-raised-button color="primary" (click)="save()">
             Save
         </button>
     </mat-dialog-actions>

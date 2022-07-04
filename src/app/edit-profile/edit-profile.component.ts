@@ -1,19 +1,21 @@
-import {ExceptionDialogContentComponent} from '../exception-dialog-content/exception-dialog-content.component';
-import {concatMap} from 'rxjs/operators';
-import {ProfileService} from './profile.service';
-import {Web3Service} from '../ehtereum/web3.service';
-import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialog, MatDialogRef,} from '@angular/material/dialog';
-import {of, Subscription} from 'rxjs';
-import {LoadingService} from '../loading/loading.service';
-import {ToastrService} from 'ngx-toastr';
-import {AuthService} from '../auth/auth.service';
-import {FormArray, FormControl, FormGroup, FormGroupDirective, NgForm, Validators} from '@angular/forms';
-import {Configurations} from "../configurations";
-import {ErrorStateMatcher} from "@angular/material/core";
+import { ExceptionDialogContentComponent } from '../exception-dialog-content/exception-dialog-content.component';
+import { concatMap } from 'rxjs/operators';
+import { ProfileService } from './profile.service';
+import { Web3Service } from '../ehtereum/web3.service';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef, } from '@angular/material/dialog';
+import { of, Subscription } from 'rxjs';
+import { LoadingService } from '../loading/loading.service';
+import { ToastrService } from 'ngx-toastr';
+import { AuthService } from '../auth/auth.service';
+import { FormArray, FormControl, FormGroup, FormGroupDirective, NgForm, Validators } from '@angular/forms';
+import { Configurations } from "../configurations";
+import { ErrorStateMatcher } from "@angular/material/core";
 
-export class EagerStateMatcher implements ErrorStateMatcher {
-    isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
+export class EagerStateMatcher implements ErrorStateMatcher
+{
+    isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean
+    {
         const isSubmitted = form && form.submitted;
         return !!(control && control.invalid && (control.dirty || control.touched || isSubmitted));
     }
@@ -24,12 +26,14 @@ export class EagerStateMatcher implements ErrorStateMatcher {
     templateUrl: './edit-profile.component.html',
     styleUrls: ['./edit-profile.component.scss'],
 })
-export class EditProfileComponent implements OnInit, OnDestroy {
+export class EditProfileComponent implements OnInit, OnDestroy
+{
     private subscription = new Subscription();
-    private imageFile: File;
+    private chosenImageFile: File;
+    private imageChanged = false;
     readonly walletId: string;
     readonly unknownImage = 'assets/images/unknown.jpg';
-    imageSrc: string | ArrayBuffer = this.unknownImage;
+    imageSrc: string | ArrayBuffer;
 
     linkMedias: Media[] = [
         Media.INSTAGRAM,
@@ -47,7 +51,8 @@ export class EditProfileComponent implements OnInit, OnDestroy {
                 private dialog: MatDialog,
                 private readonly web3Service: Web3Service, private readonly profileService: ProfileService,
                 private readonly authService: AuthService, private readonly loadingService: LoadingService,
-                private readonly toaster: ToastrService) {
+                private readonly toaster: ToastrService)
+    {
 
         this.walletId = data.walletId;
 
@@ -62,19 +67,23 @@ export class EditProfileComponent implements OnInit, OnDestroy {
         });
     }
 
-    ngOnInit(): void {
+    ngOnInit(): void
+    {
         this.loadData();
     }
 
-    ngOnDestroy(): void {
+    ngOnDestroy(): void
+    {
         this.subscription.unsubscribe();
     }
 
-    removeLink(index: number): void {
+    removeLink(index: number): void
+    {
         (this.form.get('links') as FormArray).removeAt(index);
     }
 
-    addLink(): void {
+    addLink(): void
+    {
         (this.form.get('links') as FormArray).push(
             this.createLinkFormGroup({
                 media: Media.INSTAGRAM,
@@ -83,8 +92,9 @@ export class EditProfileComponent implements OnInit, OnDestroy {
         );
     }
 
-    onImageChange(file: File): void {
-        if (file) {
+    onImageChange(file: File): void
+    {
+        if (file != null) {
             if (file.size > 2 ** 20) {
                 this.dialog.open(ExceptionDialogContentComponent, {
                     data: {
@@ -99,19 +109,23 @@ export class EditProfileComponent implements OnInit, OnDestroy {
 
             reader.onload = (_) => {
                 this.imageSrc = reader.result;
-                this.imageFile = file;
+                this.chosenImageFile = file;
+                this.imageChanged = true;
             };
         } else {
-            this.imageFile = null;
-            this.imageSrc = this.unknownImage;
+            this.chosenImageFile = null;
+            this.imageChanged = true;
+            this.imageSrc = null;
         }
     }
 
-    cancel(): void {
+    cancel(): void
+    {
         this.dialogRef.close();
     }
 
-    loadData(): void {
+    loadData(): void
+    {
         this.subscription.add(this.loadingService.prepare(
                 this.profileService.getProfile(this.walletId)
                     .pipe(
@@ -148,7 +162,8 @@ export class EditProfileComponent implements OnInit, OnDestroy {
         );
     }
 
-    createLinkFormGroup(link: Link) {
+    createLinkFormGroup(link: Link)
+    {
         return new FormGroup({
             media: new FormControl(link.media, [Validators.required]),
             link: new FormControl(link.link, [
@@ -158,20 +173,21 @@ export class EditProfileComponent implements OnInit, OnDestroy {
         });
     }
 
-    update(): void {
+    save(): void
+    {
         let profile = this.form.getRawValue();
         this.subscription.add(
             this.loadingService.prepare(
                 this.profileService.setProfile(profile)
                     .pipe(
                         concatMap((_) => {
-                            //FIXME
-                            if (this.imageFile != null)
+                            if (!this.imageChanged) return of(true);
+                            if (this.chosenImageFile != null)
                                 return this.profileService.setProfileImage(
-                                    this.imageFile,
+                                    this.chosenImageFile,
                                     this.walletId,
                                 );
-                            return of(true);
+                            return this.profileService.unsetProfileImage(this.walletId);
                         }),
                     )
             ).subscribe(value => {
@@ -181,24 +197,29 @@ export class EditProfileComponent implements OnInit, OnDestroy {
         );
     }
 
-    asFormArray(form: any): FormArray {
+    asFormArray(form: any): FormArray
+    {
         return form as FormArray;
     }
 
-    asFormGroup(form: any): FormGroup {
+    asFormGroup(form: any): FormGroup
+    {
         return form as FormGroup;
     }
 
-    openAvatarDesigner() {
+    openAvatarDesigner()
+    {
         window.open(Configurations.AVATAR_DESIGNER_URL);
     }
 
-    deletePicture() {
+    removeImage()
+    {
         this.onImageChange(null);
     }
 }
 
-export interface Profile {
+export interface Profile
+{
     walletId: string;
     name?: string;
     bio?: string;
@@ -207,12 +228,14 @@ export interface Profile {
     avatarUrl?: string;
 }
 
-interface Link {
+interface Link
+{
     link: string;
     media: Media;
 }
 
-enum Media {
+enum Media
+{
     TELEGRAM = 'TELEGRAM',
     DISCORD = 'DISCORD',
     FACEBOOK = 'FACEBOOK',

@@ -107,7 +107,6 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
 
     openPluginDialog(mode: 'menu' | 'running')
     {
-        console.log("plugin request");
         if (this.pluginDialogRef != null || this.authService.isGuestSession())
             return;
 
