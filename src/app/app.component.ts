@@ -98,16 +98,17 @@ export class AppComponent implements OnInit, AfterViewInit
     {
 
     }
-
-    async moveToHome()
-    {
-        if (this.isGameOpen()) {
-            await window.bridge.game.requestClose();
-        }
-        this.router.navigateByUrl('/rpc', { skipLocationChange: true }).then(() => {
-            this.router.navigate(['game']);
-        });
-    }
+    //
+    // async moveToHome()
+    // {
+    //     if (this.isGameOpen()) {
+    //         await window.bridge.game.requestClose();
+    //     }
+    //     // location.reload();
+    //     // this.router.navigateByUrl('/rpc', { skipLocationChange: true }).then(() => {
+    //     //     this.router.navigate(['game']);
+    //     // });
+    // }
 
     public buyLands(request: BuyLandsRequest): void
     {

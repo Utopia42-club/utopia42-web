@@ -72,7 +72,7 @@ export class UtopiaBridgeService
 
     public moveToHome(payload: BridgeMessage<undefined>): void
     {
-        this.app.moveToHome();
+        this.game.requestClose();
     }
 
     public openPluginsDialog(payload: OpenPluginDialogRequest): void

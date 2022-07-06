@@ -3,9 +3,7 @@ import { Configurations } from '../configurations';
 import { Subject } from 'rxjs';
 import { AuthService } from "../auth/auth.service";
 
-@Injectable({
-    providedIn: 'root',
-})
+@Injectable()
 export class PlayerStateService
 {
     readonly endpoint = Configurations.WS_SERVER_URL + '/position';

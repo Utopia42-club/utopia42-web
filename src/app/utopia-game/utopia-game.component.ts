@@ -1,6 +1,6 @@
 import {
     ChangeDetectorRef,
-    Component,
+    Component, ElementRef,
     HostListener,
     InjectionToken,
     NgZone,
@@ -39,13 +39,14 @@ export const GAME_TOKEN = new InjectionToken<UtopiaGameComponent>('GAME_TOKEN');
     selector: 'app-utopia-game',
     templateUrl: './utopia-game.component.html',
     styleUrls: ['./utopia-game.component.scss'],
-    providers: [UtopiaBridgeService, UtopiaApiService]
+    providers: [UtopiaBridgeService, UtopiaApiService, PlayerStateService]
 })
 export class UtopiaGameComponent implements OnInit, OnDestroy
 {
     progress = 0;
 
-    @ViewChild('gameCanvas', { static: true }) gameCanvas;
+    @ViewChild('gameCanvas', { static: true })
+    gameCanvas:ElementRef<HTMLCanvasElement>;
 
     runningPlugins = new Map<string, PluginExecutionService>();
     runningPluginsKeys = new Set<string>();
@@ -53,6 +54,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
     private readonly subscription = new Subscription();
     private pluginDialogRef: MatDialogRef<PluginSelectionComponent>;
     private script: HTMLScriptElement;
+    private closed = false;
 
 
     constructor(private bridge: UtopiaBridgeService, private appComponent: AppComponent,
@@ -71,7 +73,8 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
     @HostListener('window:beforeunload', ['$event'])
     handleClose(event)
     {
-        event.returnValue = false;
+        if (!this.closed)
+            event.returnValue = false;
     }
 
     ngOnInit(): void
@@ -232,6 +235,9 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
         });
         if (this.bridge.unityInstance != null) {
             await this.bridge.unityInstance.Quit();
+            this.closed = true;
+            this.playerStateService.disconnect();
+            location.reload();
         }
     }
 
