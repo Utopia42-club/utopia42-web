@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, of, ReplaySubject, Subject } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { AppComponent } from '../app.component';
@@ -13,7 +13,7 @@ import { UtopiaGameComponent } from './utopia-game.component';
 import { AuthService } from "../auth/auth.service";
 
 @Injectable()
-export class UtopiaBridgeService
+export class UtopiaBridgeService implements OnDestroy
 {
     public unityInstance;
     public game: UtopiaGameComponent;
@@ -23,11 +23,42 @@ export class UtopiaBridgeService
     private readonly loggedInUser = new BehaviorSubject<ReportLoggedInUserRequestBodyType>(null);
     public readonly loggedInUser$ = this.loggedInUser.asObservable();
 
+    private readonly pasteListener = (e: ClipboardEvent) => this.writeToClipboard(e);
+    private readonly cutCopyListener = (e: ClipboardEvent) => this.readClipboard(e);
+
     private responseObservable = new Map<string, Subject<any>>(); // key: CallId, value: Observable
 
     constructor(private web3service: Web3Service, private app: AppComponent, private clipboard: Clipboard,
                 readonly zone: NgZone, readonly authService: AuthService)
     {
+        document.addEventListener("paste", this.pasteListener);
+        document.addEventListener("copy", this.cutCopyListener);
+        document.addEventListener("cut", this.cutCopyListener);
+    }
+
+    ngOnDestroy(): void
+    {
+        document.removeEventListener("paste", this.pasteListener);
+        document.removeEventListener("copy", this.cutCopyListener);
+        document.removeEventListener("cut", this.cutCopyListener);
+    }
+
+    private writeToClipboard(e: ClipboardEvent)
+    {
+        if ((e.target as HTMLElement).tagName != "BODY")
+            return;
+        this.unityInstance?.SendMessage('WebBridge', 'UpdateClipboard', e.clipboardData.getData("text"));
+    }
+
+    private readClipboard(e: ClipboardEvent)
+    {
+        if ((e.target as HTMLElement).tagName != "BODY")
+            return;
+        setTimeout(() => {
+            this.call('WebBridge', 'ReadClipboard', null).subscribe(v => {
+                this.clipboard.copy(v)
+            });
+        }, 5);
     }
 
     public reportGameState(payload: ReportGameStateRequest): void
