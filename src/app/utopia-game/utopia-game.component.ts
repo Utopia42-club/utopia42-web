@@ -102,7 +102,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
             });
         this.subscription.add(userSubscription);
 
-        this.subscription.add(this.playerStateService.messages.subscribe(message => {
+        this.subscription.add(this.playerStateService.messages$.subscribe(message => {
             this.bridge.reportOtherPlayersState(JSON.parse(message.data));
         }));
         this.startGame();

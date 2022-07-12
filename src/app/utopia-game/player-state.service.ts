@@ -9,7 +9,8 @@ export class PlayerStateService
     readonly endpoint = Configurations.WS_SERVER_URL + '/position';
 
     ws: WebSocket;
-    public messages = new Subject<any>();
+    private readonly messages = new Subject<any>();
+    readonly messages$ = this.messages.asObservable();
     private requestClose = false;
     private state: ConnectionState = ConnectionState.DISCONNECTED;
 
@@ -99,8 +100,9 @@ export class PlayerStateService
 
     public reportPlayerState(playerState: any)
     {
-        if (!this.authService.isGuestSession() && this.state == ConnectionState.CONNECTED)
+        if (!this.authService.isGuestSession() && this.state == ConnectionState.CONNECTED) {
             this.ws.send(playerState);
+        }
     }
 }
 
