@@ -9,6 +9,7 @@ import { BuyLandValidation } from './buy-land-validation';
 import { BuyLandsData } from './buy-lands-data';
 import { BuyLandsService } from './buy-lands.service';
 import { ToastrService } from 'ngx-toastr';
+import { ConnectionDetail } from "../ehtereum/connection-detail";
 
 
 @Component({
@@ -16,8 +17,10 @@ import { ToastrService } from 'ngx-toastr';
     templateUrl: './buy-lands.component.html',
     styleUrls: ['./buy-lands.component.scss'],
 })
-export class BuyLandsComponent implements OnInit, OnDestroy {
-    private subscription = new Subscription();
+export class BuyLandsComponent implements OnInit, OnDestroy
+{
+    private readonly connection: ConnectionDetail;
+    private readonly subscription = new Subscription();
     readonly lands: PricedLand[];
     private signature: string;
     private lastLandCheckedId: number;
@@ -28,11 +31,14 @@ export class BuyLandsComponent implements OnInit, OnDestroy {
                 private dialog: MatDialog,
                 private readonly loadingService: LoadingService,
                 private readonly toaster: ToastrService,
-                private readonly buyLandsService: BuyLandsService) {
+                private readonly buyLandsService: BuyLandsService)
+    {
         this.lands = data.request.body;
+        this.connection = data.request.connection;
     }
 
-    ngOnInit(): void {
+    ngOnInit(): void
+    {
         this.subscription.add(
             this.loadingService.prepare(
                 of(this.lands).pipe(
@@ -43,7 +49,7 @@ export class BuyLandsComponent implements OnInit, OnDestroy {
                         throw new Error('Exactly one land should be selected for buying');
                     }),
                     concatMap((land: Land) => {
-                        return this.buyLandsService.validate(land);
+                        return this.buyLandsService.validate(land, this.connection.network, this.connection.contractAddress);
                     }),
                     concatMap((validation: BuyLandValidation) => {
                         if (!validation.valid) {
@@ -57,7 +63,7 @@ export class BuyLandsComponent implements OnInit, OnDestroy {
                             }
                             throw new Error('No signature retrieved');
                         }
-                        throw new Error('Conflict detected. Buying cancelled');
+                        throw new Error('The requested land has conflict with other lands.');
                     }),
                     concatMap((price: string) => {
                         this.lands[0].price = Number(price);
@@ -78,11 +84,13 @@ export class BuyLandsComponent implements OnInit, OnDestroy {
         );
     }
 
-    ngOnDestroy(): void {
+    ngOnDestroy(): void
+    {
         this.subscription.unsubscribe();
     }
 
-    buy(): void {
+    buy(): void
+    {
         this.subscription.add(
             this.loadingService.prepare(
                 of(this.lands[0]).pipe(
@@ -112,11 +120,13 @@ export class BuyLandsComponent implements OnInit, OnDestroy {
         );
     }
 
-    cancel(): void {
+    cancel(): void
+    {
         this.dialogRef.close();
     }
 
-    totalPrice(): number {
+    totalPrice(): number
+    {
         let price = 0;
         for (let land of this.lands) {
             price = price + land.price;
@@ -124,7 +134,8 @@ export class BuyLandsComponent implements OnInit, OnDestroy {
         return price;
     }
 
-    getLandProperty(land: PricedLand, property: string): Number {
+    getLandProperty(land: PricedLand, property: string): Number
+    {
         if (property == 'x1') {
             return land.startCoordinate.x;
         }

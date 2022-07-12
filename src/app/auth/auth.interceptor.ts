@@ -25,7 +25,7 @@ export class AuthInterceptor implements HttpInterceptor
     intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>>
     {
         if (!request.url.startsWith(Configurations.SERVER_URL)
-            || request.url.endsWith('networks.json')
+            || request.url.includes('/world/contracts')
             || request.url.includes('/auth')
             || request.url.includes('/login')) {
             return next.handle(request);

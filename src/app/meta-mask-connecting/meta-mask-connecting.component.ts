@@ -3,7 +3,6 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Subject, Subscription, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ConnectionDetail } from '../ehtereum/connection-detail';
-import { Networks } from '../ehtereum/network';
 import { Web3Service } from '../ehtereum/web3.service';
 
 @Component({
@@ -19,15 +18,17 @@ export class MetaMaskConnectingComponent implements OnInit, OnDestroy
     public readonly result$ = this.resultSubject.asObservable();
     private readonly targetWallet: string;
     private readonly targetNetwork: number;
+    private readonly targetNetworkName: string;
     retry = null;
     title: string = "Connecting to Meta Mask";
     message: string;
 
-    constructor(@Inject(MAT_DIALOG_DATA) public data: ConnectionDetail,
+    constructor(@Inject(MAT_DIALOG_DATA) public data: ConnectionDetail & { networkName: string },
                 private service: Web3Service,
                 private dialog: MatDialogRef<any>)
     {
         this.targetNetwork = data.network;
+        this.targetNetworkName = data.networkName;
         this.targetWallet = data.wallet;
         this.stateSubscription.add(service.connected$.subscribe(() => this.tryConnect()));
         this.stateSubscription.add(service.wallet$.subscribe(() => this.tryConnect()));
@@ -43,11 +44,6 @@ export class MetaMaskConnectingComponent implements OnInit, OnDestroy
     {
         this.stateSubscription.unsubscribe();
         this.connectionSubscription?.unsubscribe();
-    }
-
-    networkName(): string
-    {
-        return Networks.all.get(this.data.network)?.name ?? 'unknown';
     }
 
     cancel(): void
@@ -68,6 +64,7 @@ export class MetaMaskConnectingComponent implements OnInit, OnDestroy
             this.service.connect({
                 networkId: this.targetNetwork,
                 wallet: this.targetWallet,
+                networkName: this.targetNetworkName,
                 openDialogIfFailed: false
             })
                 .pipe(catchError(e => {
@@ -105,12 +102,7 @@ export class MetaMaskConnectingComponent implements OnInit, OnDestroy
     private wrongNetwork(): void
     {
         this.retry = () => this.tryConnect();
-        if (this.networkName() == null) {
-            this.title = "Unknown network id in url";
-            this.message = "";
-        } else {
-            this.title = "You are connected to the wrong network";
-            this.message = `Please connect to the ${this.networkName()}`;
-        }
+        this.title = "You are connected to the wrong network";
+        this.message = `Please connect to the ${this.targetNetworkName ?? 'unknown'}`;
     }
 }

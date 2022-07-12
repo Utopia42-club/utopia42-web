@@ -6,10 +6,8 @@ import { catchError, distinctUntilChanged, map, switchMap } from 'rxjs/operators
 import Web3 from 'web3';
 import { LoadingService } from '../loading/loading.service';
 import { UTOPIA_ABI } from './abi';
-import { Networks } from './network';
 import { UtopiaContract } from './utopia-contract';
 import { MetaMaskConnectingComponent } from "../meta-mask-connecting/meta-mask-connecting.component";
-import { ConnectionDetail } from "./connection-detail";
 import { MatDialog } from "@angular/material/dialog";
 
 
@@ -20,7 +18,7 @@ export class Web3Service
 {
     private connectedAccounts: string[] = [];
     private web3ProviderCache = new Map<number, Web3>();
-    private contractCache = new Map<number, UtopiaContract>();
+    private contractCache = new Map<string, UtopiaContract>();
     private readonly connectedSubject = new BehaviorSubject(false);
     readonly connected$ = this.connectedSubject.asObservable().pipe(distinctUntilChanged());
     private readonly walletSubject = new BehaviorSubject<string>(null);
@@ -37,44 +35,37 @@ export class Web3Service
     {
     }
 
-    private getWeb3(networkId: number): Web3 | null
+    private getWeb3(networkId: number, rpcProvider: string): Web3 | null
     {
         // if ((networkId == null && this.win.web3 != null)) {
         //     return new Web3(this.win.web3.currentProvider);
         // }
-        if (!Networks.supported.has(networkId)) {
-            return null;
-        }
         if (this.web3ProviderCache.has(networkId)) {
             return this.web3ProviderCache.get(networkId)!;
         }
 
-        let network = Networks.all.get(networkId);
-        this.web3ProviderCache.set(networkId, new Web3(new Web3.providers.HttpProvider(network.provider)));
+        this.web3ProviderCache.set(networkId, new Web3(new Web3.providers.HttpProvider(rpcProvider)));
         return this.web3ProviderCache.get(networkId)!;
     }
 
-    public getSmartContract(networkId?: number): UtopiaContract
+    public getSmartContract(rpcProvider: string, contractAddress: string): UtopiaContract
     {
-        if (networkId == null || this.networkId() == networkId) {
-            networkId = this.metaMaskProvider != undefined ? this.networkId() : Networks.MainNet().id;
-            if (!this.web3ProviderCache.has(networkId)) {
-                this.web3ProviderCache.set(networkId, new Web3(this.metaMaskProvider));
-            }
+        if (this.metaMaskProvider == null) {
+            throw new Error("Provider is not created.");
+        }
+        const networkId = this.networkId();
+        if (!this.web3ProviderCache.has(networkId)) {
+            this.web3ProviderCache.set(networkId, new Web3(this.metaMaskProvider));
         }
 
-        if (!Networks.supported.has(networkId)) {
-            return null;
-        }
-
-        if (!this.contractCache.has(networkId)) {
-            const web3 = this.getWeb3(networkId)!;
-            var network = Networks.all.get(networkId);
-            this.contractCache.set(networkId,
-                new UtopiaContract(new web3.eth.Contract(UTOPIA_ABI, network.contractAddress),
+        const key = `${networkId}_${contractAddress}`;
+        if (!this.contractCache.has(key)) {
+            const web3 = this.getWeb3(networkId, rpcProvider)!;
+            this.contractCache.set(key,
+                new UtopiaContract(new web3.eth.Contract(UTOPIA_ABI, contractAddress),
                     this.loadingService, this.wallet(), web3, this.toaster));
         }
-        return this.contractCache.get(networkId!)!;
+        return this.contractCache.get(key!)!;
     }
 
     public providerIfPresent(): any
@@ -154,13 +145,17 @@ export class Web3Service
         );
     }
 
-    public connect(options?: { networkId?: number, wallet?: string, openDialogIfFailed?: boolean }): Observable<boolean>
+    public connect(options?: { networkId?: number, wallet?: string, networkName?: string, openDialogIfFailed?: boolean }): Observable<boolean>
     {
         const connection = this.tryForConnection(options);
         if (options?.openDialogIfFailed ?? false) {
             return connection.pipe(switchMap(c => {
                 if (c) return of(true);
-                return this.openConnectionDialog({ network: options?.networkId, wallet: options?.wallet });
+                return this.openConnectionDialog({
+                    network: options?.networkId,
+                    wallet: options?.wallet,
+                    networkName: options?.networkName
+                });
             }));
         }
         return connection;
@@ -215,11 +210,11 @@ export class Web3Service
         });
     }
 
-    private openConnectionDialog(options: { network: number, wallet: string }): Observable<boolean>
+    private openConnectionDialog(options: { network: number, wallet: string, networkName: string }): Observable<boolean>
     {
         let ref = this.dialog.open(MetaMaskConnectingComponent, {
             disableClose: true,
-            data: options as ConnectionDetail
+            data: options
         });
         return ref.componentInstance.result$;
     }

@@ -16,12 +16,15 @@ export class BuyLandsService
     {
     }
 
-    public validate(land: Land): Observable<BuyLandValidation>
+    public validate(land: Land, network: number, contract: string): Observable<BuyLandValidation>
     {
         return this.httpClient.post<any>(
-            this.endpoint + `/land/validateForBuy`,
+            `${this.endpoint}/land/validateForBuy`,
             JSON.stringify(land),
-            { headers: new HttpHeaders().set('Content-Type', 'application/json') }
+            {
+                headers: new HttpHeaders().set('Content-Type', 'application/json'),
+                params: { network, contract }
+            }
         );
     }
 }

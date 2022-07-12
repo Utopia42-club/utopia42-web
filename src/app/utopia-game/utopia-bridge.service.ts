@@ -28,7 +28,7 @@ export class UtopiaBridgeService implements OnDestroy
 
     private responseObservable = new Map<string, Subject<any>>(); // key: CallId, value: Observable
 
-    constructor(private web3service: Web3Service, private app: AppComponent, private clipboard: Clipboard,
+    constructor(private web3Service: Web3Service, private app: AppComponent, private clipboard: Clipboard,
                 readonly zone: NgZone, readonly authService: AuthService)
     {
         document.addEventListener("paste", this.pasteListener);
@@ -120,22 +120,18 @@ export class UtopiaBridgeService implements OnDestroy
 
     public connectMetamask(payload: BridgeMessage<number>): Observable<ConnectionDetail>
     {
-        return this.app.getContractSafe(payload.body, null)
+        return this.web3Service.connect({ openDialogIfFailed: true })
             .pipe(
-                switchMap(value => {
-                    if (value != null)
-                        return this.web3service.isConnected()
-                    return of(null);
-                }),
                 map((v) => {
                     if (!v)
                         return null;
                     return {
-                        network: this.web3service.networkId(),
-                        wallet: this.web3service.wallet(),
+                        network: this.web3Service.networkId(),
+                        wallet: this.web3Service.wallet(),
+                        contractAddress: null,
                     };
                 })
-            )
+            );
     }
 
     public copyToClipboard(payload: BridgeMessage<string>): void
