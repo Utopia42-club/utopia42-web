@@ -11,6 +11,7 @@ import * as uuid from 'uuid';
 import { Position } from './position';
 import { UtopiaGameComponent } from './utopia-game.component';
 import { AuthService } from "../auth/auth.service";
+import { MetaverseContract } from "../multiverse/metaverse-contract";
 
 @Injectable()
 export class UtopiaBridgeService implements OnDestroy
@@ -18,6 +19,7 @@ export class UtopiaBridgeService implements OnDestroy
     public unityInstance;
     public game: UtopiaGameComponent;
     private position?: Position;
+    private startingContract: MetaverseContract;
     private readonly gameState = new BehaviorSubject<State>(null);
     public readonly gameState$ = this.gameState.asObservable();
     private readonly loggedInUser = new BehaviorSubject<ReportLoggedInUserRequestBodyType>(null);
@@ -137,6 +139,18 @@ export class UtopiaBridgeService implements OnDestroy
     public copyToClipboard(payload: BridgeMessage<string>): void
     {
         this.clipboard.copy(payload.body);
+    }
+
+
+    public getStartingContract(payload: BridgeMessage<string>): Observable<MetaverseContract>
+    {
+        console.log(this.startingContract?.networkId == null ? null : this.startingContract);
+        return of(this.startingContract?.networkId == null ? null : this.startingContract);
+    }
+
+    public setStartingContract(startingContract: MetaverseContract)
+    {
+        this.startingContract = startingContract;
     }
 
     public getStartingPosition(payload: BridgeMessage<string>): Observable<Position>

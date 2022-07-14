@@ -111,7 +111,7 @@ export class BuyLandsComponent implements OnInit, OnDestroy
                     }),
                     tap((v) => {
                         if (v) {
-                            this.toaster.info('Land bought successfully');
+                            this.toaster.info('Buying land requested successfully');
                         }
                         this.dialogRef.close();
                     })
