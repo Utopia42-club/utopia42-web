@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { BuyLandsData } from './buy-lands/buy-lands-data';
 import { BuyLandsComponent } from './buy-lands/buy-lands.component';
@@ -24,8 +24,8 @@ import {
 import { HttpClient } from '@angular/common/http';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
-import { MetaMaskConnectingComponent } from "./meta-mask-connecting/meta-mask-connecting.component";
 import { BridgeMessage } from "./utopia-game/bridge-message";
+import { MultiverseService } from "./multiverse/multiverse.service";
 
 @Component({
     selector: 'app-root',
@@ -35,8 +35,8 @@ import { BridgeMessage } from "./utopia-game/bridge-message";
 export class AppComponent implements OnInit, AfterViewInit
 {
 
-    constructor(private service: Web3Service, private dialog: MatDialog, private route: ActivatedRoute,
-                readonly router: Router, readonly http: HttpClient)
+    constructor(private readonly multiverseService: MultiverseService, private readonly web3Service: Web3Service, private readonly dialog: MatDialog,
+                private readonly route: ActivatedRoute, readonly router: Router, readonly http: HttpClient)
     {
     }
 
@@ -46,7 +46,8 @@ export class AppComponent implements OnInit, AfterViewInit
             if (params.method != null && params.wallet != null && params.network != null) {
                 let connection: ConnectionDetail = {
                     wallet: `${params.wallet}`.toLowerCase(),
-                    network: parseInt(`${params.network}`)
+                    network: parseInt(`${params.network}`),
+                    contractAddress: params.contract.toString()
                 };
                 if (params.param != null) {
                     if (params.method == 'buy') {
@@ -98,6 +99,7 @@ export class AppComponent implements OnInit, AfterViewInit
     {
 
     }
+
     //
     // async moveToHome()
     // {
@@ -112,7 +114,7 @@ export class AppComponent implements OnInit, AfterViewInit
 
     public buyLands(request: BuyLandsRequest): void
     {
-        this.getContractSafe(request.connection.network, request.connection.wallet)
+        this.getContractSafe(request.connection)
             .subscribe(contract => {
                 if (contract != null) {
                     this.dialog.open(BuyLandsComponent, {
@@ -125,7 +127,7 @@ export class AppComponent implements OnInit, AfterViewInit
 
     public saveLands(request: SaveLandsRequest): void
     {
-        this.getContractSafe(request.connection.network, request.connection.wallet)
+        this.getContractSafe(request.connection)
             .subscribe(contract => {
                 if (contract != null) {
                     this.dialog.open(SaveLandsComponent, {
@@ -138,7 +140,7 @@ export class AppComponent implements OnInit, AfterViewInit
 
     public transferLand(request: TransferLandRequest): void
     {
-        this.getContractSafe(request.connection.network, request.connection.wallet)
+        this.getContractSafe(request.connection)
             .subscribe(contract => {
                 if (contract != null) {
                     this.dialog.open(TransferLandComponent, {
@@ -151,7 +153,7 @@ export class AppComponent implements OnInit, AfterViewInit
 
     public setNft(request: SetNftRequest): void
     {
-        this.getContractSafe(request.connection.network, request.connection.wallet)
+        this.getContractSafe(request.connection)
             .subscribe(contract => {
                 if (contract != null) {
                     this.dialog.open(SetNftComponent, {
@@ -164,7 +166,7 @@ export class AppComponent implements OnInit, AfterViewInit
 
     public editProfile(request: BridgeMessage<undefined>): void
     {
-        this.getContractSafe(request.connection.network, request.connection.wallet)
+        this.getContractSafe(request.connection)
             .subscribe(contract => {
                 if (contract != null) {
                     window.bridge?.freezeGame();
@@ -184,17 +186,19 @@ export class AppComponent implements OnInit, AfterViewInit
             });
     }
 
-    public getContractSafe(network: number, wallet: string): Observable<UtopiaContract>
+    private getContractSafe(connection: ConnectionDetail): Observable<UtopiaContract>
     {
-        return this.service.connect({ networkId: network, wallet: wallet, openDialogIfFailed: true })
-            .pipe(
-                map((connected) => {
-                    if (connected) {
-                        return this.service.getSmartContract();
-                    }
-                    return null;
-                })
-            );
+        return this.multiverseService.getContract(connection.network, connection.contractAddress)
+            .pipe(switchMap(metaverseContract => {
+                return this.web3Service.connect({
+                    networkId: connection.network,
+                    wallet: connection.wallet,
+                    networkName: metaverseContract.networkName,
+                    openDialogIfFailed: true
+                }).pipe(map(connected =>
+                    connected ? this.web3Service.getSmartContract(metaverseContract.networkRpcProvider, metaverseContract.address) : null
+                ));
+            }));
     }
 
     isGameOpen()

@@ -32,6 +32,7 @@ import { SearchCriteria } from './plugin/SearchCriteria';
 import { PlayerStateService } from './player-state.service';
 import { AuthService } from '../auth/auth.service';
 import { distinctUntilChanged, filter, map, switchMap, take } from "rxjs/operators";
+import { MetaverseContract } from "../multiverse/metaverse-contract";
 
 export const GAME_TOKEN = new InjectionToken<UtopiaGameComponent>('GAME_TOKEN');
 
@@ -46,7 +47,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
     progress = 0;
 
     @ViewChild('gameCanvas', { static: true })
-    gameCanvas:ElementRef<HTMLCanvasElement>;
+    gameCanvas: ElementRef<HTMLCanvasElement>;
 
     runningPlugins = new Map<string, PluginExecutionService>();
     runningPluginsKeys = new Set<string>();
@@ -83,6 +84,14 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
             const position = params.position;
             if (position != null) {
                 this.bridge.setStartingPosition(position);
+            }
+            const contract = params.contract?.toString();
+            const net = parseInt(`${params.network}`);
+            if (contract != null && !isNaN(net)) {
+                let metaverseContract = new MetaverseContract();
+                metaverseContract.networkId = net;
+                metaverseContract.address = contract;
+                this.bridge.setStartingContract(metaverseContract)
             }
         }));
         const userSubscription = combineLatest([this.bridge.gameState$, this.bridge.loggedInUser$])

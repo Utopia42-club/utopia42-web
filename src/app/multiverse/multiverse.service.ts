@@ -1,0 +1,35 @@
+import { Injectable } from '@angular/core';
+import { Configurations } from "../configurations";
+import { Observable } from "rxjs";
+import { MetaverseContract } from "./metaverse-contract";
+import { HttpClient } from "@angular/common/http";
+import { shareReplay } from "rxjs/operators";
+
+@Injectable({
+    providedIn: 'root'
+})
+export class MultiverseService
+{
+    private lastRequest: {
+        networkId: number,
+        contract: string,
+        result: Observable<MetaverseContract>
+    };
+
+    constructor(private httpClient: HttpClient)
+    {
+    }
+
+    public getContract(networkId: number, contract: string): Observable<MetaverseContract>
+    {
+        if (this.lastRequest != null && this.lastRequest.networkId == networkId
+            && this.lastRequest.contract == contract)
+            return this.lastRequest.result;
+       this.lastRequest = {
+            networkId, contract,
+            result: this.httpClient.get<MetaverseContract>(`${Configurations.SERVER_URL}/world/contracts/${networkId}/${contract}`)
+                .pipe(shareReplay(1))
+        };
+       return this.lastRequest.result;
+    }
+}

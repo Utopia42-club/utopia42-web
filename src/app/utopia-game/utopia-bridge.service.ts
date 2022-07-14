@@ -11,6 +11,7 @@ import * as uuid from 'uuid';
 import { Position } from './position';
 import { UtopiaGameComponent } from './utopia-game.component';
 import { AuthService } from "../auth/auth.service";
+import { MetaverseContract } from "../multiverse/metaverse-contract";
 
 @Injectable()
 export class UtopiaBridgeService implements OnDestroy
@@ -18,6 +19,7 @@ export class UtopiaBridgeService implements OnDestroy
     public unityInstance;
     public game: UtopiaGameComponent;
     private position?: Position;
+    private startingContract: MetaverseContract;
     private readonly gameState = new BehaviorSubject<State>(null);
     public readonly gameState$ = this.gameState.asObservable();
     private readonly loggedInUser = new BehaviorSubject<ReportLoggedInUserRequestBodyType>(null);
@@ -28,7 +30,7 @@ export class UtopiaBridgeService implements OnDestroy
 
     private responseObservable = new Map<string, Subject<any>>(); // key: CallId, value: Observable
 
-    constructor(private web3service: Web3Service, private app: AppComponent, private clipboard: Clipboard,
+    constructor(private web3Service: Web3Service, private app: AppComponent, private clipboard: Clipboard,
                 readonly zone: NgZone, readonly authService: AuthService)
     {
         document.addEventListener("paste", this.pasteListener);
@@ -120,27 +122,35 @@ export class UtopiaBridgeService implements OnDestroy
 
     public connectMetamask(payload: BridgeMessage<number>): Observable<ConnectionDetail>
     {
-        return this.app.getContractSafe(payload.body, null)
+        return this.web3Service.connect({ openDialogIfFailed: true })
             .pipe(
-                switchMap(value => {
-                    if (value != null)
-                        return this.web3service.isConnected()
-                    return of(null);
-                }),
                 map((v) => {
                     if (!v)
                         return null;
                     return {
-                        network: this.web3service.networkId(),
-                        wallet: this.web3service.wallet(),
+                        network: this.web3Service.networkId(),
+                        wallet: this.web3Service.wallet(),
+                        contractAddress: null,
                     };
                 })
-            )
+            );
     }
 
     public copyToClipboard(payload: BridgeMessage<string>): void
     {
         this.clipboard.copy(payload.body);
+    }
+
+
+    public getStartingContract(payload: BridgeMessage<string>): Observable<MetaverseContract>
+    {
+        console.log(this.startingContract?.networkId == null ? null : this.startingContract);
+        return of(this.startingContract?.networkId == null ? null : this.startingContract);
+    }
+
+    public setStartingContract(startingContract: MetaverseContract)
+    {
+        this.startingContract = startingContract;
     }
 
     public getStartingPosition(payload: BridgeMessage<string>): Observable<Position>

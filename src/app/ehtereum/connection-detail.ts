@@ -1,4 +1,6 @@
-export interface ConnectionDetail {
+export interface ConnectionDetail
+{
     wallet: string;
     network: number;
+    contractAddress: string;
 }
