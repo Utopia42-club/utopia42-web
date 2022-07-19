@@ -1,4 +1,4 @@
-#Utopia42
+# Utopia42
 Utopia42 is a decentralized Multiverse. Different organizations, communities and
 projects can deploy their own Metaverse and start to build their own 3D world. Utopia42
 was launched on Polygon as the first blockchain. The protocol is multichain and soon
