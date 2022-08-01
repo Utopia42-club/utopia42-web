@@ -1,9 +1,9 @@
 export class Configurations {
-    // public static readonly SERVER_URL = 'https://utopiapi.vitaminhq.ir';
-    // public static readonly WS_SERVER_URL = 'wss://utopiapi.vitaminhq.ir';
+    public static readonly SERVER_URL = 'https://utopiapi.vitaminhq.ir';
+    public static readonly WS_SERVER_URL = 'wss://utopiapi.vitaminhq.ir';
 
-    public static readonly SERVER_URL = 'https://demoapi.utopia42.club';
-    public static readonly WS_SERVER_URL = 'wss://demoapi.utopia42.club';
+    // public static readonly SERVER_URL = 'https://demoapi.utopia42.club';
+    // public static readonly WS_SERVER_URL = 'wss://demoapi.utopia42.club';
 
     // public static readonly SERVER_URL = "https://api.utopia42.club";
     // public static readonly WS_SERVER_URL = "wss://api.utopia42.club";
