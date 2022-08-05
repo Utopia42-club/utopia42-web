@@ -1,11 +1,14 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { Configurations } from '../configurations';
-import { Subject } from 'rxjs';
+import { Observable, Subject, Subscription } from 'rxjs';
 import { AuthService } from "../auth/auth.service";
+import { distinctUntilChanged, filter } from "rxjs/operators";
 
 @Injectable()
-export class PlayerStateService
+export class PlayerStateService implements OnDestroy
 {
+    private static readonly CONTRACT_CHANGED_REASON = "CONTRACT_CHANGED_REASON";
+    private contractSubscription: Subscription;
     readonly endpoint = Configurations.WS_SERVER_URL + '/position';
 
     ws: WebSocket;
@@ -18,7 +21,26 @@ export class PlayerStateService
     {
     }
 
-    connect()
+    start(contract$: Observable<{ network: number, address: string }>)
+    {
+        if (this.contractSubscription != null)
+            throw new Error("Service already started!");
+        this.contractSubscription = contract$
+            .pipe(filter(v => v != null),
+                distinctUntilChanged(
+                    (c1, c2) => c1.network != c2.network || c1.address?.toLowerCase() != c2.address.toLowerCase()
+                )
+            ).subscribe(contract => {
+                if (this.ws != null) {
+                    const ws = this.ws;
+                    this.ws = null;
+                    ws.close(undefined, PlayerStateService.CONTRACT_CHANGED_REASON);
+                }
+                this.connect(contract.network, contract.address);
+            });
+    }
+
+    connect(network: number, contract: string)
     {
         if (this.ws != null) {
             this.ws.close();
@@ -29,17 +51,17 @@ export class PlayerStateService
             this.authService.getAuthToken().subscribe(token => {
                 if (token != null) {
                     console.log('Connecting to ' + this.endpoint);
-                    this.doConnect(token);
+                    this.doConnect(token, network, contract);
                 }
             });
-        else this.doConnect(null);
+        else this.doConnect(null, network, contract);
     }
 
-    private doConnect(token: string)
+    private doConnect(token: string, network: number, contract: string)
     {
         console.log("Connecting socket...");
 
-        var ws = this.ws = new WebSocket(this.endpoint);
+        var ws = this.ws = new WebSocket(`${this.endpoint}/${network}/${contract.toLowerCase()}`);
         this.ws.onopen = e => {
             if (this.ws != ws) return;
 
@@ -58,7 +80,7 @@ export class PlayerStateService
                 if (msg.startsWith('@error:Unauthorized')) {
                     this.disconnect();
                     this.authService.removeCachedAuthToken();
-                    this.connect();
+                    this.connect(network, contract);
                 } else {
                     throw new Error(msg.slice(7, msg.length));
                 }
@@ -68,6 +90,8 @@ export class PlayerStateService
             }
         };
         this.ws.onclose = event => {
+            if (event.reason == PlayerStateService.CONTRACT_CHANGED_REASON)
+                return;
             if (this.ws != ws) return;
             console.log("Socket was closed...");
 
@@ -75,7 +99,7 @@ export class PlayerStateService
             if (this.state != ConnectionState.CONNECTING) {
                 this.state = ConnectionState.DISCONNECTED;
                 if (!this.requestClose) {
-                    this.doConnect(token);
+                    this.doConnect(token, network, contract);
                 }
             }
         };
@@ -103,6 +127,11 @@ export class PlayerStateService
         if (!this.authService.isGuestSession() && this.state == ConnectionState.CONNECTED) {
             this.ws.send(playerState);
         }
+    }
+
+    ngOnDestroy()
+    {
+        this.contractSubscription?.unsubscribe();
     }
 }
 

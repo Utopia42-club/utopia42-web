@@ -1,6 +1,7 @@
 import {
     ChangeDetectorRef,
-    Component, ElementRef,
+    Component,
+    ElementRef,
     HostListener,
     InjectionToken,
     NgZone,
@@ -105,7 +106,16 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
                         return this.authService.getAuthToken(true);
                     return of(null);
                 })).subscribe((token) => {
-                this.playerStateService.connect();
+                this.playerStateService.start(this.bridge.loggedInUser$
+                    .pipe(filter(s=>
+                        s != null && s.Network != null && s.Contract != null
+                    ), map(s=>{
+                        return {
+                            network: s.Network,
+                            address: s.Contract
+                        }
+                    }))
+                );
                 if (token != null)
                     this.runAutoStartPlugins();
             });

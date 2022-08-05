@@ -1,6 +1,6 @@
 import { Injectable, NgZone, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, of, ReplaySubject, Subject } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { AppComponent } from '../app.component';
 import { ConnectionDetail } from '../ehtereum/connection-detail';
 import { Land } from '../ehtereum/models';
@@ -274,6 +274,8 @@ export interface ReportLoggedInUserRequestBodyType
 {
     WalletId: string;
     IsGuest: boolean;
+    Contract: string;
+    Network: number;
 }
 
 export type SetNftRequest = BridgeMessage<SetNftRequestBodyType>;
