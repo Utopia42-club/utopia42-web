@@ -94,20 +94,20 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
             .pipe(filter(([s, u]: [State, Session]) => s == State.PLAYING),
                 map(([s, u]) => u),
                 distinctUntilChanged((a, b) =>
-                    a.IsGuest != b.IsGuest || (!a.IsGuest && a.WalletId != b.WalletId)
+                    a.isGuest != b.isGuest || (!a.isGuest && a.walletId != b.walletId)
                 ), take(1), switchMap(session => {
-                    this.authService.updateSession({ walletId: session.WalletId, isGuest: session.IsGuest });
+                    this.authService.updateSession({ walletId: session.walletId, isGuest: session.isGuest });
                     if (!this.authService.isGuestSession())
                         return this.authService.getAuthToken(true);
                     return of(null);
                 })).subscribe((token) => {
                 this.playerStateService.start(this.bridge.session$
                     .pipe(filter(s =>
-                        s != null && s.Network != null && s.Contract != null
+                        s != null && s.network != null && s.contract != null
                     ), map(s => {
                         return {
-                            network: s.Network,
-                            address: s.Contract
+                            network: s.network,
+                            address: s.contract
                         }
                     }))
                 );

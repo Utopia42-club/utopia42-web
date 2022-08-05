@@ -1,29 +1,36 @@
-import {NgZone} from '@angular/core';
-import {Observable, Subscription} from 'rxjs';
-import {UtopiaApiService} from './utopia-api.service';
-import {catchError, switchMap, tap} from 'rxjs/operators';
-import {SimpleDialogAction, SimpleDialogComponent, SimpleDialogData} from '../../simple-dialog/simple-dialog.component';
-import {ToastrService} from 'ngx-toastr';
-import {Plugin} from './Plugin';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {PluginService} from './plugin.service';
+import { NgZone } from '@angular/core';
+import { Observable, Subscription } from 'rxjs';
+import { UtopiaApiService } from './utopia-api.service';
+import { catchError, switchMap, tap } from 'rxjs/operators';
+import {
+    SimpleDialogAction,
+    SimpleDialogComponent,
+    SimpleDialogData
+} from '../../simple-dialog/simple-dialog.component';
+import { ToastrService } from 'ngx-toastr';
+import { Plugin } from './Plugin';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { PluginService } from './plugin.service';
 
-export class PluginExecutionService {
+export class PluginExecutionService
+{
     private secureEvalIframe: HTMLIFrameElement;
     private windowListener: (event: MessageEvent) => void;
 
     private runningPlugin: Plugin;
     private runId: string;
 
-    resultMap = new Map<string, Subscription>();
+    readonly resultMap = new Map<string, Subscription>();
 
     private terminateConfirmationDialog: MatDialogRef<SimpleDialogComponent>;
 
     constructor(readonly pluginService: PluginService, readonly utopiaApi: UtopiaApiService,
-                readonly zone: NgZone, readonly dialog: MatDialog, readonly toaster: ToastrService) {
+                readonly zone: NgZone, readonly dialog: MatDialog, readonly toaster: ToastrService)
+    {
     }
 
-    runPlugin(plugin: Plugin, runId: string): Observable<PluginRunResult> {
+    runPlugin(plugin: Plugin, runId: string): Observable<PluginRunResult>
+    {
         this.runId = runId;
         this.runningPlugin = plugin;
 
@@ -44,14 +51,16 @@ export class PluginExecutionService {
             );
     }
 
-    private closeTerminateDialog(terminated: boolean) {
+    private closeTerminateDialog(terminated: boolean)
+    {
         if (this.terminateConfirmationDialog) {
             this.terminateConfirmationDialog.close(terminated);
             this.terminateConfirmationDialog = null;
         }
     }
 
-    public openTerminateConfirmationDialog() {
+    public openTerminateConfirmationDialog()
+    {
         this.terminateConfirmationDialog = this.dialog.open(SimpleDialogComponent, {
             data: new SimpleDialogData(
                 'Plugin Execution',
@@ -70,7 +79,8 @@ export class PluginExecutionService {
         return this.terminateConfirmationDialog;
     }
 
-    private doRunPlugin(code: string): Observable<PluginRunResult> {
+    private doRunPlugin(code: string): Observable<PluginRunResult>
+    {
         return this.pluginService.getFile('assets/sandbox-0.1.html')
             .pipe(
                 switchMap(iframeSrc => {
@@ -91,31 +101,33 @@ export class PluginExecutionService {
                             }, '*');
                         });
 
-                        let that = this;
+                        let executionService = this;
                         this.windowListener = function windowListener(event: MessageEvent) {
-                            if ((event.origin === 'null' && event.source === that.secureEvalIframe.contentWindow)) {
+                            if ((event.origin === 'null' && event.source === executionService.secureEvalIframe.contentWindow)) {
                                 let message = event.data;
                                 switch (message.type) {
                                     case 'request': {
                                         if (message.body.method == 'getInputsFromUser') {
-                                            message.body.params.push(that.runningPlugin);
+                                            message.body.params.push(executionService.runningPlugin);
                                         }
-                                        let res = that.zone.run(() => that.utopiaApi[message.body.method].apply(that.utopiaApi, message.body.params));
+                                        let res = executionService.zone.run(() => executionService.utopiaApi[message.body.method].apply(executionService.utopiaApi, message.body.params));
                                         if (res instanceof Observable) {
-                                            that.resultMap.set(message.id, res.subscribe(value => {
-                                                that.secureEvalIframe.contentWindow.postMessage({
+                                            executionService.resultMap.set(message.id, res.subscribe(value => {
+                                                executionService.secureEvalIframe.contentWindow.postMessage({
                                                     id: message.id,
                                                     type: 'response',
                                                     body: value
                                                 }, '*');
                                             }, error => {
-                                                that.secureEvalIframe.contentWindow.postMessage({
+                                                executionService.resultMap.delete(message.id);
+                                                executionService.secureEvalIframe.contentWindow.postMessage({
                                                     id: message.id,
                                                     type: 'responseError',
                                                     body: error
                                                 }, '*');
                                             }, () => {
-                                                that.secureEvalIframe.contentWindow.postMessage({
+                                                executionService.resultMap.delete(message.id);
+                                                executionService.secureEvalIframe.contentWindow.postMessage({
                                                     id: message.id,
                                                     type: 'complete'
                                                 }, '*');
@@ -124,26 +136,26 @@ export class PluginExecutionService {
                                         break;
                                     }
                                     case 'cancel': {
-                                        if (that.resultMap.has(message.id)) {
-                                            that.resultMap.get(message.id).unsubscribe();
-                                            that.resultMap.delete(message.id);
+                                        if (executionService.resultMap.has(message.id)) {
+                                            executionService.resultMap.get(message.id).unsubscribe();
+                                            executionService.resultMap.delete(message.id);
                                         } else {
                                             subs.error(new Error('Invalid message from plugin: ' + message.id));
                                         }
                                         break;
                                     }
                                     case 'end': {
-                                        that.clearPluginFrame();
+                                        executionService.clearPluginFrame();
                                         subs.complete();
                                         break;
                                     }
                                     case 'error': {
-                                        that.clearPluginFrame();
+                                        executionService.clearPluginFrame();
                                         subs.error(message.body);
                                         break;
                                     }
                                     default: {
-                                        that.clearPluginFrame();
+                                        executionService.clearPluginFrame();
                                         subs.error(new Error('Unknown message type from plugin: ' + message.type));
                                     }
                                 }
@@ -156,7 +168,8 @@ export class PluginExecutionService {
             );
     }
 
-    private clearPluginFrame() {
+    private clearPluginFrame()
+    {
         if (this.secureEvalIframe != null) {
             window.removeEventListener('message', this.windowListener);
             document.body.removeChild(this.secureEvalIframe);
@@ -166,19 +179,22 @@ export class PluginExecutionService {
         }
     }
 
-    public terminateFrame() {
+    public terminateFrame()
+    {
         this.secureEvalIframe.contentWindow.postMessage({
             type: 'end',
         }, '*');
         this.clearPluginFrame(); // Do we need to wait a little to do this?
     }
 
-    getRunningPlugin() {
+    getRunningPlugin()
+    {
         return this.runningPlugin;
     }
 }
 
-export interface PluginRunResult {
+export interface PluginRunResult
+{
     type: string;
     body?: string;
     error?: string;

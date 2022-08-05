@@ -81,7 +81,12 @@ export class UtopiaBridgeService implements OnDestroy
 
     public reportSession(payload: ReportSessionRequest): void
     {
-        this.session.next(payload.body);
+        this.session.next({
+            walletId: payload.body.WalletId,
+            contract: payload.body.Contract,
+            isGuest: payload.body.IsGuest,
+            network: payload.body.Network,
+        });
     }
 
     public buy(payload: BuyLandsRequest): void
@@ -278,6 +283,14 @@ export interface ReportPlayerStateRequestBodyType
 
 export interface Session
 {
+    walletId: string;
+    isGuest: boolean;
+    contract: string;
+    network: number;
+}
+
+interface SessionRequestBody
+{
     WalletId: string;
     IsGuest: boolean;
     Contract: string;
@@ -290,7 +303,7 @@ export type TransferLandRequest = BridgeMessage<number>;
 
 export type ReportGameStateRequest = BridgeMessage<string>;
 
-export type ReportSessionRequest = BridgeMessage<Session>;
+export type ReportSessionRequest = BridgeMessage<SessionRequestBody>;
 
 export type ReportPlayerStateRequest = BridgeMessage<ReportPlayerStateRequestBodyType>;
 
