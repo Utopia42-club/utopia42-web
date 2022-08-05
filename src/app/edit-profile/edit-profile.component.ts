@@ -209,7 +209,7 @@ export class EditProfileComponent implements OnInit, OnDestroy
 
     openAvatarDesigner()
     {
-        window.open(Configurations.AVATAR_DESIGNER_URL);
+        window.open(Configurations.Instance.avatarDesignerURL);
     }
 
     removeImage()

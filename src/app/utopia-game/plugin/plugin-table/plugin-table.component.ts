@@ -105,7 +105,7 @@ export class PluginTableComponent implements OnInit, AfterViewInit {
     }
 
     isPluginVerified(plugin: Plugin): boolean {
-        return plugin.scriptUrl.trim().startsWith(Configurations.PLUGINS_REPO_PREFIX);
+        return plugin.scriptUrl.trim().startsWith(Configurations.Instance.pluginsRepoPrefix);
     }
 }
 

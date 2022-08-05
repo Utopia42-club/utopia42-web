@@ -11,12 +11,7 @@ import {
     ViewContainerRef
 } from '@angular/core';
 import { AppComponent } from '../app.component';
-import {
-    ReportLoggedInUserRequestBodyType,
-    ReportPlayerStateRequestBodyType,
-    State,
-    UtopiaBridgeService
-} from './utopia-bridge.service';
+import { ReportPlayerStateRequestBodyType, Session, State, UtopiaBridgeService } from './utopia-bridge.service';
 import { ToastrService } from 'ngx-toastr';
 import { ActivatedRoute } from '@angular/router';
 import { UtopiaApiService } from './plugin/utopia-api.service';
@@ -95,8 +90,8 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
                 this.bridge.setStartingContract(metaverseContract)
             }
         }));
-        const userSubscription = combineLatest([this.bridge.gameState$, this.bridge.loggedInUser$])
-            .pipe(filter(([s, u]: [State, ReportLoggedInUserRequestBodyType]) => s == State.PLAYING),
+        const userSubscription = combineLatest([this.bridge.gameState$, this.bridge.session$])
+            .pipe(filter(([s, u]: [State, Session]) => s == State.PLAYING),
                 map(([s, u]) => u),
                 distinctUntilChanged((a, b) =>
                     a.IsGuest != b.IsGuest || (!a.IsGuest && a.WalletId != b.WalletId)
@@ -106,10 +101,10 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
                         return this.authService.getAuthToken(true);
                     return of(null);
                 })).subscribe((token) => {
-                this.playerStateService.start(this.bridge.loggedInUser$
-                    .pipe(filter(s=>
+                this.playerStateService.start(this.bridge.session$
+                    .pipe(filter(s =>
                         s != null && s.Network != null && s.Contract != null
-                    ), map(s=>{
+                    ), map(s => {
                         return {
                             network: s.Network,
                             address: s.Contract

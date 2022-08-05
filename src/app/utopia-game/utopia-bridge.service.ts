@@ -12,6 +12,7 @@ import { Position } from './position';
 import { UtopiaGameComponent } from './utopia-game.component';
 import { AuthService } from "../auth/auth.service";
 import { MetaverseContract } from "../multiverse/metaverse-contract";
+import { Configurations } from "../configurations";
 
 @Injectable()
 export class UtopiaBridgeService implements OnDestroy
@@ -22,8 +23,8 @@ export class UtopiaBridgeService implements OnDestroy
     private startingContract: MetaverseContract;
     private readonly gameState = new BehaviorSubject<State>(null);
     public readonly gameState$ = this.gameState.asObservable();
-    private readonly loggedInUser = new BehaviorSubject<ReportLoggedInUserRequestBodyType>(null);
-    public readonly loggedInUser$ = this.loggedInUser.asObservable();
+    private readonly session = new BehaviorSubject<Session>(null);
+    public readonly session$ = this.session.asObservable();
 
     private readonly pasteListener = (e: ClipboardEvent) => this.writeToClipboard(e);
     private readonly cutCopyListener = (e: ClipboardEvent) => this.readClipboard(e);
@@ -63,6 +64,11 @@ export class UtopiaBridgeService implements OnDestroy
         }, 5);
     }
 
+    public getConfigurations(): Configurations
+    {
+        return Configurations.Instance;
+    }
+
     public reportGameState(payload: ReportGameStateRequest): void
     {
         this.gameState.next(State[payload.body]);
@@ -73,9 +79,9 @@ export class UtopiaBridgeService implements OnDestroy
         this.game.reportPlayerState(payload.body);
     }
 
-    public reportLoggedInUser(payload: ReportLoggedInUserRequest): void
+    public reportSession(payload: ReportSessionRequest): void
     {
-        this.loggedInUser.next(payload.body);
+        this.session.next(payload.body);
     }
 
     public buy(payload: BuyLandsRequest): void
@@ -270,7 +276,7 @@ export interface ReportPlayerStateRequestBodyType
     jump: boolean;
 }
 
-export interface ReportLoggedInUserRequestBodyType
+export interface Session
 {
     WalletId: string;
     IsGuest: boolean;
@@ -284,7 +290,7 @@ export type TransferLandRequest = BridgeMessage<number>;
 
 export type ReportGameStateRequest = BridgeMessage<string>;
 
-export type ReportLoggedInUserRequest = BridgeMessage<ReportLoggedInUserRequestBodyType>;
+export type ReportSessionRequest = BridgeMessage<Session>;
 
 export type ReportPlayerStateRequest = BridgeMessage<ReportPlayerStateRequestBodyType>;
 

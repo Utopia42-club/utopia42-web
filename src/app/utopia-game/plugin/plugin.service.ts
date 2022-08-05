@@ -10,7 +10,7 @@ import { concatMap, map } from 'rxjs/operators';
     providedIn: 'root',
 })
 export class PluginService {
-    readonly endpoint = Configurations.SERVER_URL + '/plugins';
+    readonly endpoint = Configurations.Instance.apiURL + '/plugins';
 
     constructor(private httpClient: HttpClient) {
 

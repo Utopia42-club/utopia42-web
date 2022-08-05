@@ -10,7 +10,7 @@ import { Configurations } from "../configurations";
 })
 export class BuyLandsService
 {
-    readonly endpoint = Configurations.SERVER_URL;
+    readonly endpoint = Configurations.Instance.apiURL;
 
     constructor(private httpClient: HttpClient)
     {

@@ -27,7 +27,7 @@ export class MultiverseService
             return this.lastRequest.result;
        this.lastRequest = {
             networkId, contract,
-            result: this.httpClient.get<MetaverseContract>(`${Configurations.SERVER_URL}/world/contracts/${networkId}/${contract}`)
+            result: this.httpClient.get<MetaverseContract>(`${Configurations.Instance.apiURL}/world/contracts/${networkId}/${contract}`)
                 .pipe(shareReplay(1))
         };
        return this.lastRequest.result;

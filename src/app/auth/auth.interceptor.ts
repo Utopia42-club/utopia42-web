@@ -16,15 +16,14 @@ import { AuthDetails } from "./auth-details";
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor
 {
-
-
-    constructor(readonly authService: AuthService)
+    private authService: AuthService;
+    constructor()
     {
     }
 
     intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>>
     {
-        if (!request.url.startsWith(Configurations.SERVER_URL)
+        if (Configurations.Instance == null || !request.url.startsWith(Configurations.Instance.apiURL)
             || request.url.includes('/world/contracts')
             || request.url.includes('/auth')
             || request.url.includes('/login')) {
@@ -66,5 +65,10 @@ export class AuthInterceptor implements HttpInterceptor
                     )
                 )
             );
+    }
+
+    setAuthService(service: AuthService)
+    {
+        this.authService = service;
     }
 }

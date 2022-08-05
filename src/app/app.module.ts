@@ -97,6 +97,7 @@ import {
     FileFieldComponent
 } from "./utopia-game/plugin/plugin-inputs-editor/input-form/fields/file-field/file-field.component";
 import { MetaMaskConnectingComponent } from "./meta-mask-connecting/meta-mask-connecting.component";
+import { Configurations } from "./configurations";
 
 @NgModule({
     declarations: [
@@ -176,8 +177,10 @@ import { MetaMaskConnectingComponent } from "./meta-mask-connecting/meta-mask-co
         MatSlideToggleModule
     ],
     providers: [
+        ...Configurations.providers(),
+        AuthInterceptor,
         { provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: { duration: 2500 } },
-        { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+        { provide: HTTP_INTERCEPTORS, useExisting: AuthInterceptor, multi: true },
         { provide: ErrorHandler, useClass: GlobalErrorHandlerService },
     ],
     bootstrap: [AppComponent],

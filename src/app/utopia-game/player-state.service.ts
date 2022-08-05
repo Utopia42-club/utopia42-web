@@ -9,7 +9,7 @@ export class PlayerStateService implements OnDestroy
 {
     private static readonly CONTRACT_CHANGED_REASON = "CONTRACT_CHANGED_REASON";
     private contractSubscription: Subscription;
-    readonly endpoint = Configurations.WS_SERVER_URL + '/position';
+    readonly endpoint = Configurations.Instance.wsServerURL + '/position';
 
     ws: WebSocket;
     private readonly messages = new Subject<any>();

@@ -9,7 +9,7 @@ import { Configurations } from '../configurations';
 })
 export class ProfileService
 {
-    readonly endpoint = Configurations.SERVER_URL + "/profile";
+    readonly endpoint = Configurations.Instance.apiURL + "/profile";
 
     constructor(private httpClient: HttpClient)
     {

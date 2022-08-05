@@ -6,6 +6,7 @@ import { catchError, concatMap, map, shareReplay, switchMap, tap } from 'rxjs/op
 import { Web3Service } from '../ehtereum/web3.service';
 import { ProfileService } from "../edit-profile/profile.service";
 import { AuthDetails } from "./auth-details";
+import { AuthInterceptor } from "./auth.interceptor";
 
 export const TOKEN_HEADER_KEY = 'X-Auth-Token';
 
@@ -14,14 +15,16 @@ export const TOKEN_HEADER_KEY = 'X-Auth-Token';
 })
 export class AuthService
 {
-    readonly endpoint = Configurations.SERVER_URL;
+    readonly endpoint = Configurations.Instance.apiURL;
     private currentGameSession: { walletId: string, isGuest: boolean };
     private tokenObservable: Observable<string>;
     private loadingToken = false;
 
     constructor(private httpClient: HttpClient, readonly web3Service: Web3Service,
-                readonly profileService: ProfileService)
+                readonly profileService: ProfileService,
+                interceptor:AuthInterceptor)
     {
+        interceptor.setAuthService(this);
     }
 
     public updateSession(session: { walletId: string, isGuest: boolean }): void
