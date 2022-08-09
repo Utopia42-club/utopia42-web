@@ -139,9 +139,10 @@ export class PluginExecutionService
                                         if (executionService.resultMap.has(message.id)) {
                                             executionService.resultMap.get(message.id).unsubscribe();
                                             executionService.resultMap.delete(message.id);
-                                        } else {
-                                            subs.error(new Error('Invalid message from plugin: ' + message.id));
                                         }
+                                        // else {
+                                        //     subs.error(new Error('Invalid message from plugin: ' + message.id));
+                                        // }
                                         break;
                                     }
                                     case 'end': {
