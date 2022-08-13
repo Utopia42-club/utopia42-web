@@ -61,7 +61,7 @@ export class PlayerStateService implements OnDestroy
     {
         console.log("Connecting socket...");
 
-        var ws = this.ws = new WebSocket(`${this.endpoint}/${network}/${contract.toLowerCase()}`);
+        var ws = this.ws = new WebSocket(`${this.endpoint}?network=${network}&contract=${contract.toLowerCase()}`);
         this.ws.onopen = e => {
             if (this.ws != ws) return;
 
