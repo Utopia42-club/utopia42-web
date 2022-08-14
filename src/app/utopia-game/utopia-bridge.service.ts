@@ -155,8 +155,7 @@ export class UtopiaBridgeService implements OnDestroy
 
     public getStartingContract(payload: BridgeMessage<string>): Observable<MetaverseContract>
     {
-        console.log(this.startingContract?.networkId == null ? null : this.startingContract);
-        return of(this.startingContract?.networkId == null ? null : this.startingContract);
+        return of(this.startingContract?.network?.id == null ? null : this.startingContract);
     }
 
     public setStartingContract(startingContract: MetaverseContract)

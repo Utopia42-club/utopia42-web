@@ -23,13 +23,16 @@ export class MultiverseService
     public getContract(networkId: number, contract: string): Observable<MetaverseContract>
     {
         if (this.lastRequest != null && this.lastRequest.networkId == networkId
-            && this.lastRequest.contract == contract)
+            && this.lastRequest.contract == contract) {
+            console.log("returning last request!");
             return this.lastRequest.result;
-       this.lastRequest = {
+        }
+        console.log("Creating for new contract");
+        this.lastRequest = {
             networkId, contract,
             result: this.httpClient.get<MetaverseContract>(`${Configurations.Instance.apiURL}/world/contracts/${networkId}/${contract}`)
                 .pipe(shareReplay(1))
         };
-       return this.lastRequest.result;
+        return this.lastRequest.result;
     }
 }

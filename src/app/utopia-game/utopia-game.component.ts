@@ -29,6 +29,7 @@ import { PlayerStateService } from './player-state.service';
 import { AuthService } from '../auth/auth.service';
 import { distinctUntilChanged, filter, map, switchMap, take } from "rxjs/operators";
 import { MetaverseContract } from "../multiverse/metaverse-contract";
+import { NetworkData } from "../multiverse/network-data";
 
 export const GAME_TOKEN = new InjectionToken<UtopiaGameComponent>('GAME_TOKEN');
 
@@ -85,8 +86,9 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
             const net = parseInt(`${params.network}`);
             if (contract != null && !isNaN(net)) {
                 let metaverseContract = new MetaverseContract();
-                metaverseContract.networkId = net;
-                metaverseContract.address = contract;
+                metaverseContract.id = contract;
+                metaverseContract.network = new NetworkData();
+                metaverseContract.network.id = net;
                 this.bridge.setStartingContract(metaverseContract)
             }
         }));
