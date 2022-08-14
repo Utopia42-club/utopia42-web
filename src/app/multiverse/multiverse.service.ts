@@ -24,10 +24,8 @@ export class MultiverseService
     {
         if (this.lastRequest != null && this.lastRequest.networkId == networkId
             && this.lastRequest.contract == contract) {
-            console.log("returning last request!");
             return this.lastRequest.result;
         }
-        console.log("Creating for new contract");
         this.lastRequest = {
             networkId, contract,
             result: this.httpClient.get<MetaverseContract>(`${Configurations.Instance.apiURL}/world/contracts/${networkId}/${contract}`)

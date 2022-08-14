@@ -188,7 +188,6 @@ export class AppComponent implements OnInit, AfterViewInit
 
     private getContractSafe(connection: ConnectionDetail): Observable<UtopiaContract>
     {
-        console.log(connection);
         return this.multiverseService.getContract(connection.network, connection.contractAddress)
             .pipe(switchMap(metaverseContract => {
                 return this.web3Service.connect({

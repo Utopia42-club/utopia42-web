@@ -16,7 +16,6 @@ export class UtopiaContract {
     }
 
     public getLandPrice(land: Land): Observable<string> {
-        console.log(JSON.stringify(land));
         return this.loadingService.prepare(
             new Observable((s) =>
                 this.ethContract.methods.landPrice(land.startCoordinate.x, land.endCoordinate.x, land.startCoordinate.z, land.endCoordinate.z)
@@ -41,8 +40,6 @@ export class UtopiaContract {
                 if (Number(Web3.utils.fromWei(amount)) > Number(Web3.utils.fromWei(balance))) {
                     throw new Error('Insufficient balance (account balance < land price)');
                 }
-                console.log(land.startCoordinate.x, land.endCoordinate.x, land.startCoordinate.z, land.endCoordinate.z, land.ipfsKey || '', lastLandCheckedId, signature,
-                    amount, wallet);
                 return this.sendWithIncreasedGas(
                     this.ethContract.methods.assignLandConflictFree(land.startCoordinate.x, land.endCoordinate.x, land.startCoordinate.z, land.endCoordinate.z, land.ipfsKey || '', lastLandCheckedId, signature),
                     {from: wallet, value: amount});
@@ -118,10 +115,8 @@ export class UtopiaContract {
 
 
     private sendWithIncreasedGas(request: any, options: any, onConfirmation?: (confirmationNumber: number) => void): Observable<any> {
-        console.log("computing gas...")
         return fromPromise(this.web3.eth.getGasPrice())
             .pipe(switchMap(gasPrice => {
-                console.log(gasPrice);
                 return new Observable(s => {
                     request.send({
                         ...options,
