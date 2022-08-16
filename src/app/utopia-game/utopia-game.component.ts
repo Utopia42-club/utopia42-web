@@ -77,26 +77,28 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
 
     ngOnInit(): void
     {
-        this.subscription.add(this.route.queryParams.subscribe(params => {
-            const position = params.position;
-            if (position != null) {
-                this.bridge.setStartingPosition(position);
-            }
-            const contract = params.contract?.toString();
-            const net = parseInt(`${params.network}`);
-            if (contract != null && !isNaN(net)) {
-                let metaverseContract = new MetaverseContract();
-                metaverseContract.id = contract;
-                metaverseContract.network = new NetworkData();
-                metaverseContract.network.id = net;
-                this.bridge.setStartingContract(metaverseContract)
-            }
-        }));
+        this.subscription.add(
+            combineLatest([this.route.params, this.route.queryParams])
+                .subscribe(([params,queryParams]) => {
+                    const position = queryParams.position;
+                    if (position != null) {
+                        this.bridge.setStartingPosition(position);
+                    }
+                    const contract = (params.contract ?? queryParams.contract)?.toString();
+                    const net = parseInt(`${(params.network ?? queryParams.network)}`);
+                    if (contract != null && !isNaN(net)) {
+                        let metaverseContract = new MetaverseContract();
+                        metaverseContract.id = contract;
+                        metaverseContract.network = new NetworkData();
+                        metaverseContract.network.id = net;
+                        this.bridge.setStartingContract(metaverseContract)
+                    }
+                }));
         const userSubscription = combineLatest([this.bridge.gameState$, this.bridge.session$])
             .pipe(filter(([s, u]: [State, Session]) => s == State.PLAYING),
                 map(([s, u]) => u),
                 distinctUntilChanged((a, b) =>
-                    a.isGuest != b.isGuest || (!a.isGuest && a.walletId != b.walletId)
+                    !(a.isGuest != b.isGuest || (!a.isGuest && a.walletId != b.walletId))
                 ), take(1), switchMap(session => {
                     this.authService.updateSession({ walletId: session.walletId, isGuest: session.isGuest });
                     if (!this.authService.isGuestSession())
@@ -195,7 +197,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
 
     private startGame()
     {
-        let buildUrl = '/assets/game/0.21-rc3/Build';
+        let buildUrl = '/assets/game/0.21-rc5/Build';
         let loaderUrl = buildUrl + '/web.loader.js';
         let config = {
             dataUrl: buildUrl + '/web.data',
@@ -204,7 +206,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
             streamingAssetsUrl: 'StreamingAssets',
             companyName: 'Utopia 42',
             productName: 'Utopia 42',
-            productVersion: '0.21-rc3',
+            productVersion: '0.21-rc5',
             showBanner: (m, t) => this.showBanner(m, t),
         };
 

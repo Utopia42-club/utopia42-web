@@ -2,7 +2,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { Configurations } from '../configurations';
 import { Observable, Subject, Subscription } from 'rxjs';
 import { AuthService } from "../auth/auth.service";
-import { distinctUntilChanged, filter } from "rxjs/operators";
+import { distinctUntilChanged, filter, tap } from "rxjs/operators";
 
 @Injectable()
 export class PlayerStateService implements OnDestroy
@@ -28,13 +28,14 @@ export class PlayerStateService implements OnDestroy
         this.contractSubscription = contract$
             .pipe(filter(v => v != null),
                 distinctUntilChanged(
-                    (c1, c2) => c1.network != c2.network || c1.address?.toLowerCase() != c2.address.toLowerCase()
+                    (c1, c2) =>
+                        c1.network == c2.network && c1.address?.toLowerCase() == c2.address.toLowerCase()
                 )
             ).subscribe(contract => {
                 if (this.ws != null) {
                     const ws = this.ws;
                     this.ws = null;
-                    ws.close(undefined, PlayerStateService.CONTRACT_CHANGED_REASON);
+                    ws.close();
                 }
                 this.connect(contract.network, contract.address);
             });
@@ -90,8 +91,6 @@ export class PlayerStateService implements OnDestroy
             }
         };
         this.ws.onclose = event => {
-            if (event.reason == PlayerStateService.CONTRACT_CHANGED_REASON)
-                return;
             if (this.ws != ws) return;
             console.log("Socket was closed...");
 
@@ -125,7 +124,7 @@ export class PlayerStateService implements OnDestroy
     public reportPlayerState(playerState: any)
     {
         if (!this.authService.isGuestSession() && this.state == ConnectionState.CONNECTED) {
-            this.ws.send(playerState);
+            this.ws?.send(playerState);
         }
     }
 
