@@ -4,7 +4,14 @@
     overflow: auto;
 }
 
-mat-toolbar {
+::ng-deep .mat-menu-panel {
+    max-width: none !important;
+}
+
+.toolbar {
+    background-color: var(--background-color);
+    padding: 0 0.6em 0 0.6em;
+
     button {
         max-width: 90%;
         overflow: hidden;

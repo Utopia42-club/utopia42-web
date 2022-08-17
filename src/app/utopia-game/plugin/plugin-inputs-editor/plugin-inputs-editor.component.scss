@@ -1,0 +1,27 @@
+.root {
+    height: min-content;
+}
+
+.loading-inputs {
+    width: 100%;
+    height: 100%;
+    font-size: 2em;
+    font-weight: 500;
+    color: var(--background-contrast-color);
+}
+
+.actions {
+    width: 100%;
+}
+
+.title {
+    font-size: 1.4em;
+    font-weight: 500;
+    color: var(--background-contrast-color);
+}
+
+.subtitle {
+    font-size: 1.1em;
+    font-weight: 400;
+    color: var(--background-contrast-color);
+}

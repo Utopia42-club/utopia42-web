@@ -1,0 +1,6 @@
+<form [formGroup]="inputsForm" fxLayout="row" style="width: 100%">
+    <app-position-field [required]="input.required" [formControl]="control"
+                        [label]="input.label ?? input.name" [hint]="input.hint" [isList]="input.isList"
+                        [positionOptions]="service.positionOptions$ | async" style="width: 100%">
+    </app-position-field>
+</form>

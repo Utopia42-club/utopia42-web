@@ -1,12 +1,12 @@
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { of, Subscription } from 'rxjs';
 import { catchError, concatMap, map, takeLast, tap } from 'rxjs/operators';
 import { ExceptionDialogContentComponent } from '../exception-dialog-content/exception-dialog-content.component';
-import { LoadingService } from '../loading.service';
+import { LoadingService } from '../loading/loading.service';
 import { SaveLandsRequestBodyType } from '../utopia-game/utopia-bridge.service';
 import { SaveLandsData } from './save-lands-data';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
     selector: 'app-save-lands',
@@ -20,10 +20,10 @@ export class SaveLandsComponent implements OnInit, OnDestroy
     readonly ipfsKeysLength: number;
 
     constructor(@Inject(MAT_DIALOG_DATA) public data: SaveLandsData,
-        private dialogRef: MatDialogRef<any>,
-        private dialog: MatDialog,
-        private readonly loadingService: LoadingService,
-        private snackBar: MatSnackBar)
+                private dialogRef: MatDialogRef<any>,
+                private dialog: MatDialog,
+                private readonly loadingService: LoadingService,
+                private readonly toaster: ToastrService)
     {
         this.ipfsKeys = data.request.body;
         this.ipfsKeysLength = Object.keys(this.ipfsKeys).length;
@@ -46,30 +46,24 @@ export class SaveLandsComponent implements OnInit, OnDestroy
     save(): void
     {
         const status = Array.from(Object.keys(this.ipfsKeys)).map(k => false);
-
         this.subscription.add(
             this.loadingService.prepare(
                 of(...Object.keys(this.ipfsKeys))
                     .pipe(
-                        concatMap((index, i) =>
-                        {
+                        concatMap((landId, i) => {
                             return this.data.contract
-                                .updateLand(this.ipfsKeys[index], index, this.data.request.connection.wallet)
-                                .pipe(map(v =>
-                                {
+                                .updateLand(this.ipfsKeys[landId], landId, this.data.request.connection.wallet)
+                                .pipe(map(v => {
                                     status[i] = true;
-                                    this.snackBar.open(`Land ${index} saved.`);
+                                    this.toaster.info(`Saving Land ${landId} requested.`);
                                     return true;
                                 }));
-                        }), catchError(e =>
-                        {
+                        }), catchError(e => {
                             console.log(e);
                             this.dialog.open(ExceptionDialogContentComponent, { data: { title: "Failed to save lands!" } });
                             return of(false);
-                        }), takeLast(1), tap(v =>
-                        {
+                        }), takeLast(1), tap(v => {
                             if (v) {
-                                this.snackBar.open(`All Lands saved.`);
                                 this.dialogRef.close();
                             }
                         })

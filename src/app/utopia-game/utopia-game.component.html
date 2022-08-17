@@ -1,5 +1,7 @@
 <div class="full-content" fxLayoutAlign="center center">
-    <canvas [class.hidden]="progress < 100" id="unity-canvas" fxFill></canvas>
+    <canvas #gameCanvas class="game-canvas" tabindex=0 [class.hidden]="progress < 100" id="unity-canvas"
+            fxFill></canvas>
     <mat-progress-spinner *ngIf="progress < 100" mode="determinate" [value]="progress">
     </mat-progress-spinner>
 </div>
+

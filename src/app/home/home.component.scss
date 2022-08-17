@@ -1,12 +1,9 @@
-mat-card {
-    height: 10rem;
-    cursor: pointer;
-    mat-card-content {
-        flex: 1 1 auto;
-        mat-icon {
-            font-size: 5rem;
-            width: 5rem;
-            height: 5rem;
-        }
-    }
+.logo {
+    aspect-ratio: 1.4/1;
+    height: 100%;
+}
+
+.footer {
+    height: 20vh;
+    width: 100%;
 }

@@ -1,0 +1,32 @@
+.root {
+    width: 55em;
+    max-height: 25em;
+    height: min-content;
+}
+
+.actions {
+    width: 100%;
+}
+
+.title {
+    font-size: 1.4em;
+    font-weight: 500;
+    color: var(--background-contrast-color);
+}
+
+.terms {
+    width: 100%;
+}
+
+.footer {
+    width: 100%;
+}
+
+.code {
+    width: 100%;
+    padding: 0.5em;
+    white-space: pre-wrap;
+    max-height: 20em;
+    overflow-y: auto;
+    border: 1px solid var(--background-lighter-color);
+}

@@ -1,13 +1,32 @@
-
 export interface Land {
-    x1: number;
-    x2: number;
-    y1: number;
-    y2: number;
+    id?: number;
+    startCoordinate: SerializableVector3Int;
+    endCoordinate: SerializableVector3Int;
     time?: number;
     ipfsKey?: string;
+    isNft?: boolean;
+    owner?: string;
+    ownerIndex?: number;
+    properties?: LandProperties;
 }
 
 export interface PricedLand extends Land {
     price?: number;
+}
+
+export interface SerializableVector3Int {
+    x: number;
+    y: number;
+    z: number;
+}
+
+export interface SerializableVector3 {
+    x: number;
+    y: number;
+    z: number;
+}
+
+export interface LandProperties {
+    color: string;
+    name: string;
 }

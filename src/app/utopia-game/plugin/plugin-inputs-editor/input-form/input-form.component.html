@@ -1,0 +1,13 @@
+<form [formGroup]="inputsForm" class="inputs"
+      [gdAreas]="gridAreas" [gdColumns]="templateColumns" [gdRows]="templateRows"
+      gdGap="0.5em">
+    <div *ngFor="let input of inputs" [ngClass]="{'list-field' : input.isList}"
+         [gdArea]="input.name">
+        <app-input-field *ngIf="!input.isList" [input]="input" [control]="control(input.name)"
+                         [inputsForm]="inputsForm"></app-input-field>
+        <ng-container *ngIf="input.isList">
+            <app-master-slave-input [input]="input" [inputsForm]="inputsForm" [control]="formArray(input.name)">
+            </app-master-slave-input>
+        </ng-container>
+    </div>
+</form>

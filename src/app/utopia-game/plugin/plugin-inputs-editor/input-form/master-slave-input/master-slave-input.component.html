@@ -1,0 +1,58 @@
+<div fxLayout="column" class="root">
+    <p [innerHtml]="((input.label ?? input.name) + (input.required ? '*' :'')) | sanitize" class="label">
+    </p>
+    <div fxFlex class="content" fxLayout="row-reverse">
+        <div class="table-container">
+            <table class="master" [class.dim]="slaveControl!=null" mat-table [dataSource]="items">
+                <ng-container matColumnDef="index">
+                    <th mat-header-cell *matHeaderCellDef> No.</th>
+                    <td mat-cell class="index-cell" *matCellDef="let element; let i=index;">
+                        {{i + 1}}
+                        <div class="hover-actions" (click)="$event.stopPropagation()">
+                            <button mat-icon-button color="warn" (click)="deleteAt(i)">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                            <button mat-icon-button color="primary" (click)="move(i, i-1)">
+                                <mat-icon>arrow_upward</mat-icon>
+                            </button>
+                            <button mat-icon-button color="primary" (click)="move(i, i+1)">
+                                <mat-icon>arrow_downward</mat-icon>
+                            </button>
+                        </div>
+                    </td>
+                </ng-container>
+
+                <ng-container *ngFor="let column of columns">
+                    <ng-container [matColumnDef]="column.name">
+                        <th mat-header-cell *matHeaderCellDef> {{column.label}} </th>
+                        <td mat-cell *matCellDef="let element"> {{column.textProvider(element)}} </td>
+                    </ng-container>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky:true"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns; let index = index;"
+                    (click)="editRow(index)">
+                </tr>
+            </table>
+        </div>
+
+        <button *ngIf="slaveControl==null" class="add-fab" mat-mini-fab color="primary" (click)="add()">
+            <mat-icon>add</mat-icon>
+        </button>
+        <div class="overlay" *ngIf="slaveControl!=null" (click)="overlayClick()"></div>
+        <div *ngIf="slaveControl!=null" fxLayout="column" class="slave">
+            <app-input-field fxFlex [control]="$any(slaveControl)" [input]="input"
+                             [inputsForm]="inputsForm"></app-input-field>
+
+            <div class="actions" fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="0.5em">
+                <button *ngIf="!createMode" mat-flat-button color="warn" (click)="deleteSlave()">
+                    <mat-icon>delete</mat-icon>
+                </button>
+                <button mat-flat-button color="primary"
+                        (click)="submitSlave()" [disabled]="!slaveControl?.valid">
+                    <mat-icon>check</mat-icon>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,78 @@
+<div class="plugin-table">
+    <div class="table-container">
+        <table mat-table [dataSource]="plugins" multiTemplateDataRows>
+            <ng-container matColumnDef="id">
+                <th mat-header-cell *matHeaderCellDef>Id</th>
+                <td mat-cell *matCellDef="let row">{{row.id}}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Title</th>
+                <td mat-cell *matCellDef="let row">
+                    <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="0.3em">
+                        <span>{{row.name}}</span>
+                        <mat-icon *ngIf="isPluginVerified(row)" matTooltip="Verified" style="color: dodgerblue">
+                            check_circle
+                        </mat-icon>
+                        <mat-icon *ngIf="row.state == pluginState.DEPRECATED" matTooltip="Deprecated"
+                                  style="color: darkred">
+                            error
+                        </mat-icon>
+                    </div>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="description">
+                <th mat-header-cell *matHeaderCellDef>Description</th>
+                <td mat-cell *matCellDef="let row">
+                    <p class="description-cell">{{row.description}}</p>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let row">
+                    <div fxLayout="row" fxLayoutAlign="start center">
+                        <ng-container *ngFor="let action of rowActions">
+                            <button mat-icon-button [color]="action.color ?? 'primary'"
+                                    *ngIf="action.isVisible(row)"
+                                    [matTooltip]="action.tooltip"
+                                    (click)="action.perform(row);$event.stopPropagation()">
+                                <mat-icon>{{action.icon}}</mat-icon>
+                            </button>
+                        </ng-container>
+                    </div>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="expandedDetail">
+                <td mat-cell *matCellDef="let row" [attr.colspan]="displayedColumns.length">
+                    <div class="row__detail" [@detailExpand]="row == expandedRow ? 'expanded' : 'collapsed'">
+                        <div fxLayout="row" fxLayoutAlign="start start" fxLayoutGap="1em">
+                            <img class="row__detail__image" src="/assets/images/default-plugin-icon.png"
+                                 alt="plugin-icon">
+                            <div fxLayout="column" fxLayoutAlign="start start" fxLayoutGap="0.6em"
+                                 style="padding-top: 1em">
+                                <div class="row__detail__wallet">
+                                    <strong>By</strong> {{row.walletId}}
+                                </div>
+                                <div class="row__detail__description">
+                                    {{row.description}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky:true"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+                class="simple-row" [class.expanded-row]="expandedRow === row"
+                (click)="expandedRow = expandedRow === row ? null : row">
+            </tr>
+            <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
+
+        </table>
+    </div>
+    <mat-paginator [length]="10000" [pageSize]="10" [hidePageSize]="true"></mat-paginator>
+</div>

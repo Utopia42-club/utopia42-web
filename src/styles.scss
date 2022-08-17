@@ -1,70 +1,82 @@
-@import '~@angular/material/theming';
+@use '@angular/material' as mat;
+// regular style toast
+@import '~ngx-toastr/toastr';
+@import "~prismjs/themes/prism-dark.css";
 
-@include mat-core();
+$pink-palette: mat.define-palette(mat.$pink-palette);
+$indigo-palette: mat.define-palette(mat.$indigo-palette);
+$orange-palette: mat.define-palette(mat.$blue-palette);
 
-$primary: mat-palette($mat-deep-purple);
-$accent: mat-palette($mat-amber, A200, A100, A400);
-$warn: mat-palette($mat-red);
-$theme: mat-light-theme($primary, $accent, $warn);
-@include angular-material-theme($theme);
-
-:root{
-    --accent-color: #{mat-color($accent, default)};
-    --primary-color: #{mat-color($primary, default)};
-    --primary-contrast-color: #{mat-color($primary, default-contrast)};
-    --accent-contrast-color: #{mat-color($primary, default-contrast)};
+.pink {
+    background-color: mat.get-color-from-palette($pink-palette, default);
+    color: mat.get-color-from-palette($pink-palette, default-contrast);
 }
 
-$pink-palette: mat-palette($mat-pink);
-$indigo-palette: mat-palette($mat-indigo);
-
-.pink{
-    background-color: mat-color($pink-palette, default);
-    color: mat-color($pink-palette, default-contrast);
+.indigo {
+    background-color: mat.get-color-from-palette($indigo-palette, default);
+    color: mat.get-color-from-palette($indigo-palette, default-contrast);
 }
 
-.indigo{
-    background-color: mat-color($indigo-palette, default);
-    color: mat-color($indigo-palette, default-contrast);
-}
-
-.primary{
-    background-color: mat-color($primary, default);
-    color: mat-color($primary, default-contrast);
-}
-
-.accent{
-    background-color: mat-color($accent, default);
-    color: mat-color($accent, default-contrast);
+.orange {
+    background-color: mat.get-color-from-palette($orange-palette, default);
+    color: mat.get-color-from-palette($orange-palette, default-contrast);
 }
 
 html,
 body {
     height: 100%;
 }
+
 body {
     margin: 0;
     font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
-
-.page-content{
-    margin-top: 4rem !important;
-    max-width: 100%;
-    width: fit-content;
-    margin: auto;
+.page-content {
+    width: 100%;
     display: grid;
+    background-color: var(--background-color);
+    height: calc(100vh - 50px);
 }
 
-.full-content{
+.full-content {
+    background-color: var(--background-color);
     width: 100vw;
-    height: calc(100vh - 56px);
+    height: 100%;
 }
 
-.loading-panel{
+.loading-panel {
     z-index: 2000;
 }
 
-.loading-back-drop{
+.loading-back-drop {
     z-index: 1999;
+}
+
+.transparent-backdrop {
+    background-color: transparent;
+}
+
+.full-width {
+    width: 100%;
+}
+
+//**************************//
+//       scrollbar          //
+//**************************//
+*{
+    scrollbar-width: thin;
+    scrollbar-color: var(--background-darker-color) #6f86a8;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--background-darker-color);
+    border: 1px solid var(--background-lighter-color);
+    border-radius: 0.5em;
+}
+::-webkit-scrollbar-corner {
+    background: #6f86a8;
+}
+::-webkit-scrollbar {
+    background: #6f86a8;
+    width: 0.5em;
 }

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script>
+        worker = undefined;
+        window.addEventListener('message', function (e) {
+            let mainWindow = e.source;
+            let target = e.origin;
+            let message = e.data;
+            if (message.type === 'request') {
+                let code = `
+                    importScripts('https://cdnjs.cloudflare.com/ajax/libs/rxjs/7.5.4/rxjs.umd.js');
+
+                    let idCounter = 0;
+                    let map = new Map();
+
+                    function callMethod(method, params){
+                        return new rxjs.Observable(function (subscriber) {
+                            let callId = idCounter;
+                            idCounter++;
+                            map.set(callId, subscriber);
+                            let message = {
+                                type: 'request',
+                                body: {
+                                    method: method,
+                                    params: params
+                                },
+                                id: callId
+                            };
+                            postMessage(message);
+                            return {
+                                unsubscribe: () => {
+                                    if(map.has(callId)){
+                                        map.delete(callId);
+                                        let message = {
+                                            type: 'cancel',
+                                            id: callId
+                                        };
+                                        postMessage(message);
+                                    }
+                                },
+                            }
+                        });
+                    }
+
+                    UtopiaApi = {
+                        getInputsFromUser: function (inputs) {
+                            return callMethod('getInputsFromUser', [inputs, false]);
+                        },
+                        getInputsFromUser: function (inputs, useCache) {
+                            return callMethod('getInputsFromUser', [inputs, useCache]);
+                        },
+                        placeBlock: function (type, x, y, z) {
+                            return callMethod('placeBlock', [type, x, y, z]);
+                        },
+                        placeBlocks: function (blocks) {
+                            return callMethod('placeBlocks', [blocks]);
+                        },
+                        placeMetaBlocks: function (metaBlocks) {
+                            return callMethod('placeMetaBlocks', [metaBlocks]);
+                        },
+                        previewBlocks: function (blocks) {
+                            return callMethod('previewBlocks', [blocks]);
+                        },
+                        selectBlocks: function (positions) {
+                            return callMethod('selectBlocks', [positions]);
+                        },
+                        getPlayerPosition: function () {
+                            return callMethod('getPlayerPosition', undefined);
+                        },
+                        getBlockTypeAt: function (position) {
+                            return callMethod('getBlockTypeAt', [position]);
+                        },
+                        session: function() {
+                            return callMethod('session', undefined);
+                        },
+                        currentLand: function () {
+                            return callMethod('currentLand', undefined);
+                        },
+                        blockPlaced: function () {
+                            return callMethod('blockPlaced', undefined);
+                        },
+                        getPlayerLands: function (walletId) {
+                            return callMethod('getPlayerLands', [walletId]);
+                        },
+                        getCurrentLand: function () {
+                            return callMethod('getCurrentLand', undefined);
+                        },
+                        getMarkers: function () {
+                            return callMethod('getCurrentLand', undefined);
+                        },
+                        getCurrentWallet: function () {
+                            return callMethod('getCurrentWallet', undefined);
+                        },
+                    };
+
+                    onmessage = function (e) {
+                        var message = e.data;
+                        if(message.type == 'request'){
+                            try {
+                                ${message.body.code}
+                                if( main == null )
+                                    throw new Error('main is not defined');
+                                main().then(() => {
+                                    postMessage({
+                                        type: 'end'
+                                    });
+                                },(e) => {
+                                    postMessage({
+                                        type: 'error',
+                                        body: e.message
+                                    });
+                                });
+                            } catch (e) {
+                                postMessage({
+                                    type: 'error',
+                                    body: e.message
+                                });
+                            }
+                        } else if(message.type == 'response' || message.type == 'responseError') {
+                            let subscriber = map.get(message.id);
+                            if(subscriber != null){
+                                if(message.type == 'response'){
+                                    subscriber.next(message.body);
+                                } else {
+                                    subscriber.error(message.body);
+                                }
+                            } else {
+                                postMessage({
+                                    type: 'error',
+                                    body: 'Invalid Response'
+                                });
+                            }
+                        } else if(message.type == 'complete') {
+                            let subscriber = map.get(message.id);
+                            if(subscriber != null){
+                                subscriber.complete();
+                                map.delete(message.id);
+                            }
+                        } else {
+                            postMessage({
+                                type: 'error',
+                                body: 'Invalid Response'
+                            });
+                        }
+                    }
+                `;
+                let bb = new Blob([code],
+                    {
+                        type: 'text/javascript'
+                    });
+
+                let bbURL = URL.createObjectURL(bb);
+                this.worker = new Worker(bbURL);
+                this.worker.onmessage = function (e) {
+                    mainWindow.postMessage(e.data, target);
+                }
+                this.worker.postMessage(message);
+            } else if (message.type === 'response' || message.type === 'responseError' || message.type === 'complete') {
+                if (this.worker != null) //FIXME else? error?
+                    this.worker.postMessage(message);
+            } else if (message.type === 'end') {
+                this.worker.terminate();
+                this.worker = undefined;
+            } else {
+                throw new Error('Unknown message type sent to sandbox: ' + message.type);
+            }
+        });
+    </script>
+</head>
+<body>
+</body>
+</html>

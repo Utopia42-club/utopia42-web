@@ -1,0 +1,146 @@
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+$md-primary: (
+    50 : #e6f2fa,
+    100 : #c2def2,
+    200 : #99c9e9,
+    300 : #70b3e0,
+    400 : #51a2d9,
+    500 : #3292d2,
+    600 : #2d8acd,
+    700 : #267fc7,
+    800 : #1f75c1,
+    900 : #1363b6,
+    A100 : #e6f2ff,
+    A200 : #b3d6ff,
+    A400 : #80baff,
+    A700 : #67acff,
+    contrast: (
+        50 : #000000,
+        100 : #000000,
+        200 : #000000,
+        300 : #000000,
+        400 : #000000,
+        500 : #ffffff,
+        600 : #ffffff,
+        700 : #ffffff,
+        800 : #ffffff,
+        900 : #ffffff,
+        A100 : #000000,
+        A200 : #000000,
+        A400 : #000000,
+        A700 : #000000,
+    )
+);
+
+$md-accent: (
+    50 : #e6f8ed,
+    100 : #c0edd3,
+    200 : #96e2b6,
+    300 : #6bd699,
+    400 : #4ccd83,
+    500 : #2cc46d,
+    600 : #27be65,
+    700 : #21b65a,
+    800 : #1baf50,
+    900 : #10a23e,
+    A100 : #d2ffde,
+    A200 : #9fffb9,
+    A400 : #6cff94,
+    A700 : #52ff81,
+    contrast: (
+        50 : #000000,
+        100 : #000000,
+        200 : #000000,
+        300 : #000000,
+        400 : #000000,
+        500 : #000000,
+        600 : #000000,
+        700 : #ffffff,
+        800 : #ffffff,
+        900 : #ffffff,
+        A100 : #000000,
+        A200 : #000000,
+        A400 : #000000,
+        A700 : #000000,
+    )
+);
+
+// Define a light theme
+$light-primary: mat.define-palette($md-primary);
+$light-accent: mat.define-palette($md-accent);
+$light-theme: mat.define-light-theme((
+    color: (
+        primary: $light-primary,
+        accent: $light-accent,
+    )
+));
+
+// Define a dark theme
+$dark-primary: mat.define-palette($md-primary);
+$dark-accent: mat.define-palette($md-accent);
+$dark-theme: mat.define-dark-theme((
+    color: (
+        primary: $dark-primary,
+        accent: $dark-accent,
+    )
+));
+
+// Apply the dark theme by default
+@include mat.core-theme($dark-theme);
+@include mat.all-component-themes($dark-theme);
+
+// Apply the light theme only when the `.utopia-light-theme` CSS class is applied
+// to an ancestor element of the components (such as `body`).
+.utopia-light-theme {
+    @include mat.core-color($light-theme);
+    @include mat.all-component-themes($light-theme);
+
+    --background-lighter-color: whitesmoke;
+    --background-color: white;
+    --background-contrast-color: #000000;
+    --primary-color: #{mat.get-color-from-palette($light-primary, default)};
+    --primary-contrast-color: #{mat.get-color-from-palette($light-primary, default-contrast)};
+    --accent-color: #{mat.get-color-from-palette($light-accent, default)};
+    --accent-contrast-color: #{mat.get-color-from-palette($light-accent, default-contrast)};
+
+    .primary {
+        background-color: mat.get-color-from-palette($light-primary, default);
+        color: mat.get-color-from-palette($light-primary, default-contrast);
+    }
+
+    .accent {
+        background-color: mat.get-color-from-palette($light-accent, default);
+        color: mat.get-color-from-palette($light-accent, default-contrast);
+    }
+}
+
+:root {
+    --background-lighter-color: #2A3C4DFF;
+    --background-color: #182430;
+    --background-darker-color: #182430B2;
+    --background-contrast-color: #F0F0F0;
+    --primary-color: #{mat.get-color-from-palette($dark-primary, default)};
+    --primary-contrast-color: #{mat.get-color-from-palette($dark-primary, default-contrast)};
+    --accent-color: #{mat.get-color-from-palette($dark-accent, default)};
+    --accent-contrast-color: #{mat.get-color-from-palette($dark-accent, default-contrast)};
+}
+
+.primary {
+    background-color: mat.get-color-from-palette($dark-primary, default);
+    color: mat.get-color-from-palette($dark-primary, default-contrast);
+}
+
+.accent {
+    background-color: mat.get-color-from-palette($dark-accent, default);
+    color: mat.get-color-from-palette($dark-accent, default-contrast);
+}
+
+.mat-dialog-container,
+.mat-table,
+.mat-paginator-container,
+.mat-select-panel{
+    background-color: var(--background-color);
+}

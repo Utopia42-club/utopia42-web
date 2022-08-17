@@ -1,0 +1,91 @@
+<div fxFill fxLayout="column">
+    <h2 mat-dialog-title>Edit Profile</h2>
+
+    <mat-dialog-content style="max-height: 100%; flex: 1 1 auto">
+        <form [formGroup]="form" style="width: 100%; height: 100%">
+            <div fxLayout="row" fxLayoutGap="1em" fxLayoutAlign="center start">
+                <div fxLayout="column" fxLayoutGap="0.6em" fxLayoutAlign="center center">
+                    <div class="profile">
+                        <img class="profile-image" [src]="imageSrc == null ? unknownImage : imageSrc"/>
+                        <label for="file-upload" class="file-input-label">
+                            <p class="label">
+                                Click to choose picture
+                            </p>
+                        </label>
+                        <input id="file-upload" class="file-input" type="file" accept="image/*" #fileInput
+                               (change)="onImageChange(fileInput.files[0])"/>
+                        <button *ngIf="imageSrc != null" mat-icon-button color="warn" (click)="removeImage()"
+                                class="delete-profile-button"
+                                matTooltip="Remove image">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    </div>
+                    <mat-form-field class="field">
+                        <mat-label>Name</mat-label>
+                        <input matInput formControlName="name" [required]="true"/>
+                    </mat-form-field>
+                </div>
+
+                <div fxFlex fxLayout="column" fxLayoutAlign="start center">
+                    <mat-form-field class="field">
+                        <mat-label>Bio</mat-label>
+                        <textarea matInput rows="9" formControlName="bio" [errorStateMatcher]="matcher"></textarea>
+                        <mat-hint align="end">{{form.value?.bio?.length || 0}} / 2048</mat-hint>
+                        <mat-error *ngIf="form.controls.bio.invalid">
+                            The text entered exceeds the maximum length
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div style="width: 100%" fxLayout="row" fxLayoutGap="0.6em" fxLayoutAlign="start center">
+                <mat-form-field class="field avatar-url">
+                    <mat-label>Avatar Url</mat-label>
+                    <input matInput formControlName="avatarUrl"/>
+                    <mat-error *ngIf="!asFormGroup(form).controls.avatarUrl.valid">Not a valid url</mat-error>
+                </mat-form-field>
+                <button mat-raised-button color="primary" (click)="openAvatarDesigner()">
+                    Open Avatar Designer
+                </button>
+            </div>
+
+            <div fxLayout="column" fxLayoutAlign="center center" class="social-links">
+                <div *ngFor="let linkControl of asFormArray(form.get('links')).controls; let i = index"
+                     [formGroup]="asFormGroup(linkControl)"
+                     fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="0.4em" class="link-form">
+                    <mat-form-field fxFlex="30">
+                        <mat-select required="true" formControlName="media">
+                            <mat-option *ngFor="let media of linkMedias" [value]="media">
+                                {{ media }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field fxFlex>
+                        <input placeholder="Url" matInput formControlName="link"/>
+                        <mat-error *ngIf="!asFormGroup(linkControl).controls.link.valid">Not a valid url</mat-error>
+                    </mat-form-field>
+
+                    <button mat-icon-button color="warn" class="delete-link-button" (click)="removeLink(i)">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </div>
+            </div>
+            <div fxLayout="row" fxLayoutAlign="start center">
+                <button mat-stroked-button class="add-link-button" (click)="addLink()">
+                    Add new social link
+                </button>
+            </div>
+        </form>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <button tabindex="-1" mat-raised-button color="accent" (click)="cancel()">
+            Cancel
+        </button>
+        <button [disabled]="!form.valid" mat-raised-button color="primary" (click)="save()">
+            Save
+        </button>
+    </mat-dialog-actions>
+
+</div>

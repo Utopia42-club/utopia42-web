@@ -1,0 +1,16 @@
+<div fxLayout="column" fxLayoutAlign="start center" class="root" (click)="$event.stopPropagation()">
+    <div class="title-section" fxLayout="row" fxLayoutAlign="start center">
+        <p class="title">Plugin Store</p>
+    </div>
+    <div class="header">
+        <app-plugin-search-bar [formControl]="filter" style="width: 100%">
+        </app-plugin-search-bar>
+    </div>
+    <div class="plugins">
+        <app-plugin-table [loader]="pluginTableLoader" [rowActions]="pluginTableRowActions">
+        </app-plugin-table>
+    </div>
+    <div class="actions" fxLayout="row" fxLayoutAlign="end center">
+        <button mat-raised-button color="accent" (click)="onClose()">Close</button>
+    </div>
+</div>

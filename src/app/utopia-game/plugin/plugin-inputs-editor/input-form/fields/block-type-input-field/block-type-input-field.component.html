@@ -1,0 +1,4 @@
+<app-block-type-field [required]="input.required" [formControl]="control"
+                      [label]="input.label ?? input.name" [hint]="input.hint" [isList]="input.isList"
+                      [blockTypes]="service.blockTypes$ | async" style="width: 100%">
+</app-block-type-field>

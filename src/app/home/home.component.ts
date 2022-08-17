@@ -1,9 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { Router } from '@angular/router';
-import { AppComponent } from '../app.component';
-import { PortLandsComponent } from '../port-lands/port-lands.component';
-
 
 
 @Component({
@@ -11,19 +6,14 @@ import { PortLandsComponent } from '../port-lands/port-lands.component';
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.scss']
 })
-export class HomeComponent implements OnInit {
-    constructor(private router: Router,
-        private dialog: MatDialog,
-        private app: AppComponent) {
-    }
-    ngOnInit(): void {
+export class HomeComponent implements OnInit
+{
+    constructor()
+    {
     }
 
-    portLands() {
-        this.dialog.open(PortLandsComponent, { data: this.app });
-    }
-
-    startGame() {
-        this.router.navigate(['game']);
+    ngOnInit(): void
+    {
     }
 }
+

@@ -1,0 +1,45 @@
+.fields-group {
+    ::ng-deep .mat-form-field-infix {
+        width: auto;
+        border-top: none;
+    }
+}
+
+.label {
+    margin: 0;
+    font-size: 0.8em;
+    line-height: 1.1em;
+    color: #838383;
+}
+
+.hint {
+    margin: 0;
+    font-size: 0.8em;
+    line-height: 1.1em;
+    color: #838383;
+}
+
+.input-field {
+    ::ng-deep .mat-form-field-wrapper {
+        margin-bottom: -1em;
+    }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button,
+    {
+        display: none;
+    }
+
+    input {
+        -moz-appearance: textfield;
+        width: 90%;
+    }
+    width: 5em;
+}
+
+.options-drop-down {
+
+}
+
+.position-field {
+}
