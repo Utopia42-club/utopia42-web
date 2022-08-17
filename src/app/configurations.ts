@@ -29,11 +29,13 @@ export class Configurations
     public readonly ipfsServerURL: string;
     public readonly dAppUrl: string;
     public readonly avatarRenderApi: string;
+    public readonly publicIpfsGateway: string;
 
     private constructor(params: {
         pluginsRepoPrefix: string, avatarDesignerURL: string, apiURL: string,
         wsServerURL: string, webAppBaseURL: string, ipfsServerURL: string,
-        dAppUrl: string, avatarRenderApi: string
+        dAppUrl: string, avatarRenderApi: string,
+        publicIpfsGateway:string
     })
     {
         this.pluginsRepoPrefix = params.pluginsRepoPrefix;
@@ -44,6 +46,7 @@ export class Configurations
         this.ipfsServerURL = params.ipfsServerURL;
         this.dAppUrl = params.dAppUrl;
         this.avatarRenderApi = params.avatarRenderApi;
+        this.publicIpfsGateway = params.publicIpfsGateway;
     }
 
     static initEnv(http: HttpClient, dialog: MatDialog, envFileLocation: string)
