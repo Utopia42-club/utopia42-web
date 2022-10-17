@@ -30,6 +30,7 @@ import { AuthService } from '../auth/auth.service';
 import { distinctUntilChanged, filter, map, switchMap, take } from "rxjs/operators";
 import { MetaverseContract } from "../multiverse/metaverse-contract";
 import { NetworkData } from "../multiverse/network-data";
+import { LivekitService } from "./livekit.service";
 
 export const GAME_TOKEN = new InjectionToken<UtopiaGameComponent>('GAME_TOKEN');
 
@@ -37,7 +38,7 @@ export const GAME_TOKEN = new InjectionToken<UtopiaGameComponent>('GAME_TOKEN');
     selector: 'app-utopia-game',
     templateUrl: './utopia-game.component.html',
     styleUrls: ['./utopia-game.component.scss'],
-    providers: [UtopiaBridgeService, UtopiaApiService, PlayerStateService]
+    providers: [UtopiaBridgeService, UtopiaApiService, PlayerStateService, LivekitService]
 })
 export class UtopiaGameComponent implements OnInit, OnDestroy
 {
@@ -61,7 +62,8 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
                 readonly loadingService: LoadingService, readonly authService: AuthService,
                 readonly pluginService: PluginService, readonly dialogService: MatDialog, readonly overlay: Overlay,
                 readonly vcr: ViewContainerRef, readonly cdr: ChangeDetectorRef,
-                readonly playerStateService: PlayerStateService)
+                readonly playerStateService: PlayerStateService,
+                private readonly livekitService: LivekitService)
     {
         window.bridge = bridge;
 
@@ -79,7 +81,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
     {
         this.subscription.add(
             combineLatest([this.route.params, this.route.queryParams])
-                .subscribe(([params,queryParams]) => {
+                .subscribe(([params, queryParams]) => {
                     const position = queryParams.position;
                     if (position != null) {
                         this.bridge.setStartingPosition(position);
@@ -105,6 +107,17 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
                         return this.authService.getAuthToken(true);
                     return of(null);
                 })).subscribe((token) => {
+                this.livekitService.start(this.bridge.session$
+                    .pipe(filter(s =>
+                        s != null && s.network != null && s.contract != null
+                    ), map(s => {
+                        return {
+                            network: s.network,
+                            address: s.contract,
+                            wallet: s.walletId
+                        }
+                    }))
+                );
                 this.playerStateService.start(this.bridge.session$
                     .pipe(filter(s =>
                         s != null && s.network != null && s.contract != null
