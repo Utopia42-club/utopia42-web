@@ -30,12 +30,14 @@ export class Configurations
     public readonly dAppUrl: string;
     public readonly avatarRenderApi: string;
     public readonly publicIpfsGateway: string;
+    public readonly livekitBackendApi: string;
+    public readonly livekitServer: string;
 
     private constructor(params: {
         pluginsRepoPrefix: string, avatarDesignerURL: string, apiURL: string,
         wsServerURL: string, webAppBaseURL: string, ipfsServerURL: string,
         dAppUrl: string, avatarRenderApi: string,
-        publicIpfsGateway:string
+        publicIpfsGateway:string, livekitBackendApi: string, livekitServer: string
     })
     {
         this.pluginsRepoPrefix = params.pluginsRepoPrefix;
@@ -47,6 +49,8 @@ export class Configurations
         this.dAppUrl = params.dAppUrl;
         this.avatarRenderApi = params.avatarRenderApi;
         this.publicIpfsGateway = params.publicIpfsGateway;
+        this.livekitBackendApi = params.livekitBackendApi;
+        this.livekitServer = params.livekitServer;
     }
 
     static initEnv(http: HttpClient, dialog: MatDialog, envFileLocation: string)
