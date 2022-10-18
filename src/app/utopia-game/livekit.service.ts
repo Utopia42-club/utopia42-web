@@ -2,7 +2,12 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { Observable, Subscription, throwError } from 'rxjs';
 import { HttpClient } from "@angular/common/http";
 import { UtopiaBridgeService } from "./utopia-bridge.service";
-import { Room, RoomEvent } from 'livekit-client';
+import { 
+    Room, 
+    RoomEvent,
+    RemoteTrack,
+    Track
+} from 'livekit-client';
 import { Configurations } from '../configurations';
 
 interface ApiResponse {
@@ -30,6 +35,14 @@ export class LivekitService implements OnDestroy
                 this.room.localParticipant.setScreenShareEnabled(false)
                 this.room.localParticipant.setMicrophoneEnabled(true)
             })
+            .on(RoomEvent.TrackSubscribed, (
+                track: RemoteTrack
+            ) => {
+                console.log("Track subscribed")
+                if (track.kind === Track.Kind.Audio) {
+                    track.attach();
+                }
+            })
     }
 
     start(contract$: Observable<{ network: number, address: string, wallet: string }>)
@@ -42,7 +55,9 @@ export class LivekitService implements OnDestroy
                         if (response.success === false) {
                             return throwError(response.message)
                         }
-                        this.room.connect(this.serverUrl, response.data)
+                        this.room.connect(this.serverUrl, response.data, {
+                            autoSubscribe: true
+                        })
                     }
                 );
         });
