@@ -114,7 +114,7 @@ export class UtopiaGameComponent implements OnInit, OnDestroy
                         return {
                             network: s.network,
                             address: s.contract,
-                            wallet: s.walletId
+                            wallet: s.walletId + (token===null?("_"+new Date().valueOf().toString()):"")
                         }
                     }))
                 );
