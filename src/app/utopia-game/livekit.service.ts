@@ -28,11 +28,12 @@ export class LivekitService implements OnDestroy
                 private readonly bridge:UtopiaBridgeService)
     {
         this.room = new Room()
+        this.room.localParticipant.setMicrophoneEnabled(false)
+        this.room.localParticipant.setCameraEnabled(false)
+        this.room.localParticipant.setScreenShareEnabled(false)
         this.room
             .on(RoomEvent.Connected, () => {
                 console.log("Livekit room is connected")
-                this.room.localParticipant.setCameraEnabled(false)
-                this.room.localParticipant.setScreenShareEnabled(false)
                 this.room.localParticipant.setMicrophoneEnabled(true)
             })
             .on(RoomEvent.TrackSubscribed, (
@@ -55,9 +56,7 @@ export class LivekitService implements OnDestroy
                         if (response.success === false) {
                             return throwError(response.message)
                         }
-                        this.room.connect(this.serverUrl, response.data, {
-                            autoSubscribe: true
-                        })
+                        this.room.connect(this.serverUrl, response.data)
                     }
                 );
         });
