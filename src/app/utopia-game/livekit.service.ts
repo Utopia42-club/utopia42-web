@@ -6,9 +6,12 @@ import {
     Room, 
     RoomEvent,
     RemoteTrack,
-    Track
+    Track,
+    ConnectionState,
 } from 'livekit-client';
 import { Configurations } from '../configurations';
+import { MatDialog } from '@angular/material/dialog';
+import { ExceptionDialogContentComponent } from '../exception-dialog-content/exception-dialog-content.component';
 
 interface ApiResponse {
     success: boolean;
@@ -25,7 +28,8 @@ export class LivekitService implements OnDestroy
     private readonly serverUrl = Configurations.Instance.livekitServer;
 
     constructor(private readonly http: HttpClient,
-                private readonly bridge:UtopiaBridgeService)
+                private readonly bridge:UtopiaBridgeService,
+                private readonly dialog:MatDialog)
     {
         this.room = new Room()
         this.room.localParticipant.setMicrophoneEnabled(false)
@@ -34,7 +38,17 @@ export class LivekitService implements OnDestroy
         this.room
             .on(RoomEvent.Connected, () => {
                 console.log("Livekit room is connected")
-                this.room.localParticipant.setMicrophoneEnabled(true)
+                if(this.room.state === ConnectionState.Connected) {
+                    this.room.localParticipant.setMicrophoneEnabled(true)
+                } else {
+                    console.log("Room state:", this.room.state)
+                    this.dialog.open(ExceptionDialogContentComponent, {
+                        data: {
+                            title: "Voice connection error",
+                            content: "Unable to connect to room",
+                        }, closeOnNavigation: false,
+                    })
+                }
             })
             .on(RoomEvent.TrackSubscribed, (
                 track: RemoteTrack
@@ -43,6 +57,10 @@ export class LivekitService implements OnDestroy
                 if (track.kind === Track.Kind.Audio) {
                     track.attach();
                 }
+            })
+            .on(RoomEvent.Disconnected, () => {
+                this.room.localParticipant.setMicrophoneEnabled(false)
+                console.log("Livekit room was disconnected")
             })
     }
 
@@ -56,7 +74,17 @@ export class LivekitService implements OnDestroy
                         if (response.success === false) {
                             return throwError(response.message)
                         }
-                        this.room.connect(this.serverUrl, response.data)
+                        try {
+                            this.room.connect(this.serverUrl, response.data)
+                        } catch (error) {
+                            this.dialog.open(ExceptionDialogContentComponent, {
+                                data: {
+                                    title: "Voice connection error",
+                                    content: "Unable to connect to room",
+                                }, closeOnNavigation: false,
+                            })
+                            console.log("Livekit connect error:", error)
+                        }
                     }
                 );
         });
