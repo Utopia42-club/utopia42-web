@@ -130,7 +130,7 @@ export class LivekitService implements OnDestroy
 
     private toggleMicrophone()
     {
-        if(this.room) {
+        if(this.room && this.room.state === ConnectionState.Connected) {
             if(this.room.localParticipant.isMicrophoneEnabled) {
                 this.room.localParticipant.setMicrophoneEnabled(false)
             } else {
