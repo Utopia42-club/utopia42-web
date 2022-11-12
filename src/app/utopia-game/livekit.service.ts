@@ -8,6 +8,7 @@ import {
     RemoteTrack,
     Track,
     ConnectionState,
+    RoomConnectOptions,
 } from 'livekit-client';
 import { Configurations } from '../configurations';
 import { MatDialog } from '@angular/material/dialog';
@@ -26,6 +27,12 @@ export class LivekitService implements OnDestroy
     private room: Room;
     private readonly apiUrl = Configurations.Instance.livekitBackendApi;
     private readonly serverUrl = Configurations.Instance.livekitServer;
+
+    private readonly ctrlaltListener = (e: KeyboardEvent) => {
+        if(e.ctrlKey && e.altKey) {
+            this.toggleMicrophone()
+        }
+    }
 
     constructor(private readonly http: HttpClient,
                 private readonly bridge:UtopiaBridgeService,
@@ -62,6 +69,8 @@ export class LivekitService implements OnDestroy
                 this.room.localParticipant.setMicrophoneEnabled(false)
                 console.log("Livekit room was disconnected")
             })
+
+        document.addEventListener("keydown", this.ctrlaltListener)
     }
 
     start(contract$: Observable<{ network: number, address: string, wallet: string }>)
@@ -71,19 +80,31 @@ export class LivekitService implements OnDestroy
             this.getAccessToken(network.toString()+"_"+address, wallet)
                 .subscribe((response: ApiResponse) => {
                         console.log("Livekit api response:", response)
-                        if (response.success === false) {
-                            return throwError(response.message)
-                        }
-                        try {
-                            this.room.connect(this.serverUrl, response.data)
-                        } catch (error) {
+                        if (response.success) {
+                            try {
+                                // const connectOpts: RoomConnectOptions = {
+                                //     rtcConfig: {
+                                //         iceTransportPolicy: 'relay',
+                                //     },
+                                // };
+                                this.room.connect(this.serverUrl, response.data)
+                            } catch (error) {
+                                this.dialog.open(ExceptionDialogContentComponent, {
+                                    data: {
+                                        title: "Voice connection error",
+                                        content: "Unable to connect to room",
+                                    }, closeOnNavigation: false,
+                                })
+                                console.log("Livekit connect error:", error)
+                            }
+                        } else {
                             this.dialog.open(ExceptionDialogContentComponent, {
                                 data: {
                                     title: "Voice connection error",
-                                    content: "Unable to connect to room",
+                                    content: "Unable to get access token",
                                 }, closeOnNavigation: false,
                             })
-                            console.log("Livekit connect error:", error)
+                            console.log("Livekit api error:", response.message)
                         }
                     }
                 );
@@ -105,5 +126,16 @@ export class LivekitService implements OnDestroy
             'verse': verse,
             'participant': wallet
         })
+    }
+
+    private toggleMicrophone()
+    {
+        if(this.room) {
+            if(this.room.localParticipant.isMicrophoneEnabled) {
+                this.room.localParticipant.setMicrophoneEnabled(false)
+            } else {
+                this.room.localParticipant.setMicrophoneEnabled(true)
+            }
+        }
     }
 }
